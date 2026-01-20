@@ -1,0 +1,69 @@
+{
+  "name": "ralph-ai",
+  "version": "1.0.0",
+  "description": "Autonomous AI Coding Loop with Validation Gates - Process PRD tasks with Claude, Gemini, or Cursor",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ralph": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "watch": "tsc -w",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "keywords": [
+    "ai",
+    "automation",
+    "coding",
+    "claude",
+    "gemini",
+    "cursor",
+    "prd",
+    "autonomous",
+    "validation",
+    "cli"
+  ],
+  "author": "Ralph Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thedjpetersen/ralph.git"
+  },
+  "homepage": "https://github.com/thedjpetersen/ralph#readme",
+  "bugs": {
+    "url": "https://github.com/thedjpetersen/ralph/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "hooks",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md"
+  ],
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "dotenv": "^16.3.1",
+    "execa": "^8.0.1",
+    "ora": "^8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.7.0",
+    "vitest": "^1.6.0"
+  }
+}
