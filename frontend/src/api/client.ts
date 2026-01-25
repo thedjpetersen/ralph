@@ -1237,3 +1237,517 @@ export const receiptsApi = {
     return `${API_BASE}/accounts/${accountId}/receipts/${id}/thumbnail`;
   },
 };
+
+// Budget types
+export type BudgetStatus = 'active' | 'inactive' | 'archived';
+export type BudgetPeriodType = 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly' | 'custom';
+export type BudgetPeriodStatus = 'upcoming' | 'active' | 'closed';
+export type BudgetGoalType = 'spending_limit' | 'savings_target' | 'category_limit' | 'merchant_limit';
+export type BudgetGoalStatus = 'active' | 'completed' | 'failed' | 'cancelled';
+
+export interface Budget {
+  id: string;
+  account_id: string;
+  name: string;
+  description?: string;
+  period_type: BudgetPeriodType;
+  total_amount: number;
+  currency: string;
+  status: BudgetStatus;
+  is_default: boolean;
+  start_date?: string;
+  end_date?: string;
+  rollover_enabled: boolean;
+  rollover_amount?: number;
+  alert_threshold?: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
+export interface BudgetDetail extends Budget {
+  current_period?: BudgetPeriod;
+  allocations: BudgetAllocation[];
+  goals: BudgetGoal[];
+  total_spent: number;
+  total_remaining: number;
+  percentage_used: number;
+}
+
+export interface BudgetPeriod {
+  id: string;
+  budget_id: string;
+  period_number: number;
+  start_date: string;
+  end_date: string;
+  total_amount: number;
+  spent_amount: number;
+  remaining_amount: number;
+  rollover_amount: number;
+  status: BudgetPeriodStatus;
+  closed_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BudgetPeriodDetail extends BudgetPeriod {
+  allocations: BudgetAllocationPeriodSummary[];
+  transactions_count: number;
+  daily_average_spend: number;
+  projected_spend: number;
+}
+
+export interface BudgetAllocation {
+  id: string;
+  budget_id: string;
+  category_id?: string;
+  category_name?: string;
+  store_id?: string;
+  store_name?: string;
+  name: string;
+  description?: string;
+  amount: number;
+  percentage?: number;
+  is_percentage: boolean;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BudgetAllocationPeriodSummary {
+  allocation_id: string;
+  allocation_name: string;
+  budgeted_amount: number;
+  spent_amount: number;
+  remaining_amount: number;
+  percentage_used: number;
+}
+
+export interface BudgetGoal {
+  id: string;
+  budget_id: string;
+  name: string;
+  description?: string;
+  type: BudgetGoalType;
+  target_amount: number;
+  current_amount: number;
+  progress_percentage: number;
+  category_id?: string;
+  category_name?: string;
+  store_id?: string;
+  store_name?: string;
+  start_date?: string;
+  end_date?: string;
+  status: BudgetGoalStatus;
+  completed_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListBudgetsResponse {
+  budgets: Budget[];
+  total: number;
+}
+
+export interface ListBudgetsParams {
+  status?: BudgetStatus;
+  is_default?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateBudgetRequest {
+  name: string;
+  description?: string;
+  period_type: BudgetPeriodType;
+  total_amount: number;
+  currency?: string;
+  start_date?: string;
+  end_date?: string;
+  rollover_enabled?: boolean;
+  alert_threshold?: number;
+  is_default?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateBudgetRequest {
+  name?: string;
+  description?: string;
+  period_type?: BudgetPeriodType;
+  total_amount?: number;
+  currency?: string;
+  start_date?: string;
+  end_date?: string;
+  rollover_enabled?: boolean;
+  alert_threshold?: number;
+  status?: BudgetStatus;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ListBudgetPeriodsResponse {
+  periods: BudgetPeriod[];
+  total: number;
+}
+
+export interface ListBudgetPeriodsParams {
+  status?: BudgetPeriodStatus;
+  start_date?: string;
+  end_date?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface GenerateBudgetPeriodsRequest {
+  count?: number;
+  start_date?: string;
+}
+
+export interface ListBudgetAllocationsResponse {
+  allocations: BudgetAllocation[];
+  total: number;
+}
+
+export interface CreateBudgetAllocationRequest {
+  category_id?: string;
+  store_id?: string;
+  name: string;
+  description?: string;
+  amount?: number;
+  percentage?: number;
+  is_percentage?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateBudgetAllocationRequest {
+  name?: string;
+  description?: string;
+  amount?: number;
+  percentage?: number;
+  is_percentage?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ListBudgetGoalsResponse {
+  goals: BudgetGoal[];
+  total: number;
+}
+
+export interface ListBudgetGoalsParams {
+  status?: BudgetGoalStatus;
+  type?: BudgetGoalType;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateBudgetGoalRequest {
+  name: string;
+  description?: string;
+  type: BudgetGoalType;
+  target_amount: number;
+  category_id?: string;
+  store_id?: string;
+  start_date?: string;
+  end_date?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateBudgetGoalRequest {
+  name?: string;
+  description?: string;
+  target_amount?: number;
+  status?: BudgetGoalStatus;
+  metadata?: Record<string, unknown>;
+}
+
+// Budget API methods (account-scoped)
+export const budgetsApi = {
+  async list(accountId: string, params?: ListBudgetsParams): Promise<ListBudgetsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.is_default !== undefined) searchParams.set('is_default', params.is_default.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/budgets${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch budgets');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<Budget> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch budget');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateBudgetRequest): Promise<Budget> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create budget');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateBudgetRequest): Promise<Budget> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update budget');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete budget');
+    }
+  },
+
+  async getDetail(accountId: string, id: string): Promise<BudgetDetail> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${id}/detail`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch budget detail');
+    }
+    return response.json();
+  },
+
+  async setDefault(accountId: string, id: string): Promise<Budget> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${id}/default`, {
+      method: 'PUT',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to set budget as default');
+    }
+    return response.json();
+  },
+
+  async activate(accountId: string, id: string): Promise<Budget> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${id}/activate`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to activate budget');
+    }
+    return response.json();
+  },
+
+  async deactivate(accountId: string, id: string): Promise<Budget> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${id}/deactivate`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to deactivate budget');
+    }
+    return response.json();
+  },
+};
+
+// Budget Periods API methods (account-scoped, nested under budgets)
+export const budgetPeriodsApi = {
+  async list(accountId: string, budgetId: string, params?: ListBudgetPeriodsParams): Promise<ListBudgetPeriodsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/budgets/${budgetId}/periods${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch budget periods');
+    }
+    return response.json();
+  },
+
+  async getCurrent(accountId: string, budgetId: string): Promise<BudgetPeriod> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/periods/current`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch current budget period');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, budgetId: string, periodId: string): Promise<BudgetPeriod> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/periods/${periodId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch budget period');
+    }
+    return response.json();
+  },
+
+  async getDetail(accountId: string, budgetId: string, periodId: string): Promise<BudgetPeriodDetail> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/periods/${periodId}/detail`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch budget period detail');
+    }
+    return response.json();
+  },
+
+  async generate(accountId: string, budgetId: string, data?: GenerateBudgetPeriodsRequest): Promise<BudgetPeriod[]> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/periods/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data || {}),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to generate budget periods');
+    }
+    return response.json();
+  },
+
+  async activate(accountId: string, budgetId: string, periodId: string): Promise<BudgetPeriod> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/periods/${periodId}/activate`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to activate budget period');
+    }
+    return response.json();
+  },
+
+  async close(accountId: string, budgetId: string, periodId: string): Promise<BudgetPeriod> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/periods/${periodId}/close`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to close budget period');
+    }
+    return response.json();
+  },
+};
+
+// Budget Allocations API methods (account-scoped, nested under budgets)
+export const budgetAllocationsApi = {
+  async list(accountId: string, budgetId: string): Promise<ListBudgetAllocationsResponse> {
+    const url = `${API_BASE}/accounts/${accountId}/budgets/${budgetId}/allocations`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch budget allocations');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, budgetId: string, data: CreateBudgetAllocationRequest): Promise<BudgetAllocation> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/allocations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create budget allocation');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, budgetId: string, id: string, data: UpdateBudgetAllocationRequest): Promise<BudgetAllocation> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/allocations/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update budget allocation');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, budgetId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/allocations/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete budget allocation');
+    }
+  },
+};
+
+// Budget Goals API methods (account-scoped, nested under budgets)
+export const budgetGoalsApi = {
+  async list(accountId: string, budgetId: string, params?: ListBudgetGoalsParams): Promise<ListBudgetGoalsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/budgets/${budgetId}/goals${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch budget goals');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, budgetId: string, data: CreateBudgetGoalRequest): Promise<BudgetGoal> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/goals`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create budget goal');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, budgetId: string, id: string, data: UpdateBudgetGoalRequest): Promise<BudgetGoal> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/goals/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update budget goal');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, budgetId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/budgets/${budgetId}/goals/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete budget goal');
+    }
+  },
+};
