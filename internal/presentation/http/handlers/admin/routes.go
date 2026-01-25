@@ -7,20 +7,23 @@ import (
 
 // Router handles routing for admin user-related endpoints
 type Router struct {
-	userHandler *UserHandler
+	userHandler  *UserHandler
+	queueHandler *QueueHandler
 }
 
-// NewRouter creates a new Router with the given handler
-func NewRouter(userHandler *UserHandler) *Router {
+// NewRouter creates a new Router with the given handlers
+func NewRouter(userHandler *UserHandler, queueHandler *QueueHandler) *Router {
 	return &Router{
-		userHandler: userHandler,
+		userHandler:  userHandler,
+		queueHandler: queueHandler,
 	}
 }
 
-// NewDefaultRouter creates a new Router with a default handler
+// NewDefaultRouter creates a new Router with default handlers
 func NewDefaultRouter() *Router {
 	return &Router{
-		userHandler: NewUserHandler(),
+		userHandler:  NewUserHandler(),
+		queueHandler: NewQueueHandler(),
 	}
 }
 
@@ -36,10 +39,27 @@ func NewDefaultRouter() *Router {
 //  6. POST   /api/admin/users/{id}/suspend - Suspend user
 //  7. POST   /api/admin/users/{id}/unsuspend - Unsuspend user
 //  8. POST   /api/admin/users/{id}/impersonate - Generate impersonation token
+//
+// Queue Management Endpoints:
+//  9.  GET    /api/admin/queues              - List all queues (with ?status filter)
+//  10. GET    /api/admin/queues/stats        - Get aggregate queue statistics
+//  11. GET    /api/admin/queues/{name}       - Get queue by name
+//  12. GET    /api/admin/queues/{name}/jobs  - List jobs in queue (with ?status filter)
+//  13. POST   /api/admin/queues/{name}/flush - Flush queue (with ?status filter)
+//  14. POST   /api/admin/queues/{name}/pause - Pause queue processing
+//  15. POST   /api/admin/queues/{name}/resume - Resume queue processing
+//  16. GET    /api/admin/queues/{name}/jobs/{id} - Get job by ID
+//  17. POST   /api/admin/queues/{name}/jobs/{id}/retry - Retry a failed/cancelled job
+//  18. POST   /api/admin/queues/{name}/jobs/{id}/cancel - Cancel a pending/processing job
+//  19. DELETE /api/admin/queues/{name}/jobs/{id} - Delete a job
 func (r *Router) RegisterRoutes(mux *http.ServeMux) {
 	// User management routes
 	mux.HandleFunc("/api/admin/users", r.handleUsers)
 	mux.HandleFunc("/api/admin/users/", r.handleUserByID)
+
+	// Queue management routes
+	mux.HandleFunc("/api/admin/queues", r.handleQueues)
+	mux.HandleFunc("/api/admin/queues/", r.handleQueueByName)
 }
 
 // handleUsers routes requests for /api/admin/users
@@ -101,4 +121,109 @@ func (r *Router) handleUserByID(w http.ResponseWriter, req *http.Request) {
 // GetUserHandler returns the user handler
 func (r *Router) GetUserHandler() *UserHandler {
 	return r.userHandler
+}
+
+// GetQueueHandler returns the queue handler
+func (r *Router) GetQueueHandler() *QueueHandler {
+	return r.queueHandler
+}
+
+// handleQueues routes requests for /api/admin/queues
+func (r *Router) handleQueues(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case http.MethodGet:
+		r.queueHandler.HandleListQueues(w, req)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// handleQueueByName routes requests for /api/admin/queues/{name} and sub-resources
+func (r *Router) handleQueueByName(w http.ResponseWriter, req *http.Request) {
+	// Extract the path after /api/admin/queues/
+	path := strings.TrimPrefix(req.URL.Path, "/api/admin/queues/")
+	parts := strings.Split(path, "/")
+
+	if len(parts) == 0 || parts[0] == "" {
+		http.Error(w, "Queue name required", http.StatusBadRequest)
+		return
+	}
+
+	queueName := parts[0]
+
+	// Handle /api/admin/queues/stats (special case - not a queue name)
+	if queueName == "stats" && len(parts) == 1 {
+		r.queueHandler.HandleGetStats(w, req)
+		return
+	}
+
+	// Check if this is a sub-resource request
+	if len(parts) > 1 {
+		switch parts[1] {
+		case "jobs":
+			r.handleQueueJobs(w, req, queueName, parts[2:])
+			return
+		case "flush":
+			r.queueHandler.HandleFlushQueue(w, req, queueName)
+			return
+		case "pause":
+			r.queueHandler.HandlePauseQueue(w, req, queueName)
+			return
+		case "resume":
+			r.queueHandler.HandleResumeQueue(w, req, queueName)
+			return
+		default:
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+	}
+
+	// Handle queue CRUD operations
+	switch req.Method {
+	case http.MethodGet:
+		r.queueHandler.HandleGetQueue(w, req, queueName)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// handleQueueJobs routes requests for /api/admin/queues/{name}/jobs and sub-resources
+func (r *Router) handleQueueJobs(w http.ResponseWriter, req *http.Request, queueName string, parts []string) {
+	// Handle /api/admin/queues/{name}/jobs
+	if len(parts) == 0 {
+		switch req.Method {
+		case http.MethodGet:
+			r.queueHandler.HandleListJobs(w, req, queueName)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+		return
+	}
+
+	jobID := parts[0]
+
+	// Handle /api/admin/queues/{name}/jobs/{id}/action
+	if len(parts) > 1 {
+		switch parts[1] {
+		case "retry":
+			r.queueHandler.HandleRetryJob(w, req, queueName, jobID)
+			return
+		case "cancel":
+			r.queueHandler.HandleCancelJob(w, req, queueName, jobID)
+			return
+		default:
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+	}
+
+	// Handle /api/admin/queues/{name}/jobs/{id}
+	switch req.Method {
+	case http.MethodGet:
+		r.queueHandler.HandleGetJob(w, req, queueName, jobID)
+	case http.MethodDelete:
+		r.queueHandler.HandleDeleteJob(w, req, queueName, jobID)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
