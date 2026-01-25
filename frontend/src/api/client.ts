@@ -4160,3 +4160,433 @@ export const retirementBacktestApi = {
     return response.json();
   },
 };
+
+// ============================================================================
+// Google Drive Integration API
+// ============================================================================
+
+// Google Drive OAuth types
+export interface GoogleDriveOAuthInitiateRequest {
+  redirect_uri?: string;
+  scopes?: string[];
+  state?: string;
+}
+
+export interface GoogleDriveOAuthInitiateResponse {
+  authorization_url: string;
+  state: string;
+}
+
+export interface GoogleDriveOAuthCallbackRequest {
+  code: string;
+  state: string;
+  redirect_uri?: string;
+}
+
+export interface GoogleDriveOAuthCallbackResponse {
+  connection_id: string;
+  email: string;
+  name?: string;
+}
+
+// Google Drive OAuth API methods
+export const googleDriveOAuthApi = {
+  async initiate(accountId: string, data?: GoogleDriveOAuthInitiateRequest): Promise<GoogleDriveOAuthInitiateResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/oauth/initiate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data || {}),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to initiate Google Drive OAuth');
+    }
+    return response.json();
+  },
+
+  async callback(accountId: string, data: GoogleDriveOAuthCallbackRequest): Promise<GoogleDriveOAuthCallbackResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/oauth/callback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to complete Google Drive OAuth callback');
+    }
+    return response.json();
+  },
+};
+
+// Google Drive Connection types
+export type GoogleDriveConnectionStatus = 'pending' | 'active' | 'error' | 'disconnected' | 'expired';
+
+export interface GoogleDriveConnection {
+  id: string;
+  account_id: string;
+  email: string;
+  name?: string;
+  status: GoogleDriveConnectionStatus;
+  error_code?: string;
+  error_message?: string;
+  last_sync_at?: string;
+  next_sync_at?: string;
+  token_expires_at?: string;
+  storage_quota_used?: number;
+  storage_quota_total?: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListGoogleDriveConnectionsResponse {
+  connections: GoogleDriveConnection[];
+  total: number;
+}
+
+export interface ListGoogleDriveConnectionsParams {
+  status?: GoogleDriveConnectionStatus;
+  limit?: number;
+  offset?: number;
+}
+
+// Google Drive Connections API methods (account-scoped)
+export const googleDriveConnectionsApi = {
+  async list(accountId: string, params?: ListGoogleDriveConnectionsParams): Promise<ListGoogleDriveConnectionsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/drive/connections${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Drive connections');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, connectionId: string): Promise<GoogleDriveConnection> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/connections/${connectionId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Drive connection');
+    }
+    return response.json();
+  },
+
+  async disconnect(accountId: string, connectionId: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/connections/${connectionId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to disconnect Google Drive connection');
+    }
+  },
+};
+
+// Google Drive Folder types
+export type GoogleDriveFolderStatus = 'active' | 'inactive' | 'syncing' | 'error';
+
+export interface GoogleDriveFolder {
+  id: string;
+  account_id: string;
+  connection_id: string;
+  drive_folder_id: string;
+  name: string;
+  path?: string;
+  status: GoogleDriveFolderStatus;
+  sync_enabled: boolean;
+  file_count?: number;
+  last_sync_at?: string;
+  error_message?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListGoogleDriveFoldersResponse {
+  folders: GoogleDriveFolder[];
+  total: number;
+}
+
+export interface ListGoogleDriveFoldersParams {
+  connection_id?: string;
+  status?: GoogleDriveFolderStatus;
+  sync_enabled?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateGoogleDriveFolderRequest {
+  connection_id: string;
+  drive_folder_id: string;
+  name: string;
+  path?: string;
+  sync_enabled?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateGoogleDriveFolderRequest {
+  name?: string;
+  sync_enabled?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+// Google Drive Folders API methods (account-scoped)
+export const googleDriveFoldersApi = {
+  async list(accountId: string, params?: ListGoogleDriveFoldersParams): Promise<ListGoogleDriveFoldersResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.connection_id) searchParams.set('connection_id', params.connection_id);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.sync_enabled !== undefined) searchParams.set('sync_enabled', params.sync_enabled.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/drive/folders${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Drive folders');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, folderId: string): Promise<GoogleDriveFolder> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/folders/${folderId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Drive folder');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateGoogleDriveFolderRequest): Promise<GoogleDriveFolder> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/folders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create Google Drive folder');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, folderId: string, data: UpdateGoogleDriveFolderRequest): Promise<GoogleDriveFolder> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/folders/${folderId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update Google Drive folder');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, folderId: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/folders/${folderId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete Google Drive folder');
+    }
+  },
+};
+
+// Google Drive Sync types
+export type GoogleDriveSyncStatus = 'idle' | 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface GoogleDriveSyncStatus_Response {
+  status: GoogleDriveSyncStatus;
+  current_sync_id?: string;
+  files_processed?: number;
+  files_total?: number;
+  bytes_processed?: number;
+  bytes_total?: number;
+  started_at?: string;
+  estimated_completion?: string;
+  error_message?: string;
+}
+
+export interface TriggerSyncRequest {
+  folder_ids?: string[];
+  force?: boolean;
+}
+
+export interface TriggerSyncResponse {
+  sync_id: string;
+  status: GoogleDriveSyncStatus;
+  message: string;
+}
+
+export interface TriggerConnectionSyncRequest {
+  force?: boolean;
+}
+
+// Google Drive Sync API methods (account-scoped)
+export const googleDriveSyncApi = {
+  async triggerSync(accountId: string, data?: TriggerSyncRequest): Promise<TriggerSyncResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data || {}),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to trigger Google Drive sync');
+    }
+    return response.json();
+  },
+
+  async getSyncStatus(accountId: string): Promise<GoogleDriveSyncStatus_Response> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/sync/status`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Drive sync status');
+    }
+    return response.json();
+  },
+
+  async triggerConnectionSync(accountId: string, connectionId: string, data?: TriggerConnectionSyncRequest): Promise<TriggerSyncResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/connections/${connectionId}/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data || {}),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to trigger connection sync');
+    }
+    return response.json();
+  },
+};
+
+// Google Drive Sync History types
+export type SyncHistoryStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface GoogleDriveSyncHistory {
+  id: string;
+  account_id: string;
+  connection_id?: string;
+  folder_id?: string;
+  status: SyncHistoryStatus;
+  files_processed: number;
+  files_total: number;
+  files_added: number;
+  files_updated: number;
+  files_deleted: number;
+  files_failed: number;
+  bytes_processed: number;
+  error_message?: string;
+  started_at: string;
+  completed_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListGoogleDriveSyncHistoryResponse {
+  sync_history: GoogleDriveSyncHistory[];
+  total: number;
+}
+
+export interface ListGoogleDriveSyncHistoryParams {
+  connection_id?: string;
+  folder_id?: string;
+  status?: SyncHistoryStatus;
+  limit?: number;
+  offset?: number;
+}
+
+// Sync History File types
+export type SyncFileStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'skipped';
+
+export interface GoogleDriveSyncFile {
+  id: string;
+  sync_history_id: string;
+  drive_file_id: string;
+  name: string;
+  mime_type: string;
+  size: number;
+  status: SyncFileStatus;
+  error_message?: string;
+  processed_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListGoogleDriveSyncFilesResponse {
+  files: GoogleDriveSyncFile[];
+  total: number;
+}
+
+export interface ListGoogleDriveSyncFilesParams {
+  status?: SyncFileStatus;
+  limit?: number;
+  offset?: number;
+}
+
+// Google Drive Sync History API methods (account-scoped)
+export const googleDriveSyncHistoryApi = {
+  async list(accountId: string, params?: ListGoogleDriveSyncHistoryParams): Promise<ListGoogleDriveSyncHistoryResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.connection_id) searchParams.set('connection_id', params.connection_id);
+    if (params?.folder_id) searchParams.set('folder_id', params.folder_id);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/drive/sync-history${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Drive sync history');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, syncId: string): Promise<GoogleDriveSyncHistory> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/sync-history/${syncId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Drive sync history entry');
+    }
+    return response.json();
+  },
+
+  async cancel(accountId: string, syncId: string): Promise<GoogleDriveSyncHistory> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/drive/sync-history/${syncId}/cancel`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to cancel Google Drive sync');
+    }
+    return response.json();
+  },
+
+  async listFiles(accountId: string, syncId: string, params?: ListGoogleDriveSyncFilesParams): Promise<ListGoogleDriveSyncFilesResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/drive/sync-history/${syncId}/files${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch Google Drive sync files');
+    }
+    return response.json();
+  },
+};
