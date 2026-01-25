@@ -1,0 +1,274 @@
+.account-balances {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  min-height: 280px;
+}
+
+.account-balances-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.account-balances-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.total-balance {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+.accounts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 0.15s;
+}
+
+.account-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.account-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.account-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.account-name {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-meta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.account-balance {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.87);
+  flex-shrink: 0;
+}
+
+.account-balance.balance-negative {
+  color: #e74c3c;
+}
+
+.view-all-accounts {
+  display: block;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.view-all-accounts:hover {
+  background-color: rgba(100, 108, 255, 0.1);
+  border-color: #646cff;
+  color: #646cff;
+}
+
+/* Empty state */
+.account-balances-empty {
+  justify-content: center;
+  align-items: center;
+}
+
+.account-balances-empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.account-balances-empty-content .empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.account-balances-empty-content p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.connect-account-link {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #3498db;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: background-color 0.15s;
+}
+
+.connect-account-link:hover {
+  background-color: #2980b9;
+}
+
+/* Skeleton loading */
+.account-item.skeleton {
+  pointer-events: none;
+}
+
+.skeleton-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 1rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-subtitle {
+  width: 35%;
+  height: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-amount {
+  width: 80px;
+  height: 1rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-total {
+  width: 100px;
+  height: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .account-balances {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .account-balances-header h3 {
+    color: #213547;
+  }
+
+  .total-balance {
+    color: #213547;
+  }
+
+  .account-item:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .account-name {
+    color: #213547;
+  }
+
+  .account-meta {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .account-balance {
+    color: #213547;
+  }
+
+  .view-all-accounts {
+    color: #213547;
+    border-color: #ccc;
+  }
+
+  .account-balances-empty-content p {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .skeleton-icon,
+  .skeleton-title,
+  .skeleton-subtitle,
+  .skeleton-amount,
+  .skeleton-total {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}

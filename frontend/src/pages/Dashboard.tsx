@@ -2,8 +2,20 @@ import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useBudgetsStore, type BudgetDetail } from '../stores/budgets';
 import { useAccountStore } from '../stores/account';
+import { useTransactionsStore } from '../stores/transactions';
+import { useReceiptsStore } from '../stores/receipts';
+import { useFinancialStore } from '../stores/financial';
 import { PageTransition } from '../components/PageTransition';
-import { BudgetSummaryCard, SpendingByCategory, BudgetTrend } from '../components/dashboard';
+import {
+  BudgetSummaryCard,
+  SpendingByCategory,
+  BudgetTrend,
+  RecentTransactions,
+  RecentReceipts,
+  AccountBalances,
+  QuickActions,
+  NetWorthChart,
+} from '../components/dashboard';
 import './Dashboard.css';
 
 // Generate mock spending by category data from budget allocations
@@ -51,23 +63,93 @@ function generateTrendData(budget: BudgetDetail | null) {
   return dataPoints;
 }
 
+// Generate net worth trend data from financial accounts
+function generateNetWorthData(
+  accounts: { current_balance?: number; type: string }[]
+) {
+  const today = new Date();
+  const dataPoints = [];
+
+  // Calculate current totals
+  const assets = accounts
+    .filter((a) => !['credit', 'loan', 'mortgage'].includes(a.type))
+    .reduce((sum, a) => sum + (a.current_balance || 0), 0);
+
+  const liabilities = Math.abs(
+    accounts
+      .filter((a) => ['credit', 'loan', 'mortgage'].includes(a.type))
+      .reduce((sum, a) => sum + (a.current_balance || 0), 0)
+  );
+
+  const netWorth = assets - liabilities;
+
+  // Generate last 30 days of data with simulated historical values
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+
+    // Simulate slight historical variation
+    const factor = 1 - (i * 0.003) + (Math.random() * 0.01 - 0.005);
+
+    dataPoints.push({
+      date: date.toISOString().split('T')[0],
+      assets: Math.round(assets * factor),
+      liabilities: Math.round(liabilities * (1 + (i * 0.002))),
+      netWorth: Math.round(netWorth * factor),
+    });
+  }
+
+  return dataPoints;
+}
+
 export function Dashboard() {
   const { currentAccount } = useAccountStore();
   const {
     budgets,
     currentBudget,
-    isLoading,
+    isLoading: budgetsLoading,
     error,
     fetchBudgets,
     fetchBudgetDetail,
   } = useBudgetsStore();
 
-  // Fetch budgets on account change
+  const {
+    transactions,
+    isLoading: transactionsLoading,
+    fetchTransactions,
+  } = useTransactionsStore();
+
+  const {
+    receipts,
+    isLoading: receiptsLoading,
+    fetchReceipts,
+  } = useReceiptsStore();
+
+  const {
+    accounts: financialAccounts,
+    accountsSummary,
+    isLoading: financialLoading,
+    fetchAccounts: fetchFinancialAccounts,
+    fetchAccountsSummary,
+  } = useFinancialStore();
+
+  // Fetch all data on account change
   useEffect(() => {
     if (currentAccount?.id) {
       fetchBudgets(currentAccount.id, { status: 'active' });
+      fetchTransactions(currentAccount.id, { limit: 5 });
+      fetchReceipts(currentAccount.id, { limit: 5 });
+      fetchFinancialAccounts(currentAccount.id, { is_active: true, is_hidden: false });
+      fetchAccountsSummary(currentAccount.id);
     }
-  }, [currentAccount?.id, fetchBudgets]);
+  }, [
+    currentAccount?.id,
+    fetchBudgets,
+    fetchTransactions,
+    fetchReceipts,
+    fetchFinancialAccounts,
+    fetchAccountsSummary,
+  ]);
 
   // Fetch detail for default or first active budget
   useEffect(() => {
@@ -87,6 +169,11 @@ export function Dashboard() {
   const trendData = useMemo(
     () => generateTrendData(currentBudget),
     [currentBudget]
+  );
+
+  const netWorthData = useMemo(
+    () => generateNetWorthData(financialAccounts),
+    [financialAccounts]
   );
 
   if (!currentAccount) {
@@ -131,7 +218,7 @@ export function Dashboard() {
           <div>
             <h1>Dashboard</h1>
             <p className="dashboard-subtitle">
-              Overview of your budget and spending
+              Overview of your finances, budget, and spending
             </p>
           </div>
         </div>
@@ -140,7 +227,39 @@ export function Dashboard() {
           <div className="dashboard-widget widget-summary">
             <BudgetSummaryCard
               budget={currentBudget}
-              isLoading={isLoading && !currentBudget}
+              isLoading={budgetsLoading && !currentBudget}
+            />
+          </div>
+
+          <div className="dashboard-widget widget-actions">
+            <QuickActions isLoading={false} />
+          </div>
+
+          <div className="dashboard-widget widget-accounts">
+            <AccountBalances
+              accounts={financialAccounts}
+              summary={accountsSummary}
+              currency={currentBudget?.currency || 'USD'}
+              isLoading={financialLoading}
+              limit={4}
+            />
+          </div>
+
+          <div className="dashboard-widget widget-transactions">
+            <RecentTransactions
+              transactions={transactions}
+              currency={currentBudget?.currency || 'USD'}
+              isLoading={transactionsLoading}
+              limit={5}
+            />
+          </div>
+
+          <div className="dashboard-widget widget-receipts">
+            <RecentReceipts
+              receipts={receipts}
+              currency={currentBudget?.currency || 'USD'}
+              isLoading={receiptsLoading}
+              limit={5}
             />
           </div>
 
@@ -148,8 +267,17 @@ export function Dashboard() {
             <SpendingByCategory
               data={categorySpending}
               currency={currentBudget?.currency}
-              isLoading={isLoading && !currentBudget}
+              isLoading={budgetsLoading && !currentBudget}
               title="Budget Allocations"
+            />
+          </div>
+
+          <div className="dashboard-widget widget-networth">
+            <NetWorthChart
+              data={netWorthData}
+              currency={currentBudget?.currency || 'USD'}
+              isLoading={financialLoading}
+              title="Net Worth Trend"
             />
           </div>
 
@@ -157,7 +285,7 @@ export function Dashboard() {
             <BudgetTrend
               data={trendData}
               currency={currentBudget?.currency}
-              isLoading={isLoading && !currentBudget}
+              isLoading={budgetsLoading && !currentBudget}
               title="Spending Trend"
               showBudgetLine={true}
               budgetAmount={currentBudget?.total_amount}

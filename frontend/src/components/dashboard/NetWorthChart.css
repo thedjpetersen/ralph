@@ -1,0 +1,226 @@
+.networth-chart {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  min-height: 280px;
+}
+
+.networth-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.networth-chart-header h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.networth-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.current-networth {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+.networth-change {
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.networth-change.positive {
+  color: #2ecc71;
+}
+
+.networth-change.negative {
+  color: #e74c3c;
+}
+
+.change-percent {
+  margin-left: 0.25rem;
+  opacity: 0.7;
+}
+
+.networth-chart-container {
+  flex: 1;
+  min-height: 200px;
+}
+
+/* Tooltip */
+.networth-tooltip {
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.tooltip-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.tooltip-label {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.7);
+  flex: 1;
+}
+
+.tooltip-value {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty state */
+.networth-chart-empty {
+  justify-content: center;
+  align-items: center;
+}
+
+.networth-chart-empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.networth-chart-empty-content .empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.networth-chart-empty-content p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.empty-hint {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Skeleton loading */
+.skeleton-value {
+  width: 150px;
+  height: 2rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-chart {
+  width: 100%;
+  height: 200px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 480px) {
+  .networth-summary {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .current-networth {
+    font-size: 1.25rem;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .networth-chart {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .networth-chart-header h3 {
+    color: #213547;
+  }
+
+  .current-networth {
+    color: #213547;
+  }
+
+  .networth-tooltip {
+    background-color: #fff;
+    border-color: #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .tooltip-date {
+    color: rgba(0, 0, 0, 0.5);
+    border-bottom-color: #eee;
+  }
+
+  .tooltip-label {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .tooltip-value {
+    color: #213547;
+  }
+
+  .networth-chart-empty-content p {
+    color: #213547;
+  }
+
+  .empty-hint {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .skeleton-value,
+  .skeleton-chart {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
