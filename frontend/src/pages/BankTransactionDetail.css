@@ -1,0 +1,572 @@
+.bank-transaction-detail-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.detail-header {
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #646cff;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.detail-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.detail-header-info {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.detail-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.transaction-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-posted {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.status-pending {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.status-cancelled {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+.transaction-type {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.type-credit {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.type-debit {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.type-transfer {
+  background-color: rgba(155, 89, 182, 0.15);
+  color: #9b59b6;
+}
+
+.type-fee {
+  background-color: rgba(230, 126, 34, 0.15);
+  color: #e67e22;
+}
+
+.type-interest {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.type-adjustment {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.type-other {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+.recurring-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+}
+
+.pending-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-button,
+.save-button {
+  padding: 0.625rem 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.edit-button:hover,
+.save-button:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-edit-button {
+  padding: 0.625rem 1rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  color: rgba(255, 255, 255, 0.87);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.cancel-edit-button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+.cancel-edit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.detail-error,
+.detail-loading {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.detail-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.back-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.back-button:hover {
+  background-color: #747bff;
+}
+
+.detail-error-message {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 6px;
+  color: #ff6b6b;
+}
+
+.detail-content {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.transaction-amount-section {
+  text-align: center;
+  padding: 2rem;
+  margin: -2rem -2rem 2rem -2rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px 12px 0 0;
+}
+
+.amount-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount-positive {
+  color: #2ecc71;
+}
+
+.amount-negative {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.transaction-date {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+.posted-date {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.detail-section {
+  margin-bottom: 2rem;
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-section h2 {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.87);
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.5rem;
+}
+
+.category-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.current-category {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.category-badge {
+  padding: 0.5rem 1rem;
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.change-category-button,
+.assign-category-button {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.change-category-button:hover,
+.assign-category-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+.recurring-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.recurring-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.recurring-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #646cff;
+}
+
+.recurrence-info {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.recurrence-pattern {
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.receipt-link {
+  color: #646cff;
+  text-decoration: none;
+}
+
+.receipt-link:hover {
+  text-decoration: underline;
+}
+
+.detail-notes {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.notes-textarea {
+  width: 100%;
+  padding: 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.notes-textarea:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.detail-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.detail-tag {
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.no-tags {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.tags-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tags-list.editable {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.remove-tag-button {
+  background: none;
+  border: none;
+  color: #646cff;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  margin-left: 0.25rem;
+  line-height: 1;
+}
+
+.remove-tag-button:hover {
+  color: #ff6b6b;
+}
+
+.add-tag-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tag-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 0.875rem;
+}
+
+.tag-input:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.add-tag-button {
+  padding: 0.5rem 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.add-tag-button:hover {
+  background-color: #747bff;
+}
+
+.detail-timestamps {
+  display: flex;
+  gap: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #444;
+}
+
+.timestamp-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .detail-error,
+  .detail-loading {
+    background-color: #f5f5f5;
+  }
+
+  .detail-content {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .transaction-amount-section {
+    background-color: #f5f5f5;
+  }
+
+  .amount-negative {
+    color: #213547;
+  }
+
+  .transaction-date {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .posted-date {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .detail-section h2 {
+    color: #213547;
+    border-bottom-color: #ddd;
+  }
+
+  .detail-notes {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .notes-textarea,
+  .tag-input {
+    background-color: #fff;
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .detail-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .detail-value {
+    color: #213547;
+  }
+
+  .no-tags {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .detail-timestamps {
+    border-top-color: #ddd;
+  }
+
+  .cancel-edit-button,
+  .change-category-button,
+  .assign-category-button {
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .cancel-edit-button:hover:not(:disabled),
+  .change-category-button:hover,
+  .assign-category-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+  }
+
+  .recurrence-info {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

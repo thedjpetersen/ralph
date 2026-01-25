@@ -24,6 +24,8 @@ import { BudgetDetail } from './pages/BudgetDetail';
 import { BudgetForm } from './components/BudgetForm';
 import { FinancialConnections } from './pages/FinancialConnections';
 import { FinancialAccounts } from './pages/FinancialAccounts';
+import { BankTransactions } from './pages/BankTransactions';
+import { BankTransactionDetail } from './pages/BankTransactionDetail';
 import './App.css';
 
 function App() {
@@ -58,6 +60,8 @@ function App() {
         <Route path="/budgets/:id/edit" element={<BudgetForm />} />
         <Route path="/connections" element={<FinancialConnections />} />
         <Route path="/financial-accounts" element={<FinancialAccounts />} />
+        <Route path="/bank-transactions" element={<BankTransactions />} />
+        <Route path="/bank-transactions/:id" element={<BankTransactionDetail />} />
       </Route>
     </Routes>
   );

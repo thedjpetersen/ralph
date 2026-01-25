@@ -1,0 +1,358 @@
+.recurring-transactions {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.recurring-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid #333;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.recurring-header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.recurring-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.recurring-info {
+  padding: 1rem 1.5rem;
+  background-color: rgba(100, 108, 255, 0.05);
+  border-bottom: 1px solid #333;
+}
+
+.recurring-info p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+.recurring-loading,
+.recurring-error,
+.recurring-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+
+.recurring-error p {
+  margin: 0 0 1rem;
+  color: #ff6b6b;
+}
+
+.recurring-empty h3 {
+  margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.recurring-empty p {
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+.retry-button {
+  padding: 0.5rem 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.view-transactions-link {
+  color: #646cff;
+  text-decoration: none;
+}
+
+.view-transactions-link:hover {
+  text-decoration: underline;
+}
+
+.recurring-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.recurring-item {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #333;
+}
+
+.recurring-item:last-child {
+  border-bottom: none;
+}
+
+.recurring-item-main {
+  padding: 0;
+}
+
+.recurring-item-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  gap: 1rem;
+  transition: background-color 0.15s;
+}
+
+.recurring-item-link:hover {
+  background-color: rgba(100, 108, 255, 0.05);
+}
+
+.recurring-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.recurring-merchant {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recurring-category {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.recurring-item-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.recurring-item-amount .amount-positive {
+  color: #2ecc71;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.recurring-item-amount .amount-negative {
+  color: rgba(255, 255, 255, 0.87);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.recurring-type {
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.type-credit {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.type-debit {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.type-transfer {
+  background-color: rgba(155, 89, 182, 0.15);
+  color: #9b59b6;
+}
+
+.type-fee {
+  background-color: rgba(230, 126, 34, 0.15);
+  color: #e67e22;
+}
+
+.type-interest {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.type-other {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+.recurring-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid #2a2a2a;
+}
+
+.recurring-item-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pattern-select {
+  padding: 0.375rem 0.75rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 0.75rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M2.5 4.5L6 8L9.5 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 1.5rem;
+}
+
+.pattern-select:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.remove-recurring-button {
+  padding: 0.375rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid rgba(255, 107, 107, 0.5);
+  color: #ff6b6b;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  margin-left: auto;
+}
+
+.remove-recurring-button:hover {
+  background-color: rgba(255, 107, 107, 0.1);
+  border-color: #ff6b6b;
+}
+
+@media (max-width: 600px) {
+  .recurring-item-link {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .recurring-item-amount {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .recurring-item-controls {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .recurring-transactions {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .recurring-header {
+    border-bottom-color: #ddd;
+    background-color: #f5f5f5;
+  }
+
+  .recurring-header h2 {
+    color: #213547;
+  }
+
+  .recurring-subtitle {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .close-button {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .close-button:hover {
+    color: #213547;
+  }
+
+  .recurring-info {
+    background-color: rgba(100, 108, 255, 0.05);
+    border-bottom-color: #ddd;
+  }
+
+  .recurring-info p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .recurring-empty h3 {
+    color: #213547;
+  }
+
+  .recurring-empty p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .recurring-item {
+    border-bottom-color: #eee;
+  }
+
+  .recurring-merchant {
+    color: #213547;
+  }
+
+  .recurring-category {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .recurring-item-amount .amount-negative {
+    color: #213547;
+  }
+
+  .recurring-item-controls {
+    background-color: #f9f9f9;
+    border-top-color: #eee;
+  }
+
+  .recurring-item-date {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .pattern-select {
+    background-color: #fff;
+    border-color: #ccc;
+    color: #213547;
+  }
+}
