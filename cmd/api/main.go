@@ -12,6 +12,7 @@ import (
 
 	"clockzen-next/internal/ent"
 	"clockzen-next/internal/infrastructure/google"
+	"clockzen-next/internal/presentation/http/handlers/admin"
 	"clockzen-next/internal/presentation/http/handlers/analysis"
 	"clockzen-next/internal/presentation/http/handlers/integration"
 	"clockzen-next/internal/presentation/http/handlers/retirement"
@@ -34,7 +35,11 @@ func main() {
 	mux.HandleFunc("/api/health", handleHealth)
 
 	// Register admin routes (protected by admin middleware)
-	mux.Handle("/api/admin/", middleware.RequireAdmin(http.HandlerFunc(handleAdminRoutes)))
+	// Create admin router and wrap with RequireAdmin middleware
+	adminRouter := admin.NewDefaultRouter()
+	adminMux := http.NewServeMux()
+	adminRouter.RegisterRoutes(adminMux)
+	mux.Handle("/api/admin/", middleware.RequireAdmin(adminMux))
 
 	// Register retirement routes (doesn't require DB)
 	retirementRouter := retirement.NewDefaultRouter()
@@ -164,20 +169,3 @@ func getEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
-// handleAdminRoutes handles requests to admin endpoints.
-// All routes under /api/admin/ are protected by the admin middleware.
-func handleAdminRoutes(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	// Example admin endpoint: GET /api/admin/status
-	if r.URL.Path == "/api/admin/status" && r.Method == http.MethodGet {
-		json.NewEncoder(w).Encode(map[string]string{
-			"status": "admin access granted",
-		})
-		return
-	}
-
-	// Add more admin routes here as needed
-
-	http.Error(w, "Not found", http.StatusNotFound)
-}
