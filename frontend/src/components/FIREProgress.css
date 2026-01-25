@@ -1,0 +1,374 @@
+.fire-progress {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+/* Circular Progress */
+.progress-circle-container {
+  flex-shrink: 0;
+}
+
+.progress-circle {
+  position: relative;
+  width: 180px;
+  height: 180px;
+}
+
+.progress-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.progress-arc {
+  transition: stroke-dasharray 0.5s ease;
+}
+
+.progress-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.progress-percentage {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-label {
+  display: block;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.25rem;
+}
+
+/* Progress Details */
+.progress-details {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Progress Bar */
+.progress-bar-section {
+  margin-bottom: 1.5rem;
+}
+
+.progress-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.progress-bar-value {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-bar-container {
+  position: relative;
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: visible;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #646cff 0%, #2ecc71 100%);
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.milestone-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.milestone-marker.reached {
+  background-color: #2ecc71;
+}
+
+.milestone-marker .milestone-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
+  font-size: 0.625rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+}
+
+.milestone-marker.reached .milestone-label {
+  color: #2ecc71;
+}
+
+/* Stats Grid */
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value.current {
+  color: #3498db;
+}
+
+.stat-value.target {
+  color: #646cff;
+}
+
+.stat-value.remaining {
+  color: #f39c12;
+}
+
+.stat-value.date {
+  color: #9b59b6;
+}
+
+/* Milestone Section */
+.milestone-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(100, 108, 255, 0.2);
+}
+
+.milestone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.milestone-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #646cff;
+}
+
+.milestone-amount {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+
+.milestone-bar-container {
+  height: 6px;
+  background-color: rgba(100, 108, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.milestone-bar-fill {
+  height: 100%;
+  background-color: #646cff;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.milestone-hint {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Time to FIRE Section */
+.time-to-fire-section {
+  padding: 1rem;
+  background-color: rgba(155, 89, 182, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(155, 89, 182, 0.2);
+}
+
+.time-to-fire-section h4 {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: #9b59b6;
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.time-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.time-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+.time-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.projected-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(155, 89, 182, 0.2);
+}
+
+.projected-label {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.projected-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2ecc71;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fire-progress {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .progress-circle {
+    width: 160px;
+    height: 160px;
+  }
+
+  .progress-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .time-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .progress-bar-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .milestone-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .projected-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  .progress-percentage {
+    color: #213547;
+  }
+
+  .progress-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .progress-bar-label {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .progress-bar-value {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .progress-bar-container {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .milestone-marker {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .milestone-marker .milestone-label {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .progress-stats {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .stat-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .milestone-hint {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .time-value {
+    color: #213547;
+  }
+
+  .time-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .projected-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+}

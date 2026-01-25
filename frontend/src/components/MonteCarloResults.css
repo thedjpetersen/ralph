@@ -1,0 +1,485 @@
+.montecarlo-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Success Rate Section */
+.success-rate-section {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+}
+
+.success-gauge-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.success-gauge {
+  width: 100%;
+  height: 100%;
+}
+
+.success-arc {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.success-gauge-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.success-percentage {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.success-percentage.excellent {
+  color: #2ecc71;
+}
+
+.success-percentage.good {
+  color: #f39c12;
+}
+
+.success-percentage.fair {
+  color: #e67e22;
+}
+
+.success-percentage.poor {
+  color: #e74c3c;
+}
+
+.success-label {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.25rem;
+}
+
+.success-interpretation {
+  flex: 1;
+}
+
+.interpretation-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.interpretation-title.excellent {
+  color: #2ecc71;
+}
+
+.interpretation-title.good {
+  color: #f39c12;
+}
+
+.interpretation-title.fair {
+  color: #e67e22;
+}
+
+.interpretation-title.poor {
+  color: #e74c3c;
+}
+
+.interpretation-text {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+/* Simulation Stats */
+.simulation-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.375rem;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value.median {
+  color: #646cff;
+}
+
+/* Percentile Section */
+.percentile-section {
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+}
+
+.percentile-section h4 {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.percentile-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.percentile-item {
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.percentile-item.highlight {
+  background-color: rgba(100, 108, 255, 0.1);
+  border: 1px solid rgba(100, 108, 255, 0.2);
+}
+
+.percentile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.375rem;
+}
+
+.percentile-label {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.percentile-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+.percentile-value.pessimistic {
+  color: #e74c3c;
+}
+
+.percentile-value.median {
+  color: #646cff;
+}
+
+.percentile-value.optimistic {
+  color: #2ecc71;
+}
+
+.percentile-bar-container {
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.percentile-bar {
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.percentile-bar.pessimistic {
+  background-color: #e74c3c;
+}
+
+.percentile-bar.median {
+  background-color: #646cff;
+}
+
+.percentile-bar.optimistic {
+  background-color: #2ecc71;
+}
+
+/* Scenario Chart */
+.scenario-chart-section {
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+}
+
+.scenario-chart-section h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.chart-description {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.scenario-chart-container {
+  margin-bottom: 1rem;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-line {
+  width: 24px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.legend-line.median {
+  background-color: #646cff;
+}
+
+.legend-line.fire {
+  background-color: #f39c12;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #f39c12,
+    #f39c12 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.legend-area {
+  width: 24px;
+  height: 12px;
+  background: linear-gradient(to bottom, rgba(100, 108, 255, 0.3), rgba(100, 108, 255, 0.05));
+  border-radius: 2px;
+}
+
+.legend-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Tooltip */
+.montecarlo-tooltip {
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 180px;
+}
+
+.montecarlo-tooltip .tooltip-header {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.montecarlo-tooltip .tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.montecarlo-tooltip .tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.montecarlo-tooltip .tooltip-row.main {
+  background-color: rgba(100, 108, 255, 0.1);
+  margin: 0.25rem -0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 4px;
+}
+
+.montecarlo-tooltip .tooltip-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.montecarlo-tooltip .tooltip-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  flex: 1;
+}
+
+.montecarlo-tooltip .tooltip-value {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Explanation */
+.montecarlo-explanation {
+  padding: 1rem;
+  background-color: rgba(100, 108, 255, 0.05);
+  border: 1px solid rgba(100, 108, 255, 0.1);
+  border-radius: 8px;
+}
+
+.montecarlo-explanation h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  color: #646cff;
+}
+
+.montecarlo-explanation p {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+.montecarlo-explanation p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .success-rate-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .simulation-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-legend {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .success-gauge-container {
+    width: 140px;
+    height: 140px;
+  }
+
+  .success-percentage {
+    font-size: 1.5rem;
+  }
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  .success-rate-section,
+  .stat-card,
+  .percentile-section,
+  .scenario-chart-section {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .success-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .interpretation-text {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .stat-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .stat-value {
+    color: #213547;
+  }
+
+  .percentile-section h4,
+  .scenario-chart-section h4 {
+    color: #213547;
+  }
+
+  .percentile-label {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .percentile-value {
+    color: #213547;
+  }
+
+  .percentile-bar-container {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .percentile-bar {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .chart-description {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .legend-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .montecarlo-tooltip {
+    background-color: #fff;
+    border-color: #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .montecarlo-tooltip .tooltip-header {
+    color: #213547;
+    border-bottom-color: #eee;
+  }
+
+  .montecarlo-tooltip .tooltip-label {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .montecarlo-tooltip .tooltip-value {
+    color: #213547;
+  }
+
+  .montecarlo-explanation {
+    background-color: rgba(100, 108, 255, 0.05);
+  }
+
+  .montecarlo-explanation p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

@@ -1,0 +1,537 @@
+.fire-history-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.fire-history-header {
+  margin-bottom: 2rem;
+}
+
+.fire-history-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.fire-history-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.fire-history-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.calculator-link {
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background-color 0.15s;
+}
+
+.calculator-link:hover {
+  background-color: #747bff;
+}
+
+/* Action Bar */
+.fire-history-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+}
+
+.select-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.select-all-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.select-all-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #646cff;
+  cursor: pointer;
+}
+
+.delete-selected-button {
+  padding: 0.5rem 1rem;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.delete-selected-button:hover {
+  background-color: #c0392b;
+}
+
+.clear-all-button {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.clear-all-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+/* Empty State */
+.fire-history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  min-height: 300px;
+}
+
+.fire-history-empty h2,
+.fire-history-empty h3 {
+  margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.fire-history-empty p {
+  margin: 0 0 1.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  max-width: 400px;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.select-account-link {
+  color: #646cff;
+  text-decoration: none;
+}
+
+.select-account-link:hover {
+  text-decoration: underline;
+}
+
+/* Calculations List */
+.calculations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.calculation-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  transition: border-color 0.15s;
+}
+
+.calculation-card.selected {
+  border-color: #646cff;
+  background-color: rgba(100, 108, 255, 0.05);
+}
+
+.calculation-checkbox {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 0.25rem;
+}
+
+.calculation-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #646cff;
+  cursor: pointer;
+}
+
+.calculation-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.calculation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.calculation-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.calculation-date {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.calculation-plan {
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.delete-button {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.delete-button:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+}
+
+/* Results */
+.calculation-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.result-item.main {
+  flex-basis: 100%;
+}
+
+.result-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.result-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-value.fire-number {
+  font-size: 1.5rem;
+  color: #646cff;
+}
+
+.result-value.progress {
+  color: #3498db;
+}
+
+.result-value.success-high {
+  color: #2ecc71;
+}
+
+.result-value.success-medium {
+  color: #f39c12;
+}
+
+.result-value.success-low {
+  color: #e74c3c;
+}
+
+/* Inputs */
+.calculation-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.input-item {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.modal-content h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.modal-content p {
+  margin: 0 0 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  padding: 0.75rem 1.25rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+.confirm-delete-button {
+  padding: 0.75rem 1.25rem;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.confirm-delete-button:hover {
+  background-color: #c0392b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fire-history-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calculator-link {
+    text-align: center;
+  }
+
+  .fire-history-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .select-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .clear-all-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .calculation-results {
+    gap: 1rem;
+  }
+
+  .result-item {
+    flex-basis: calc(50% - 0.5rem);
+  }
+
+  .result-item.main {
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .calculation-card {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .calculation-checkbox {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .calculation-card {
+    position: relative;
+    padding-right: 3rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .cancel-button,
+  .confirm-delete-button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  .fire-history-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .fire-history-actions,
+  .fire-history-empty,
+  .calculation-card,
+  .modal-content {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .calculation-card.selected {
+    background-color: rgba(100, 108, 255, 0.05);
+  }
+
+  .select-all-label {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .clear-all-button {
+    border-color: #ccc;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .clear-all-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+  }
+
+  .fire-history-empty h2,
+  .fire-history-empty h3 {
+    color: #213547;
+  }
+
+  .fire-history-empty p {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .calculation-date {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .delete-button {
+    color: rgba(0, 0, 0, 0.3);
+  }
+
+  .calculation-results {
+    border-bottom-color: #eee;
+  }
+
+  .result-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .result-value {
+    color: #213547;
+  }
+
+  .input-item {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content h3 {
+    color: #213547;
+  }
+
+  .modal-content p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .cancel-button {
+    border-color: #ccc;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .cancel-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+  }
+}
