@@ -2337,6 +2337,485 @@ export const personasApi = {
   },
 };
 
+// Employer types
+export type EmployerStatus = 'active' | 'inactive';
+
+export interface Employer {
+  id: string;
+  account_id: string;
+  name: string;
+  display_name?: string;
+  ein?: string;
+  address?: {
+    street1?: string;
+    street2?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  };
+  phone?: string;
+  email?: string;
+  website?: string;
+  status: EmployerStatus;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
+export interface ListEmployersResponse {
+  employers: Employer[];
+  total: number;
+}
+
+export interface ListEmployersParams {
+  status?: EmployerStatus;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateEmployerRequest {
+  name: string;
+  display_name?: string;
+  ein?: string;
+  address?: {
+    street1?: string;
+    street2?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  };
+  phone?: string;
+  email?: string;
+  website?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateEmployerRequest {
+  name?: string;
+  display_name?: string;
+  ein?: string;
+  address?: {
+    street1?: string;
+    street2?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  };
+  phone?: string;
+  email?: string;
+  website?: string;
+  status?: EmployerStatus;
+  metadata?: Record<string, unknown>;
+}
+
+// Employers API methods (account-scoped)
+export const employersApi = {
+  async list(accountId: string, params?: ListEmployersParams): Promise<ListEmployersResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/employers${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch employers');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<Employer> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/employers/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch employer');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateEmployerRequest): Promise<Employer> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/employers`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create employer');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateEmployerRequest): Promise<Employer> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/employers/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update employer');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/employers/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete employer');
+    }
+  },
+};
+
+// Paycheck types
+export type PaycheckStatus = 'pending' | 'processed' | 'reviewed' | 'archived';
+export type PayFrequency = 'weekly' | 'biweekly' | 'semimonthly' | 'monthly' | 'quarterly' | 'annual' | 'other';
+
+export interface PaycheckEarning {
+  id: string;
+  paycheck_id: string;
+  type: string;
+  description?: string;
+  hours?: number;
+  rate?: number;
+  amount: number;
+  ytd_amount?: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaycheckDeduction {
+  id: string;
+  paycheck_id: string;
+  type: string;
+  description?: string;
+  amount: number;
+  ytd_amount?: number;
+  is_pretax: boolean;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Paycheck {
+  id: string;
+  account_id: string;
+  employer_id: string;
+  employer_name?: string;
+  pay_date: string;
+  pay_period_start: string;
+  pay_period_end: string;
+  pay_frequency?: PayFrequency;
+  gross_pay: number;
+  net_pay: number;
+  total_taxes: number;
+  total_deductions: number;
+  total_earnings: number;
+  currency: string;
+  check_number?: string;
+  direct_deposit_account?: string;
+  status: PaycheckStatus;
+  needs_review: boolean;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  notes?: string;
+  receipt_id?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
+export interface PaycheckDetail extends Paycheck {
+  earnings: PaycheckEarning[];
+  deductions: PaycheckDeduction[];
+}
+
+export interface ListPaychecksResponse {
+  paychecks: Paycheck[];
+  total: number;
+}
+
+export interface ListPaychecksParams {
+  employer_id?: string;
+  status?: PaycheckStatus;
+  needs_review?: boolean;
+  start_date?: string;
+  end_date?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreatePaycheckRequest {
+  employer_id: string;
+  pay_date: string;
+  pay_period_start: string;
+  pay_period_end: string;
+  pay_frequency?: PayFrequency;
+  gross_pay: number;
+  net_pay: number;
+  total_taxes?: number;
+  total_deductions?: number;
+  total_earnings?: number;
+  currency?: string;
+  check_number?: string;
+  direct_deposit_account?: string;
+  notes?: string;
+  receipt_id?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdatePaycheckRequest {
+  employer_id?: string;
+  pay_date?: string;
+  pay_period_start?: string;
+  pay_period_end?: string;
+  pay_frequency?: PayFrequency;
+  gross_pay?: number;
+  net_pay?: number;
+  total_taxes?: number;
+  total_deductions?: number;
+  total_earnings?: number;
+  currency?: string;
+  check_number?: string;
+  direct_deposit_account?: string;
+  status?: PaycheckStatus;
+  notes?: string;
+  receipt_id?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface AddEarningRequest {
+  type: string;
+  description?: string;
+  hours?: number;
+  rate?: number;
+  amount: number;
+  ytd_amount?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateEarningRequest {
+  type?: string;
+  description?: string;
+  hours?: number;
+  rate?: number;
+  amount?: number;
+  ytd_amount?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface AddDeductionRequest {
+  type: string;
+  description?: string;
+  amount: number;
+  ytd_amount?: number;
+  is_pretax?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateDeductionRequest {
+  type?: string;
+  description?: string;
+  amount?: number;
+  ytd_amount?: number;
+  is_pretax?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+// Paychecks API methods (account-scoped)
+export const paychecksApi = {
+  async list(accountId: string, params?: ListPaychecksParams): Promise<ListPaychecksResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.employer_id) searchParams.set('employer_id', params.employer_id);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.needs_review !== undefined) searchParams.set('needs_review', params.needs_review.toString());
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/paychecks${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch paychecks');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<Paycheck> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch paycheck');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreatePaycheckRequest): Promise<Paycheck> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create paycheck');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdatePaycheckRequest): Promise<Paycheck> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update paycheck');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete paycheck');
+    }
+  },
+
+  async getDetails(accountId: string, id: string): Promise<PaycheckDetail> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${id}/details`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch paycheck details');
+    }
+    return response.json();
+  },
+
+  async markReviewed(accountId: string, id: string): Promise<Paycheck> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${id}/reviewed`, {
+      method: 'PUT',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to mark paycheck as reviewed');
+    }
+    return response.json();
+  },
+
+  async listNeedingReview(accountId: string, params?: { limit?: number; offset?: number }): Promise<ListPaychecksResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/paychecks/needing-review${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch paychecks needing review');
+    }
+    return response.json();
+  },
+};
+
+// Paycheck Earnings API methods (account-scoped, nested under paychecks)
+export const paycheckEarningsApi = {
+  async add(accountId: string, paycheckId: string, data: AddEarningRequest): Promise<PaycheckEarning> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${paycheckId}/earnings`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add earning');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, paycheckId: string, id: string, data: UpdateEarningRequest): Promise<PaycheckEarning> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${paycheckId}/earnings/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update earning');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, paycheckId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${paycheckId}/earnings/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete earning');
+    }
+  },
+};
+
+// Paycheck Deductions API methods (account-scoped, nested under paychecks)
+export const paycheckDeductionsApi = {
+  async add(accountId: string, paycheckId: string, data: AddDeductionRequest): Promise<PaycheckDeduction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${paycheckId}/deductions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add deduction');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, paycheckId: string, id: string, data: UpdateDeductionRequest): Promise<PaycheckDeduction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${paycheckId}/deductions/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update deduction');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, paycheckId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/paychecks/${paycheckId}/deductions/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete deduction');
+    }
+  },
+};
+
 // Sync types
 export interface SyncResult {
   connection_id?: string;
