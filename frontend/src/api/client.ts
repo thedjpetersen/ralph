@@ -2869,3 +2869,1294 @@ export const syncApi = {
     return response.json();
   },
 };
+
+// ============================================================================
+// Retirement Planning API Types and Methods
+// ============================================================================
+
+// Retirement Plan types
+export type RetirementPlanStatus = 'active' | 'inactive' | 'archived' | 'draft';
+export type RetirementStrategy = 'traditional' | 'fire' | 'coast_fire' | 'barista_fire' | 'lean_fire' | 'fat_fire';
+
+export interface RetirementPlan {
+  id: string;
+  account_id: string;
+  name: string;
+  description?: string;
+  status: RetirementPlanStatus;
+  is_default: boolean;
+  strategy: RetirementStrategy;
+  target_retirement_age: number;
+  current_age: number;
+  life_expectancy: number;
+  target_annual_spending: number;
+  inflation_rate: number;
+  safe_withdrawal_rate: number;
+  expected_return_rate: number;
+  social_security_age?: number;
+  social_security_benefit?: number;
+  pension_benefit?: number;
+  pension_start_age?: number;
+  healthcare_cost_estimate?: number;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RetirementPlanDetail extends RetirementPlan {
+  retirement_accounts: RetirementAccount[];
+  income_sources: RetirementIncomeSource[];
+  expenses: RetirementExpense[];
+  fire_number?: number;
+  years_to_retirement?: number;
+  projected_portfolio_at_retirement?: number;
+  success_probability?: number;
+}
+
+export interface ListRetirementPlansResponse {
+  plans: RetirementPlan[];
+  total: number;
+}
+
+export interface ListRetirementPlansParams {
+  status?: RetirementPlanStatus;
+  strategy?: RetirementStrategy;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateRetirementPlanRequest {
+  name: string;
+  description?: string;
+  strategy?: RetirementStrategy;
+  target_retirement_age: number;
+  current_age: number;
+  life_expectancy?: number;
+  target_annual_spending: number;
+  inflation_rate?: number;
+  safe_withdrawal_rate?: number;
+  expected_return_rate?: number;
+  social_security_age?: number;
+  social_security_benefit?: number;
+  pension_benefit?: number;
+  pension_start_age?: number;
+  healthcare_cost_estimate?: number;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateRetirementPlanRequest {
+  name?: string;
+  description?: string;
+  status?: RetirementPlanStatus;
+  strategy?: RetirementStrategy;
+  target_retirement_age?: number;
+  current_age?: number;
+  life_expectancy?: number;
+  target_annual_spending?: number;
+  inflation_rate?: number;
+  safe_withdrawal_rate?: number;
+  expected_return_rate?: number;
+  social_security_age?: number;
+  social_security_benefit?: number;
+  pension_benefit?: number;
+  pension_start_age?: number;
+  healthcare_cost_estimate?: number;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+// Retirement Plans API methods (account-scoped)
+export const retirementPlansApi = {
+  async list(accountId: string, params?: ListRetirementPlansParams): Promise<ListRetirementPlansResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.strategy) searchParams.set('strategy', params.strategy);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/retirement/plans${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement plans');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<RetirementPlan> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/plans/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement plan');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateRetirementPlanRequest): Promise<RetirementPlan> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/plans`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create retirement plan');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateRetirementPlanRequest): Promise<RetirementPlan> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/plans/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update retirement plan');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/plans/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete retirement plan');
+    }
+  },
+
+  async getDetail(accountId: string, id: string): Promise<RetirementPlanDetail> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/plans/${id}/detail`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement plan detail');
+    }
+    return response.json();
+  },
+
+  async setDefault(accountId: string, id: string): Promise<RetirementPlan> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/plans/${id}/default`, {
+      method: 'PUT',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to set retirement plan as default');
+    }
+    return response.json();
+  },
+
+  async activate(accountId: string, id: string): Promise<RetirementPlan> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/plans/${id}/activate`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to activate retirement plan');
+    }
+    return response.json();
+  },
+
+  async archive(accountId: string, id: string): Promise<RetirementPlan> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/plans/${id}/archive`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to archive retirement plan');
+    }
+    return response.json();
+  },
+};
+
+// Retirement Account types
+export type RetirementAccountType = '401k' | '403b' | 'ira' | 'roth_ira' | 'sep_ira' | 'simple_ira' | 'pension' | 'brokerage' | 'hsa' | 'other';
+export type RetirementAccountStatus = 'active' | 'inactive' | 'closed';
+
+export interface RetirementAccount {
+  id: string;
+  account_id: string;
+  plan_id: string;
+  financial_account_id?: string;
+  name: string;
+  type: RetirementAccountType;
+  status: RetirementAccountStatus;
+  current_balance: number;
+  contribution_limit?: number;
+  annual_contribution?: number;
+  employer_match_percent?: number;
+  employer_match_limit?: number;
+  expected_return_rate?: number;
+  is_tax_deferred: boolean;
+  is_roth: boolean;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListRetirementAccountsResponse {
+  accounts: RetirementAccount[];
+  total: number;
+}
+
+export interface ListRetirementAccountsParams {
+  plan_id?: string;
+  type?: RetirementAccountType;
+  status?: RetirementAccountStatus;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateRetirementAccountRequest {
+  plan_id: string;
+  financial_account_id?: string;
+  name: string;
+  type: RetirementAccountType;
+  current_balance: number;
+  contribution_limit?: number;
+  annual_contribution?: number;
+  employer_match_percent?: number;
+  employer_match_limit?: number;
+  expected_return_rate?: number;
+  is_tax_deferred?: boolean;
+  is_roth?: boolean;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateRetirementAccountRequest {
+  financial_account_id?: string;
+  name?: string;
+  type?: RetirementAccountType;
+  status?: RetirementAccountStatus;
+  current_balance?: number;
+  contribution_limit?: number;
+  annual_contribution?: number;
+  employer_match_percent?: number;
+  employer_match_limit?: number;
+  expected_return_rate?: number;
+  is_tax_deferred?: boolean;
+  is_roth?: boolean;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateRetirementAccountBalanceRequest {
+  balance: number;
+  as_of_date?: string;
+}
+
+// Retirement Accounts API methods (account-scoped)
+export const retirementAccountsApi = {
+  async list(accountId: string, params?: ListRetirementAccountsParams): Promise<ListRetirementAccountsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.plan_id) searchParams.set('plan_id', params.plan_id);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/retirement/accounts${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement accounts');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<RetirementAccount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/accounts/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement account');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateRetirementAccountRequest): Promise<RetirementAccount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/accounts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create retirement account');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateRetirementAccountRequest): Promise<RetirementAccount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/accounts/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update retirement account');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/accounts/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete retirement account');
+    }
+  },
+
+  async updateBalance(accountId: string, id: string, data: UpdateRetirementAccountBalanceRequest): Promise<RetirementAccount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/accounts/${id}/balance`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update retirement account balance');
+    }
+    return response.json();
+  },
+};
+
+// Retirement Income Source types
+export type IncomeSourceType = 'social_security' | 'pension' | 'annuity' | 'rental' | 'part_time' | 'dividend' | 'other';
+export type IncomeSourceStatus = 'active' | 'inactive' | 'future';
+
+export interface RetirementIncomeSource {
+  id: string;
+  account_id: string;
+  plan_id: string;
+  name: string;
+  type: IncomeSourceType;
+  status: IncomeSourceStatus;
+  annual_amount: number;
+  start_age: number;
+  end_age?: number;
+  inflation_adjusted: boolean;
+  cola_rate?: number;
+  is_taxable: boolean;
+  tax_rate?: number;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListRetirementIncomeSourcesResponse {
+  income_sources: RetirementIncomeSource[];
+  total: number;
+}
+
+export interface ListRetirementIncomeSourcesParams {
+  plan_id?: string;
+  type?: IncomeSourceType;
+  status?: IncomeSourceStatus;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateRetirementIncomeSourceRequest {
+  plan_id: string;
+  name: string;
+  type: IncomeSourceType;
+  annual_amount: number;
+  start_age: number;
+  end_age?: number;
+  inflation_adjusted?: boolean;
+  cola_rate?: number;
+  is_taxable?: boolean;
+  tax_rate?: number;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateRetirementIncomeSourceRequest {
+  name?: string;
+  type?: IncomeSourceType;
+  status?: IncomeSourceStatus;
+  annual_amount?: number;
+  start_age?: number;
+  end_age?: number;
+  inflation_adjusted?: boolean;
+  cola_rate?: number;
+  is_taxable?: boolean;
+  tax_rate?: number;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+// Retirement Income Sources API methods (account-scoped)
+export const retirementIncomeSourcesApi = {
+  async list(accountId: string, params?: ListRetirementIncomeSourcesParams): Promise<ListRetirementIncomeSourcesResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.plan_id) searchParams.set('plan_id', params.plan_id);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/retirement/income-sources${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement income sources');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<RetirementIncomeSource> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/income-sources/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement income source');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateRetirementIncomeSourceRequest): Promise<RetirementIncomeSource> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/income-sources`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create retirement income source');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateRetirementIncomeSourceRequest): Promise<RetirementIncomeSource> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/income-sources/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update retirement income source');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/income-sources/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete retirement income source');
+    }
+  },
+};
+
+// Retirement Expense types
+export type RetirementExpenseType = 'housing' | 'healthcare' | 'transportation' | 'food' | 'utilities' | 'insurance' | 'entertainment' | 'travel' | 'other';
+export type RetirementExpenseStatus = 'active' | 'inactive' | 'future';
+export type ExpenseFrequency = 'one_time' | 'monthly' | 'quarterly' | 'annual';
+
+export interface RetirementExpense {
+  id: string;
+  account_id: string;
+  plan_id: string;
+  name: string;
+  type: RetirementExpenseType;
+  status: RetirementExpenseStatus;
+  amount: number;
+  frequency: ExpenseFrequency;
+  start_age: number;
+  end_age?: number;
+  inflation_adjusted: boolean;
+  inflation_rate?: number;
+  is_essential: boolean;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListRetirementExpensesResponse {
+  expenses: RetirementExpense[];
+  total: number;
+}
+
+export interface ListRetirementExpensesParams {
+  plan_id?: string;
+  type?: RetirementExpenseType;
+  status?: RetirementExpenseStatus;
+  is_essential?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateRetirementExpenseRequest {
+  plan_id: string;
+  name: string;
+  type: RetirementExpenseType;
+  amount: number;
+  frequency?: ExpenseFrequency;
+  start_age: number;
+  end_age?: number;
+  inflation_adjusted?: boolean;
+  inflation_rate?: number;
+  is_essential?: boolean;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateRetirementExpenseRequest {
+  name?: string;
+  type?: RetirementExpenseType;
+  status?: RetirementExpenseStatus;
+  amount?: number;
+  frequency?: ExpenseFrequency;
+  start_age?: number;
+  end_age?: number;
+  inflation_adjusted?: boolean;
+  inflation_rate?: number;
+  is_essential?: boolean;
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+// Retirement Expenses API methods (account-scoped)
+export const retirementExpensesApi = {
+  async list(accountId: string, params?: ListRetirementExpensesParams): Promise<ListRetirementExpensesResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.plan_id) searchParams.set('plan_id', params.plan_id);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.is_essential !== undefined) searchParams.set('is_essential', params.is_essential.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/retirement/expenses${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement expenses');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<RetirementExpense> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/expenses/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch retirement expense');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateRetirementExpenseRequest): Promise<RetirementExpense> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/expenses`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create retirement expense');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateRetirementExpenseRequest): Promise<RetirementExpense> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/expenses/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update retirement expense');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/expenses/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete retirement expense');
+    }
+  },
+};
+
+// FIRE Calculation types
+export interface FIRECalculationRequest {
+  plan_id: string;
+  annual_spending: number;
+  safe_withdrawal_rate?: number;
+  inflation_rate?: number;
+}
+
+export interface FIRECalculationResult {
+  fire_number: number;
+  current_portfolio: number;
+  remaining_needed: number;
+  percentage_complete: number;
+  safe_withdrawal_rate: number;
+  annual_spending_adjusted: number;
+}
+
+export interface FIRENumberRequest {
+  annual_spending: number;
+  safe_withdrawal_rate?: number;
+  include_social_security?: boolean;
+  social_security_benefit?: number;
+}
+
+export interface FIRENumberResult {
+  fire_number: number;
+  safe_withdrawal_rate: number;
+  annual_spending: number;
+  social_security_offset?: number;
+}
+
+export interface CoastFIRERequest {
+  plan_id: string;
+  target_retirement_age: number;
+  current_age: number;
+  expected_return_rate?: number;
+}
+
+export interface CoastFIREResult {
+  coast_fire_number: number;
+  current_portfolio: number;
+  is_coast_fire_achieved: boolean;
+  years_until_coast_fire?: number;
+  projected_value_at_retirement: number;
+}
+
+export interface BaristaFIRERequest {
+  plan_id: string;
+  part_time_income: number;
+  years_of_part_time: number;
+}
+
+export interface BaristaFIREResult {
+  barista_fire_number: number;
+  current_portfolio: number;
+  part_time_income_total: number;
+  remaining_needed: number;
+  is_barista_fire_achieved: boolean;
+}
+
+export interface TimeToFIRERequest {
+  plan_id: string;
+  monthly_contribution?: number;
+  expected_return_rate?: number;
+}
+
+export interface TimeToFIREResult {
+  years_to_fire: number;
+  months_to_fire: number;
+  fire_date: string;
+  fire_age: number;
+  fire_number: number;
+  projected_portfolio_at_fire: number;
+}
+
+export interface MonteCarloRequest {
+  plan_id: string;
+  simulations?: number;
+  years_in_retirement?: number;
+  return_mean?: number;
+  return_std_dev?: number;
+  inflation_mean?: number;
+  inflation_std_dev?: number;
+}
+
+export interface MonteCarloResult {
+  success_rate: number;
+  simulations_run: number;
+  median_ending_balance: number;
+  percentile_10_balance: number;
+  percentile_25_balance: number;
+  percentile_75_balance: number;
+  percentile_90_balance: number;
+  years_simulated: number;
+  scenarios: MonteCarloScenario[];
+}
+
+export interface MonteCarloScenario {
+  year: number;
+  median_balance: number;
+  percentile_10: number;
+  percentile_90: number;
+}
+
+// FIRE Calculations API methods (account-scoped)
+export const fireCalculationsApi = {
+  async calculate(accountId: string, data: FIRECalculationRequest): Promise<FIRECalculationResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/fire/calculate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate FIRE');
+    }
+    return response.json();
+  },
+
+  async calculateNumber(accountId: string, data: FIRENumberRequest): Promise<FIRENumberResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/fire/number`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate FIRE number');
+    }
+    return response.json();
+  },
+
+  async calculateCoast(accountId: string, data: CoastFIRERequest): Promise<CoastFIREResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/fire/coast`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate Coast FIRE');
+    }
+    return response.json();
+  },
+
+  async calculateBarista(accountId: string, data: BaristaFIRERequest): Promise<BaristaFIREResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/fire/barista`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate Barista FIRE');
+    }
+    return response.json();
+  },
+
+  async timeToFIRE(accountId: string, data: TimeToFIRERequest): Promise<TimeToFIREResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/fire/time-to-fire`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate time to FIRE');
+    }
+    return response.json();
+  },
+
+  async monteCarlo(accountId: string, data: MonteCarloRequest): Promise<MonteCarloResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/fire/monte-carlo`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to run Monte Carlo simulation');
+    }
+    return response.json();
+  },
+};
+
+// Projections types
+export interface ProjectionRequest {
+  plan_id: string;
+  years?: number;
+  scenario?: 'optimistic' | 'baseline' | 'pessimistic';
+}
+
+export interface ProjectionResult {
+  plan_id: string;
+  years_projected: number;
+  scenario: string;
+  projections: YearlyProjection[];
+  summary: ProjectionSummary;
+}
+
+export interface YearlyProjection {
+  year: number;
+  age: number;
+  portfolio_value: number;
+  contributions: number;
+  withdrawals: number;
+  investment_returns: number;
+  income_sources: number;
+  expenses: number;
+  net_cash_flow: number;
+  cumulative_contributions: number;
+  cumulative_withdrawals: number;
+}
+
+export interface ProjectionSummary {
+  starting_portfolio: number;
+  ending_portfolio: number;
+  total_contributions: number;
+  total_withdrawals: number;
+  total_investment_returns: number;
+  portfolio_survives: boolean;
+  depletion_age?: number;
+  depletion_year?: number;
+}
+
+export interface WithdrawalStrategyRequest {
+  plan_id: string;
+  strategy: 'fixed' | 'variable' | 'guardrails' | 'bucket';
+  initial_withdrawal_rate?: number;
+  floor_rate?: number;
+  ceiling_rate?: number;
+}
+
+export interface WithdrawalStrategyResult {
+  strategy: string;
+  recommended_withdrawal: number;
+  first_year_withdrawal: number;
+  withdrawal_schedule: WithdrawalYear[];
+  success_probability: number;
+}
+
+export interface WithdrawalYear {
+  year: number;
+  age: number;
+  withdrawal_amount: number;
+  withdrawal_rate: number;
+  portfolio_before: number;
+  portfolio_after: number;
+}
+
+export interface RothConversionRequest {
+  plan_id: string;
+  conversion_amount: number;
+  current_tax_bracket: number;
+  expected_retirement_tax_bracket: number;
+  years_until_retirement: number;
+}
+
+export interface RothConversionResult {
+  should_convert: boolean;
+  tax_cost_now: number;
+  tax_savings_later: number;
+  net_benefit: number;
+  break_even_years: number;
+  optimal_conversion_amount?: number;
+  conversion_schedule?: ConversionYear[];
+}
+
+export interface ConversionYear {
+  year: number;
+  conversion_amount: number;
+  tax_cost: number;
+  remaining_traditional: number;
+  new_roth_balance: number;
+}
+
+export interface SEPPRequest {
+  plan_id: string;
+  account_id: string;
+  start_age: number;
+  calculation_method: '72t_amortization' | '72t_annuitization' | '72t_rmd';
+}
+
+export interface SEPPResult {
+  annual_distribution: number;
+  monthly_distribution: number;
+  calculation_method: string;
+  start_age: number;
+  end_age: number;
+  total_years: number;
+  total_distributions: number;
+  interest_rate_used: number;
+  life_expectancy_factor: number;
+}
+
+// Projections API methods (account-scoped)
+export const retirementProjectionsApi = {
+  async generate(accountId: string, data: ProjectionRequest): Promise<ProjectionResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/projections/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to generate retirement projections');
+    }
+    return response.json();
+  },
+
+  async withdrawalStrategy(accountId: string, data: WithdrawalStrategyRequest): Promise<WithdrawalStrategyResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/projections/withdrawal-strategy`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate withdrawal strategy');
+    }
+    return response.json();
+  },
+
+  async rothConversion(accountId: string, data: RothConversionRequest): Promise<RothConversionResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/projections/roth-conversion`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to analyze Roth conversion');
+    }
+    return response.json();
+  },
+
+  async sepp(accountId: string, data: SEPPRequest): Promise<SEPPResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/projections/sepp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate SEPP');
+    }
+    return response.json();
+  },
+};
+
+// Cashflow types
+export interface SankeyRequest {
+  plan_id: string;
+  year?: number;
+  age?: number;
+}
+
+export interface SankeyResult {
+  nodes: SankeyNode[];
+  links: SankeyLink[];
+  total_income: number;
+  total_expenses: number;
+  net_cash_flow: number;
+}
+
+export interface SankeyNode {
+  id: string;
+  name: string;
+  type: 'income' | 'expense' | 'transfer' | 'savings';
+  value: number;
+}
+
+export interface SankeyLink {
+  source: string;
+  target: string;
+  value: number;
+}
+
+export interface IncomeExpenseFlowRequest {
+  plan_id: string;
+  start_age?: number;
+  end_age?: number;
+}
+
+export interface IncomeExpenseFlowResult {
+  years: IncomeExpenseYear[];
+  total_income: number;
+  total_expenses: number;
+  average_annual_surplus: number;
+}
+
+export interface IncomeExpenseYear {
+  year: number;
+  age: number;
+  income_sources: IncomeBreakdown[];
+  expense_categories: ExpenseBreakdown[];
+  total_income: number;
+  total_expenses: number;
+  net_cash_flow: number;
+}
+
+export interface IncomeBreakdown {
+  source: string;
+  type: IncomeSourceType;
+  amount: number;
+  is_taxable: boolean;
+}
+
+export interface ExpenseBreakdown {
+  category: string;
+  type: RetirementExpenseType;
+  amount: number;
+  is_essential: boolean;
+}
+
+export interface TaxImpactRequest {
+  plan_id: string;
+  year?: number;
+  filing_status?: 'single' | 'married_filing_jointly' | 'married_filing_separately' | 'head_of_household';
+}
+
+export interface TaxImpactResult {
+  year: number;
+  filing_status: string;
+  gross_income: number;
+  taxable_income: number;
+  federal_tax: number;
+  state_tax: number;
+  fica_tax: number;
+  total_tax: number;
+  effective_tax_rate: number;
+  marginal_tax_rate: number;
+  income_breakdown: TaxableIncomeBreakdown[];
+  deductions: TaxDeduction[];
+  tax_credits: TaxCredit[];
+}
+
+export interface TaxableIncomeBreakdown {
+  source: string;
+  gross_amount: number;
+  taxable_amount: number;
+  tax_treatment: 'ordinary' | 'capital_gains' | 'qualified_dividends' | 'tax_free';
+}
+
+export interface TaxDeduction {
+  name: string;
+  amount: number;
+  type: 'standard' | 'itemized';
+}
+
+export interface TaxCredit {
+  name: string;
+  amount: number;
+  is_refundable: boolean;
+}
+
+// Cashflow API methods (account-scoped)
+export const retirementCashflowApi = {
+  async sankey(accountId: string, data: SankeyRequest): Promise<SankeyResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/cashflow/sankey`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to generate Sankey diagram data');
+    }
+    return response.json();
+  },
+
+  async incomeExpenseFlow(accountId: string, data: IncomeExpenseFlowRequest): Promise<IncomeExpenseFlowResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/cashflow/income-expense-flow`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to generate income/expense flow');
+    }
+    return response.json();
+  },
+
+  async taxImpact(accountId: string, data: TaxImpactRequest): Promise<TaxImpactResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/cashflow/tax-impact`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to calculate tax impact');
+    }
+    return response.json();
+  },
+};
+
+// Backtest types
+export interface BacktestRequest {
+  plan_id: string;
+  start_year: number;
+  end_year?: number;
+  initial_portfolio: number;
+  annual_withdrawal: number;
+  withdrawal_strategy?: 'fixed' | 'inflation_adjusted' | 'percentage';
+  asset_allocation?: AssetAllocation;
+}
+
+export interface AssetAllocation {
+  stocks: number;
+  bonds: number;
+  cash: number;
+  other?: number;
+}
+
+export interface BacktestResult {
+  plan_id: string;
+  start_year: number;
+  end_year: number;
+  years_tested: number;
+  initial_portfolio: number;
+  final_portfolio: number;
+  total_withdrawals: number;
+  total_returns: number;
+  success: boolean;
+  failure_year?: number;
+  yearly_data: BacktestYear[];
+  statistics: BacktestStatistics;
+}
+
+export interface BacktestYear {
+  year: number;
+  starting_balance: number;
+  withdrawal: number;
+  market_return: number;
+  inflation_rate: number;
+  ending_balance: number;
+  real_return: number;
+}
+
+export interface BacktestStatistics {
+  average_annual_return: number;
+  best_year_return: number;
+  worst_year_return: number;
+  max_drawdown: number;
+  average_withdrawal: number;
+  total_inflation_adjustment: number;
+}
+
+export interface BacktestScenario {
+  id: string;
+  name: string;
+  description: string;
+  start_year: number;
+  end_year: number;
+  market_conditions: string;
+  average_return: number;
+  worst_year: number;
+  best_year: number;
+}
+
+export interface HistoricalPeriod {
+  id: string;
+  name: string;
+  start_year: number;
+  end_year: number;
+  description: string;
+  average_stock_return: number;
+  average_bond_return: number;
+  average_inflation: number;
+  notable_events: string[];
+}
+
+export interface CompareStrategiesRequest {
+  plan_id: string;
+  strategies: BacktestStrategyInput[];
+  start_year?: number;
+  end_year?: number;
+}
+
+export interface BacktestStrategyInput {
+  name: string;
+  withdrawal_rate: number;
+  asset_allocation: AssetAllocation;
+  rebalancing_frequency?: 'monthly' | 'quarterly' | 'annual' | 'never';
+}
+
+export interface CompareStrategiesResult {
+  strategies: StrategyComparison[];
+  best_strategy: string;
+  period_tested: string;
+}
+
+export interface StrategyComparison {
+  name: string;
+  success_rate: number;
+  average_ending_balance: number;
+  worst_case_balance: number;
+  best_case_balance: number;
+  max_drawdown: number;
+  risk_adjusted_return: number;
+}
+
+// Backtest API methods (account-scoped)
+export const retirementBacktestApi = {
+  async runBacktest(accountId: string, data: BacktestRequest): Promise<BacktestResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/backtest/run`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to run backtest');
+    }
+    return response.json();
+  },
+
+  async scenarios(accountId: string): Promise<BacktestScenario[]> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/backtest/scenarios`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch backtest scenarios');
+    }
+    return response.json();
+  },
+
+  async historicalPeriods(accountId: string): Promise<HistoricalPeriod[]> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/backtest/historical-periods`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch historical periods');
+    }
+    return response.json();
+  },
+
+  async compareStrategies(accountId: string, data: CompareStrategiesRequest): Promise<CompareStrategiesResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/retirement/backtest/compare-strategies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to compare strategies');
+    }
+    return response.json();
+  },
+};
