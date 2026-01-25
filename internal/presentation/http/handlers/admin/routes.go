@@ -7,23 +7,26 @@ import (
 
 // Router handles routing for admin user-related endpoints
 type Router struct {
-	userHandler  *UserHandler
-	queueHandler *QueueHandler
+	userHandler    *UserHandler
+	queueHandler   *QueueHandler
+	patternHandler *PatternHandler
 }
 
 // NewRouter creates a new Router with the given handlers
-func NewRouter(userHandler *UserHandler, queueHandler *QueueHandler) *Router {
+func NewRouter(userHandler *UserHandler, queueHandler *QueueHandler, patternHandler *PatternHandler) *Router {
 	return &Router{
-		userHandler:  userHandler,
-		queueHandler: queueHandler,
+		userHandler:    userHandler,
+		queueHandler:   queueHandler,
+		patternHandler: patternHandler,
 	}
 }
 
 // NewDefaultRouter creates a new Router with default handlers
 func NewDefaultRouter() *Router {
 	return &Router{
-		userHandler:  NewUserHandler(),
-		queueHandler: NewQueueHandler(),
+		userHandler:    NewUserHandler(),
+		queueHandler:   NewQueueHandler(),
+		patternHandler: NewPatternHandler(),
 	}
 }
 
@@ -52,6 +55,17 @@ func NewDefaultRouter() *Router {
 //  17. POST   /api/admin/queues/{name}/jobs/{id}/retry - Retry a failed/cancelled job
 //  18. POST   /api/admin/queues/{name}/jobs/{id}/cancel - Cancel a pending/processing job
 //  19. DELETE /api/admin/queues/{name}/jobs/{id} - Delete a job
+//
+// Pattern Management Endpoints:
+//  20. GET    /api/admin/patterns              - List all patterns (with ?status, ?type, ?scope, ?category filters)
+//  21. POST   /api/admin/patterns              - Create a new pattern
+//  22. POST   /api/admin/patterns/test         - Test a pattern without storing
+//  23. GET    /api/admin/patterns/{id}         - Get pattern by ID
+//  24. PUT    /api/admin/patterns/{id}         - Update pattern
+//  25. DELETE /api/admin/patterns/{id}         - Delete pattern
+//  26. POST   /api/admin/patterns/{id}/activate   - Activate a pattern
+//  27. POST   /api/admin/patterns/{id}/deactivate - Deactivate a pattern
+//  28. POST   /api/admin/patterns/{id}/test       - Test a stored pattern with test cases
 func (r *Router) RegisterRoutes(mux *http.ServeMux) {
 	// User management routes
 	mux.HandleFunc("/api/admin/users", r.handleUsers)
@@ -60,6 +74,10 @@ func (r *Router) RegisterRoutes(mux *http.ServeMux) {
 	// Queue management routes
 	mux.HandleFunc("/api/admin/queues", r.handleQueues)
 	mux.HandleFunc("/api/admin/queues/", r.handleQueueByName)
+
+	// Pattern management routes
+	mux.HandleFunc("/api/admin/patterns", r.handlePatterns)
+	mux.HandleFunc("/api/admin/patterns/", r.handlePatternByID)
 }
 
 // handleUsers routes requests for /api/admin/users
@@ -226,4 +244,71 @@ func (r *Router) handleQueueJobs(w http.ResponseWriter, req *http.Request, queue
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// handlePatterns routes requests for /api/admin/patterns
+func (r *Router) handlePatterns(w http.ResponseWriter, req *http.Request) {
+	switch req.Method {
+	case http.MethodGet:
+		r.patternHandler.HandleList(w, req)
+	case http.MethodPost:
+		r.patternHandler.HandleCreate(w, req)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// handlePatternByID routes requests for /api/admin/patterns/{id} and sub-resources
+func (r *Router) handlePatternByID(w http.ResponseWriter, req *http.Request) {
+	// Extract the path after /api/admin/patterns/
+	path := strings.TrimPrefix(req.URL.Path, "/api/admin/patterns/")
+	parts := strings.Split(path, "/")
+
+	if len(parts) == 0 || parts[0] == "" {
+		http.Error(w, "Pattern ID required", http.StatusBadRequest)
+		return
+	}
+
+	patternID := parts[0]
+
+	// Handle /api/admin/patterns/test (special case - not a pattern ID)
+	if patternID == "test" && len(parts) == 1 {
+		r.patternHandler.HandleTest(w, req)
+		return
+	}
+
+	// Check if this is a sub-resource request
+	if len(parts) > 1 {
+		switch parts[1] {
+		case "activate":
+			r.patternHandler.HandleActivate(w, req, patternID)
+			return
+		case "deactivate":
+			r.patternHandler.HandleDeactivate(w, req, patternID)
+			return
+		case "test":
+			r.patternHandler.HandleTestByID(w, req, patternID)
+			return
+		default:
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+	}
+
+	// Handle pattern CRUD operations
+	switch req.Method {
+	case http.MethodGet:
+		r.patternHandler.HandleGet(w, req, patternID)
+	case http.MethodPut, http.MethodPatch:
+		r.patternHandler.HandleUpdate(w, req, patternID)
+	case http.MethodDelete:
+		r.patternHandler.HandleDelete(w, req, patternID)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// GetPatternHandler returns the pattern handler
+func (r *Router) GetPatternHandler() *PatternHandler {
+	return r.patternHandler
 }
