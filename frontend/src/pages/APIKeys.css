@@ -1,0 +1,507 @@
+.api-keys-page {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.api-keys-header {
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #646cff;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.api-keys-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.api-keys-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.api-keys-error {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.api-keys-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.api-keys-content {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.api-keys-actions {
+  margin-bottom: 1.5rem;
+}
+
+.create-key-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.create-key-button:hover {
+  background-color: #747bff;
+}
+
+.no-keys {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.no-keys p {
+  margin: 0;
+}
+
+.no-keys-hint {
+  margin-top: 0.5rem !important;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.api-keys-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.api-key-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  gap: 1rem;
+}
+
+.api-key-item.expired {
+  opacity: 0.6;
+}
+
+.api-key-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.api-key-name {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+  margin-bottom: 0.25rem;
+}
+
+.api-key-prefix code {
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.875rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.api-key-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.expired-text {
+  color: #ff6b6b;
+}
+
+.api-key-actions {
+  flex-shrink: 0;
+}
+
+.delete-key-button {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid #ff6b6b;
+  border-radius: 6px;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.delete-key-button:hover {
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
+.delete-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.confirm-delete {
+  padding: 0.375rem 0.75rem;
+  background-color: #ff6b6b;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.confirm-delete:hover:not(:disabled) {
+  background-color: #ff5252;
+}
+
+.confirm-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-delete {
+  padding: 0.375rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.87);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.cancel-delete:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.form-help {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-error {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 6px;
+  color: #ff6b6b;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+}
+
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+.create-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.create-button:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.create-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Created key display */
+.created-key-section {
+  text-align: center;
+}
+
+.key-warning {
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  background-color: rgba(243, 156, 18, 0.1);
+  border: 1px solid rgba(243, 156, 18, 0.3);
+  border-radius: 6px;
+  color: #f39c12;
+  font-size: 0.875rem;
+}
+
+.created-key-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.created-key-display code {
+  flex: 1;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.87);
+  word-break: break-all;
+  text-align: left;
+}
+
+.copy-button {
+  padding: 0.5rem 1rem;
+  background-color: #646cff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.copy-button:hover {
+  background-color: #747bff;
+}
+
+@media (prefers-color-scheme: light) {
+  .api-keys-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .api-keys-error {
+    background-color: #f5f5f5;
+  }
+
+  .api-keys-content {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .no-keys {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .no-keys-hint {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .api-key-item {
+    background-color: #f5f5f5;
+  }
+
+  .api-key-name {
+    color: #213547;
+  }
+
+  .api-key-prefix code {
+    background-color: #eee;
+    color: #333;
+  }
+
+  .api-key-meta {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .delete-confirm {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .cancel-delete {
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .cancel-delete:hover:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .modal {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .modal-header {
+    border-bottom-color: #ddd;
+  }
+
+  .modal-close {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .modal-close:hover {
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .form-label {
+    color: #213547;
+  }
+
+  .form-input {
+    background-color: #f9f9f9;
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .form-help {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-actions {
+    border-top-color: #ddd;
+  }
+
+  .cancel-button {
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .cancel-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+  }
+
+  .created-key-display {
+    background-color: #f5f5f5;
+  }
+
+  .created-key-display code {
+    color: #213547;
+  }
+}

@@ -167,6 +167,12 @@
   margin: 0.25rem 0;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .layout-main {
   flex: 1;
   padding: 2rem;
@@ -174,6 +180,80 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* User menu styles */
+.user-menu {
+  position: relative;
+}
+
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.user-menu-trigger:hover {
+  border-color: #646cff;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #646cff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.user-dropdown {
+  min-width: 200px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 1rem;
+}
+
+.user-name {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.125rem;
+}
+
+a.dropdown-item {
+  text-decoration: none;
+}
+
+.logout-item {
+  color: #ff6b6b !important;
+}
+
+.logout-item:hover {
+  background-color: rgba(255, 107, 107, 0.1) !important;
 }
 
 @media (prefers-color-scheme: light) {
@@ -220,5 +300,13 @@
 
   .dropdown-divider {
     background-color: #ddd;
+  }
+
+  .user-name {
+    color: #213547;
+  }
+
+  .user-email {
+    color: rgba(0, 0, 0, 0.5);
   }
 }
