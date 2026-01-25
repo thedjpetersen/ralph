@@ -74,7 +74,7 @@
       "name": "Create number utility functions",
       "description": "Create a utility module at src/lib/utils/numbers.ts with functions: clamp(value, min, max) that clamps a number within range, formatCurrency(amount) that formats as USD currency string",
       "priority": "medium",
-      "status": "pending",
+      "status": "completed",
       "category": "core",
       "dependencies": [],
       "acceptance_criteria": [
@@ -90,7 +90,53 @@
           "model": "sonnet",
           "threshold": 70
         }
-      ]
+      ],
+      "validation_results": {
+        "last_run": "2026-01-25T05:26:00.423Z",
+        "passed": true,
+        "failed_gates": [],
+        "attempts": 1,
+        "gates": [
+          {
+            "gate": "build",
+            "package": "frontend",
+            "passed": true,
+            "duration": 0,
+            "output": "Package directory not found, skipping"
+          },
+          {
+            "gate": "test",
+            "package": "frontend",
+            "passed": true,
+            "duration": 0,
+            "output": "Package directory not found, skipping"
+          },
+          {
+            "gate": "lint",
+            "package": "frontend",
+            "passed": true,
+            "duration": 0,
+            "output": "Package directory not found, skipping"
+          }
+        ]
+      },
+      "passes": true,
+      "completed_at": "2026-01-25T05:27:00.449Z",
+      "judge_results": {
+        "passed": true,
+        "results": [
+          {
+            "passed": true,
+            "persona": "QA Engineer",
+            "verdict": "Approved (parsed from text)",
+            "reasoning": "",
+            "confidence": 0.5,
+            "timestamp": "2026-01-25T05:27:00.449Z"
+          }
+        ],
+        "summary": "All required judges passed. Overall score: 50%",
+        "timestamp": "2026-01-25T05:27:00.449Z"
+      }
     },
     {
       "id": "utils-003",
@@ -122,6 +168,6 @@
     "version": "1.0.0",
     "created_at": "2026-01-25T00:00:00Z",
     "description": "Multi-task test with DAG dependencies",
-    "updated_at": "2026-01-25T05:24:21.205Z"
+    "updated_at": "2026-01-25T05:27:00.449Z"
   }
 }
