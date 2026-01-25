@@ -27,6 +27,15 @@ type GoogleDriveSync func(*sql.Selector)
 // LineItem is the predicate function for lineitem builders.
 type LineItem func(*sql.Selector)
 
+// PipelineConfig is the predicate function for pipelineconfig builders.
+type PipelineConfig func(*sql.Selector)
+
+// PipelineRule is the predicate function for pipelinerule builders.
+type PipelineRule func(*sql.Selector)
+
+// PipelineVersion is the predicate function for pipelineversion builders.
+type PipelineVersion func(*sql.Selector)
+
 // Receipt is the predicate function for receipt builders.
 type Receipt func(*sql.Selector)
 

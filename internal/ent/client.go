@@ -18,6 +18,9 @@ import (
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
 	"clockzen-next/internal/ent/lineitem"
+	"clockzen-next/internal/ent/pipelineconfig"
+	"clockzen-next/internal/ent/pipelinerule"
+	"clockzen-next/internal/ent/pipelineversion"
 	"clockzen-next/internal/ent/receipt"
 	"clockzen-next/internal/ent/transaction"
 
@@ -46,6 +49,12 @@ type Client struct {
 	GoogleDriveSync *GoogleDriveSyncClient
 	// LineItem is the client for interacting with the LineItem builders.
 	LineItem *LineItemClient
+	// PipelineConfig is the client for interacting with the PipelineConfig builders.
+	PipelineConfig *PipelineConfigClient
+	// PipelineRule is the client for interacting with the PipelineRule builders.
+	PipelineRule *PipelineRuleClient
+	// PipelineVersion is the client for interacting with the PipelineVersion builders.
+	PipelineVersion *PipelineVersionClient
 	// Receipt is the client for interacting with the Receipt builders.
 	Receipt *ReceiptClient
 	// Transaction is the client for interacting with the Transaction builders.
@@ -68,6 +77,9 @@ func (c *Client) init() {
 	c.GoogleDriveFolder = NewGoogleDriveFolderClient(c.config)
 	c.GoogleDriveSync = NewGoogleDriveSyncClient(c.config)
 	c.LineItem = NewLineItemClient(c.config)
+	c.PipelineConfig = NewPipelineConfigClient(c.config)
+	c.PipelineRule = NewPipelineRuleClient(c.config)
+	c.PipelineVersion = NewPipelineVersionClient(c.config)
 	c.Receipt = NewReceiptClient(c.config)
 	c.Transaction = NewTransactionClient(c.config)
 }
@@ -169,6 +181,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GoogleDriveFolder:     NewGoogleDriveFolderClient(cfg),
 		GoogleDriveSync:       NewGoogleDriveSyncClient(cfg),
 		LineItem:              NewLineItemClient(cfg),
+		PipelineConfig:        NewPipelineConfigClient(cfg),
+		PipelineRule:          NewPipelineRuleClient(cfg),
+		PipelineVersion:       NewPipelineVersionClient(cfg),
 		Receipt:               NewReceiptClient(cfg),
 		Transaction:           NewTransactionClient(cfg),
 	}, nil
@@ -197,6 +212,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GoogleDriveFolder:     NewGoogleDriveFolderClient(cfg),
 		GoogleDriveSync:       NewGoogleDriveSyncClient(cfg),
 		LineItem:              NewLineItemClient(cfg),
+		PipelineConfig:        NewPipelineConfigClient(cfg),
+		PipelineRule:          NewPipelineRuleClient(cfg),
+		PipelineVersion:       NewPipelineVersionClient(cfg),
 		Receipt:               NewReceiptClient(cfg),
 		Transaction:           NewTransactionClient(cfg),
 	}, nil
@@ -229,7 +247,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.EmailConnection, c.EmailLabel, c.EmailSync, c.GoogleDriveConnection,
-		c.GoogleDriveFolder, c.GoogleDriveSync, c.LineItem, c.Receipt, c.Transaction,
+		c.GoogleDriveFolder, c.GoogleDriveSync, c.LineItem, c.PipelineConfig,
+		c.PipelineRule, c.PipelineVersion, c.Receipt, c.Transaction,
 	} {
 		n.Use(hooks...)
 	}
@@ -240,7 +259,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.EmailConnection, c.EmailLabel, c.EmailSync, c.GoogleDriveConnection,
-		c.GoogleDriveFolder, c.GoogleDriveSync, c.LineItem, c.Receipt, c.Transaction,
+		c.GoogleDriveFolder, c.GoogleDriveSync, c.LineItem, c.PipelineConfig,
+		c.PipelineRule, c.PipelineVersion, c.Receipt, c.Transaction,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -263,6 +283,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GoogleDriveSync.mutate(ctx, m)
 	case *LineItemMutation:
 		return c.LineItem.mutate(ctx, m)
+	case *PipelineConfigMutation:
+		return c.PipelineConfig.mutate(ctx, m)
+	case *PipelineRuleMutation:
+		return c.PipelineRule.mutate(ctx, m)
+	case *PipelineVersionMutation:
+		return c.PipelineVersion.mutate(ctx, m)
 	case *ReceiptMutation:
 		return c.Receipt.mutate(ctx, m)
 	case *TransactionMutation:
@@ -1347,6 +1373,469 @@ func (c *LineItemClient) mutate(ctx context.Context, m *LineItemMutation) (Value
 	}
 }
 
+// PipelineConfigClient is a client for the PipelineConfig schema.
+type PipelineConfigClient struct {
+	config
+}
+
+// NewPipelineConfigClient returns a client for the PipelineConfig from the given config.
+func NewPipelineConfigClient(c config) *PipelineConfigClient {
+	return &PipelineConfigClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pipelineconfig.Hooks(f(g(h())))`.
+func (c *PipelineConfigClient) Use(hooks ...Hook) {
+	c.hooks.PipelineConfig = append(c.hooks.PipelineConfig, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pipelineconfig.Intercept(f(g(h())))`.
+func (c *PipelineConfigClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PipelineConfig = append(c.inters.PipelineConfig, interceptors...)
+}
+
+// Create returns a builder for creating a PipelineConfig entity.
+func (c *PipelineConfigClient) Create() *PipelineConfigCreate {
+	mutation := newPipelineConfigMutation(c.config, OpCreate)
+	return &PipelineConfigCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PipelineConfig entities.
+func (c *PipelineConfigClient) CreateBulk(builders ...*PipelineConfigCreate) *PipelineConfigCreateBulk {
+	return &PipelineConfigCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PipelineConfigClient) MapCreateBulk(slice any, setFunc func(*PipelineConfigCreate, int)) *PipelineConfigCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PipelineConfigCreateBulk{err: fmt.Errorf("calling to PipelineConfigClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PipelineConfigCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PipelineConfigCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PipelineConfig.
+func (c *PipelineConfigClient) Update() *PipelineConfigUpdate {
+	mutation := newPipelineConfigMutation(c.config, OpUpdate)
+	return &PipelineConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PipelineConfigClient) UpdateOne(_m *PipelineConfig) *PipelineConfigUpdateOne {
+	mutation := newPipelineConfigMutation(c.config, OpUpdateOne, withPipelineConfig(_m))
+	return &PipelineConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PipelineConfigClient) UpdateOneID(id string) *PipelineConfigUpdateOne {
+	mutation := newPipelineConfigMutation(c.config, OpUpdateOne, withPipelineConfigID(id))
+	return &PipelineConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PipelineConfig.
+func (c *PipelineConfigClient) Delete() *PipelineConfigDelete {
+	mutation := newPipelineConfigMutation(c.config, OpDelete)
+	return &PipelineConfigDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PipelineConfigClient) DeleteOne(_m *PipelineConfig) *PipelineConfigDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PipelineConfigClient) DeleteOneID(id string) *PipelineConfigDeleteOne {
+	builder := c.Delete().Where(pipelineconfig.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PipelineConfigDeleteOne{builder}
+}
+
+// Query returns a query builder for PipelineConfig.
+func (c *PipelineConfigClient) Query() *PipelineConfigQuery {
+	return &PipelineConfigQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePipelineConfig},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PipelineConfig entity by its id.
+func (c *PipelineConfigClient) Get(ctx context.Context, id string) (*PipelineConfig, error) {
+	return c.Query().Where(pipelineconfig.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PipelineConfigClient) GetX(ctx context.Context, id string) *PipelineConfig {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRules queries the rules edge of a PipelineConfig.
+func (c *PipelineConfigClient) QueryRules(_m *PipelineConfig) *PipelineRuleQuery {
+	query := (&PipelineRuleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pipelineconfig.Table, pipelineconfig.FieldID, id),
+			sqlgraph.To(pipelinerule.Table, pipelinerule.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, pipelineconfig.RulesTable, pipelineconfig.RulesColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVersions queries the versions edge of a PipelineConfig.
+func (c *PipelineConfigClient) QueryVersions(_m *PipelineConfig) *PipelineVersionQuery {
+	query := (&PipelineVersionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pipelineconfig.Table, pipelineconfig.FieldID, id),
+			sqlgraph.To(pipelineversion.Table, pipelineversion.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, pipelineconfig.VersionsTable, pipelineconfig.VersionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PipelineConfigClient) Hooks() []Hook {
+	return c.hooks.PipelineConfig
+}
+
+// Interceptors returns the client interceptors.
+func (c *PipelineConfigClient) Interceptors() []Interceptor {
+	return c.inters.PipelineConfig
+}
+
+func (c *PipelineConfigClient) mutate(ctx context.Context, m *PipelineConfigMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PipelineConfigCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PipelineConfigUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PipelineConfigUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PipelineConfigDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PipelineConfig mutation op: %q", m.Op())
+	}
+}
+
+// PipelineRuleClient is a client for the PipelineRule schema.
+type PipelineRuleClient struct {
+	config
+}
+
+// NewPipelineRuleClient returns a client for the PipelineRule from the given config.
+func NewPipelineRuleClient(c config) *PipelineRuleClient {
+	return &PipelineRuleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pipelinerule.Hooks(f(g(h())))`.
+func (c *PipelineRuleClient) Use(hooks ...Hook) {
+	c.hooks.PipelineRule = append(c.hooks.PipelineRule, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pipelinerule.Intercept(f(g(h())))`.
+func (c *PipelineRuleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PipelineRule = append(c.inters.PipelineRule, interceptors...)
+}
+
+// Create returns a builder for creating a PipelineRule entity.
+func (c *PipelineRuleClient) Create() *PipelineRuleCreate {
+	mutation := newPipelineRuleMutation(c.config, OpCreate)
+	return &PipelineRuleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PipelineRule entities.
+func (c *PipelineRuleClient) CreateBulk(builders ...*PipelineRuleCreate) *PipelineRuleCreateBulk {
+	return &PipelineRuleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PipelineRuleClient) MapCreateBulk(slice any, setFunc func(*PipelineRuleCreate, int)) *PipelineRuleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PipelineRuleCreateBulk{err: fmt.Errorf("calling to PipelineRuleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PipelineRuleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PipelineRuleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PipelineRule.
+func (c *PipelineRuleClient) Update() *PipelineRuleUpdate {
+	mutation := newPipelineRuleMutation(c.config, OpUpdate)
+	return &PipelineRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PipelineRuleClient) UpdateOne(_m *PipelineRule) *PipelineRuleUpdateOne {
+	mutation := newPipelineRuleMutation(c.config, OpUpdateOne, withPipelineRule(_m))
+	return &PipelineRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PipelineRuleClient) UpdateOneID(id string) *PipelineRuleUpdateOne {
+	mutation := newPipelineRuleMutation(c.config, OpUpdateOne, withPipelineRuleID(id))
+	return &PipelineRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PipelineRule.
+func (c *PipelineRuleClient) Delete() *PipelineRuleDelete {
+	mutation := newPipelineRuleMutation(c.config, OpDelete)
+	return &PipelineRuleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PipelineRuleClient) DeleteOne(_m *PipelineRule) *PipelineRuleDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PipelineRuleClient) DeleteOneID(id string) *PipelineRuleDeleteOne {
+	builder := c.Delete().Where(pipelinerule.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PipelineRuleDeleteOne{builder}
+}
+
+// Query returns a query builder for PipelineRule.
+func (c *PipelineRuleClient) Query() *PipelineRuleQuery {
+	return &PipelineRuleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePipelineRule},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PipelineRule entity by its id.
+func (c *PipelineRuleClient) Get(ctx context.Context, id string) (*PipelineRule, error) {
+	return c.Query().Where(pipelinerule.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PipelineRuleClient) GetX(ctx context.Context, id string) *PipelineRule {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryConfig queries the config edge of a PipelineRule.
+func (c *PipelineRuleClient) QueryConfig(_m *PipelineRule) *PipelineConfigQuery {
+	query := (&PipelineConfigClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pipelinerule.Table, pipelinerule.FieldID, id),
+			sqlgraph.To(pipelineconfig.Table, pipelineconfig.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pipelinerule.ConfigTable, pipelinerule.ConfigColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PipelineRuleClient) Hooks() []Hook {
+	return c.hooks.PipelineRule
+}
+
+// Interceptors returns the client interceptors.
+func (c *PipelineRuleClient) Interceptors() []Interceptor {
+	return c.inters.PipelineRule
+}
+
+func (c *PipelineRuleClient) mutate(ctx context.Context, m *PipelineRuleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PipelineRuleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PipelineRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PipelineRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PipelineRuleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PipelineRule mutation op: %q", m.Op())
+	}
+}
+
+// PipelineVersionClient is a client for the PipelineVersion schema.
+type PipelineVersionClient struct {
+	config
+}
+
+// NewPipelineVersionClient returns a client for the PipelineVersion from the given config.
+func NewPipelineVersionClient(c config) *PipelineVersionClient {
+	return &PipelineVersionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pipelineversion.Hooks(f(g(h())))`.
+func (c *PipelineVersionClient) Use(hooks ...Hook) {
+	c.hooks.PipelineVersion = append(c.hooks.PipelineVersion, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pipelineversion.Intercept(f(g(h())))`.
+func (c *PipelineVersionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PipelineVersion = append(c.inters.PipelineVersion, interceptors...)
+}
+
+// Create returns a builder for creating a PipelineVersion entity.
+func (c *PipelineVersionClient) Create() *PipelineVersionCreate {
+	mutation := newPipelineVersionMutation(c.config, OpCreate)
+	return &PipelineVersionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PipelineVersion entities.
+func (c *PipelineVersionClient) CreateBulk(builders ...*PipelineVersionCreate) *PipelineVersionCreateBulk {
+	return &PipelineVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PipelineVersionClient) MapCreateBulk(slice any, setFunc func(*PipelineVersionCreate, int)) *PipelineVersionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PipelineVersionCreateBulk{err: fmt.Errorf("calling to PipelineVersionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PipelineVersionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PipelineVersionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PipelineVersion.
+func (c *PipelineVersionClient) Update() *PipelineVersionUpdate {
+	mutation := newPipelineVersionMutation(c.config, OpUpdate)
+	return &PipelineVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PipelineVersionClient) UpdateOne(_m *PipelineVersion) *PipelineVersionUpdateOne {
+	mutation := newPipelineVersionMutation(c.config, OpUpdateOne, withPipelineVersion(_m))
+	return &PipelineVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PipelineVersionClient) UpdateOneID(id string) *PipelineVersionUpdateOne {
+	mutation := newPipelineVersionMutation(c.config, OpUpdateOne, withPipelineVersionID(id))
+	return &PipelineVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PipelineVersion.
+func (c *PipelineVersionClient) Delete() *PipelineVersionDelete {
+	mutation := newPipelineVersionMutation(c.config, OpDelete)
+	return &PipelineVersionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PipelineVersionClient) DeleteOne(_m *PipelineVersion) *PipelineVersionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PipelineVersionClient) DeleteOneID(id string) *PipelineVersionDeleteOne {
+	builder := c.Delete().Where(pipelineversion.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PipelineVersionDeleteOne{builder}
+}
+
+// Query returns a query builder for PipelineVersion.
+func (c *PipelineVersionClient) Query() *PipelineVersionQuery {
+	return &PipelineVersionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePipelineVersion},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PipelineVersion entity by its id.
+func (c *PipelineVersionClient) Get(ctx context.Context, id string) (*PipelineVersion, error) {
+	return c.Query().Where(pipelineversion.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PipelineVersionClient) GetX(ctx context.Context, id string) *PipelineVersion {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryConfig queries the config edge of a PipelineVersion.
+func (c *PipelineVersionClient) QueryConfig(_m *PipelineVersion) *PipelineConfigQuery {
+	query := (&PipelineConfigClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pipelineversion.Table, pipelineversion.FieldID, id),
+			sqlgraph.To(pipelineconfig.Table, pipelineconfig.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pipelineversion.ConfigTable, pipelineversion.ConfigColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PipelineVersionClient) Hooks() []Hook {
+	return c.hooks.PipelineVersion
+}
+
+// Interceptors returns the client interceptors.
+func (c *PipelineVersionClient) Interceptors() []Interceptor {
+	return c.inters.PipelineVersion
+}
+
+func (c *PipelineVersionClient) mutate(ctx context.Context, m *PipelineVersionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PipelineVersionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PipelineVersionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PipelineVersionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PipelineVersionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PipelineVersion mutation op: %q", m.Op())
+	}
+}
+
 // ReceiptClient is a client for the Receipt schema.
 type ReceiptClient struct {
 	config
@@ -1665,11 +2154,12 @@ func (c *TransactionClient) mutate(ctx context.Context, m *TransactionMutation) 
 type (
 	hooks struct {
 		EmailConnection, EmailLabel, EmailSync, GoogleDriveConnection,
-		GoogleDriveFolder, GoogleDriveSync, LineItem, Receipt, Transaction []ent.Hook
+		GoogleDriveFolder, GoogleDriveSync, LineItem, PipelineConfig, PipelineRule,
+		PipelineVersion, Receipt, Transaction []ent.Hook
 	}
 	inters struct {
 		EmailConnection, EmailLabel, EmailSync, GoogleDriveConnection,
-		GoogleDriveFolder, GoogleDriveSync, LineItem, Receipt,
-		Transaction []ent.Interceptor
+		GoogleDriveFolder, GoogleDriveSync, LineItem, PipelineConfig, PipelineRule,
+		PipelineVersion, Receipt, Transaction []ent.Interceptor
 	}
 )

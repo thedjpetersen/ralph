@@ -393,6 +393,220 @@ var (
 			},
 		},
 	}
+	// PipelineConfigsColumns holds the columns for the "pipeline_configs" table.
+	PipelineConfigsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "pipeline_type", Type: field.TypeEnum, Enums: []string{"receipt_processing", "email_parsing", "categorization", "export", "notification", "custom"}},
+		{Name: "trigger_type", Type: field.TypeEnum, Enums: []string{"manual", "on_receipt", "on_sync", "scheduled", "webhook"}, Default: "manual"},
+		{Name: "trigger_config", Type: field.TypeString, Nullable: true},
+		{Name: "enabled", Type: field.TypeBool, Default: true},
+		{Name: "is_default", Type: field.TypeBool, Default: false},
+		{Name: "current_version", Type: field.TypeInt, Default: 1},
+		{Name: "settings", Type: field.TypeJSON, Nullable: true},
+		{Name: "input_schema", Type: field.TypeJSON, Nullable: true},
+		{Name: "output_schema", Type: field.TypeJSON, Nullable: true},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "execution_count", Type: field.TypeInt, Default: 0},
+		{Name: "success_count", Type: field.TypeInt, Default: 0},
+		{Name: "failure_count", Type: field.TypeInt, Default: 0},
+		{Name: "last_executed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// PipelineConfigsTable holds the schema information for the "pipeline_configs" table.
+	PipelineConfigsTable = &schema.Table{
+		Name:       "pipeline_configs",
+		Columns:    PipelineConfigsColumns,
+		PrimaryKey: []*schema.Column{PipelineConfigsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pipelineconfig_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineConfigsColumns[1]},
+			},
+			{
+				Name:    "pipelineconfig_pipeline_type",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineConfigsColumns[4]},
+			},
+			{
+				Name:    "pipelineconfig_trigger_type",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineConfigsColumns[5]},
+			},
+			{
+				Name:    "pipelineconfig_enabled",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineConfigsColumns[7]},
+			},
+			{
+				Name:    "pipelineconfig_is_default",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineConfigsColumns[8]},
+			},
+			{
+				Name:    "pipelineconfig_user_id_pipeline_type",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineConfigsColumns[1], PipelineConfigsColumns[4]},
+			},
+			{
+				Name:    "pipelineconfig_user_id_is_default",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineConfigsColumns[1], PipelineConfigsColumns[8]},
+			},
+			{
+				Name:    "pipelineconfig_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineConfigsColumns[18]},
+			},
+		},
+	}
+	// PipelineRulesColumns holds the columns for the "pipeline_rules" table.
+	PipelineRulesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "rule_type", Type: field.TypeEnum, Enums: []string{"filter", "transform", "categorize", "tag", "extract", "validate", "route"}},
+		{Name: "priority", Type: field.TypeInt, Default: 0},
+		{Name: "enabled", Type: field.TypeBool, Default: true},
+		{Name: "conditions", Type: field.TypeJSON, Nullable: true},
+		{Name: "actions", Type: field.TypeJSON, Nullable: true},
+		{Name: "parameters", Type: field.TypeJSON, Nullable: true},
+		{Name: "target_fields", Type: field.TypeJSON, Nullable: true},
+		{Name: "match_mode", Type: field.TypeEnum, Enums: []string{"all", "any", "none"}, Default: "all"},
+		{Name: "stop_on_match", Type: field.TypeBool, Default: false},
+		{Name: "execution_count", Type: field.TypeInt, Default: 0},
+		{Name: "last_executed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "config_id", Type: field.TypeString},
+	}
+	// PipelineRulesTable holds the schema information for the "pipeline_rules" table.
+	PipelineRulesTable = &schema.Table{
+		Name:       "pipeline_rules",
+		Columns:    PipelineRulesColumns,
+		PrimaryKey: []*schema.Column{PipelineRulesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "pipeline_rules_pipeline_configs_rules",
+				Columns:    []*schema.Column{PipelineRulesColumns[17]},
+				RefColumns: []*schema.Column{PipelineConfigsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pipelinerule_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineRulesColumns[1]},
+			},
+			{
+				Name:    "pipelinerule_config_id",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineRulesColumns[17]},
+			},
+			{
+				Name:    "pipelinerule_rule_type",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineRulesColumns[4]},
+			},
+			{
+				Name:    "pipelinerule_enabled",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineRulesColumns[6]},
+			},
+			{
+				Name:    "pipelinerule_priority",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineRulesColumns[5]},
+			},
+			{
+				Name:    "pipelinerule_config_id_priority",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineRulesColumns[17], PipelineRulesColumns[5]},
+			},
+			{
+				Name:    "pipelinerule_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineRulesColumns[15]},
+			},
+		},
+	}
+	// PipelineVersionsColumns holds the columns for the "pipeline_versions" table.
+	PipelineVersionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "version_number", Type: field.TypeInt},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "changelog", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "snapshot", Type: field.TypeJSON, Nullable: true},
+		{Name: "rules_snapshot", Type: field.TypeJSON, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"draft", "active", "deprecated", "archived"}, Default: "draft"},
+		{Name: "is_current", Type: field.TypeBool, Default: false},
+		{Name: "created_by", Type: field.TypeString, Nullable: true},
+		{Name: "approved_by", Type: field.TypeString, Nullable: true},
+		{Name: "approved_at", Type: field.TypeTime, Nullable: true},
+		{Name: "activated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "deprecated_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "config_id", Type: field.TypeString},
+	}
+	// PipelineVersionsTable holds the schema information for the "pipeline_versions" table.
+	PipelineVersionsTable = &schema.Table{
+		Name:       "pipeline_versions",
+		Columns:    PipelineVersionsColumns,
+		PrimaryKey: []*schema.Column{PipelineVersionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "pipeline_versions_pipeline_configs_versions",
+				Columns:    []*schema.Column{PipelineVersionsColumns[16]},
+				RefColumns: []*schema.Column{PipelineConfigsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "pipelineversion_config_id",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineVersionsColumns[16]},
+			},
+			{
+				Name:    "pipelineversion_version_number",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineVersionsColumns[1]},
+			},
+			{
+				Name:    "pipelineversion_status",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineVersionsColumns[7]},
+			},
+			{
+				Name:    "pipelineversion_is_current",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineVersionsColumns[8]},
+			},
+			{
+				Name:    "pipelineversion_config_id_version_number",
+				Unique:  true,
+				Columns: []*schema.Column{PipelineVersionsColumns[16], PipelineVersionsColumns[1]},
+			},
+			{
+				Name:    "pipelineversion_config_id_is_current",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineVersionsColumns[16], PipelineVersionsColumns[8]},
+			},
+			{
+				Name:    "pipelineversion_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{PipelineVersionsColumns[14]},
+			},
+		},
+	}
 	// ReceiptsColumns holds the columns for the "receipts" table.
 	ReceiptsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -578,6 +792,9 @@ var (
 		GoogleDriveFoldersTable,
 		GoogleDriveSyncsTable,
 		LineItemsTable,
+		PipelineConfigsTable,
+		PipelineRulesTable,
+		PipelineVersionsTable,
 		ReceiptsTable,
 		TransactionsTable,
 	}
@@ -589,5 +806,7 @@ func init() {
 	GoogleDriveFoldersTable.ForeignKeys[0].RefTable = GoogleDriveConnectionsTable
 	GoogleDriveSyncsTable.ForeignKeys[0].RefTable = GoogleDriveConnectionsTable
 	LineItemsTable.ForeignKeys[0].RefTable = ReceiptsTable
+	PipelineRulesTable.ForeignKeys[0].RefTable = PipelineConfigsTable
+	PipelineVersionsTable.ForeignKeys[0].RefTable = PipelineConfigsTable
 	TransactionsTable.ForeignKeys[0].RefTable = ReceiptsTable
 }

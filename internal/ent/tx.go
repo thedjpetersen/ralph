@@ -26,6 +26,12 @@ type Tx struct {
 	GoogleDriveSync *GoogleDriveSyncClient
 	// LineItem is the client for interacting with the LineItem builders.
 	LineItem *LineItemClient
+	// PipelineConfig is the client for interacting with the PipelineConfig builders.
+	PipelineConfig *PipelineConfigClient
+	// PipelineRule is the client for interacting with the PipelineRule builders.
+	PipelineRule *PipelineRuleClient
+	// PipelineVersion is the client for interacting with the PipelineVersion builders.
+	PipelineVersion *PipelineVersionClient
 	// Receipt is the client for interacting with the Receipt builders.
 	Receipt *ReceiptClient
 	// Transaction is the client for interacting with the Transaction builders.
@@ -168,6 +174,9 @@ func (tx *Tx) init() {
 	tx.GoogleDriveFolder = NewGoogleDriveFolderClient(tx.config)
 	tx.GoogleDriveSync = NewGoogleDriveSyncClient(tx.config)
 	tx.LineItem = NewLineItemClient(tx.config)
+	tx.PipelineConfig = NewPipelineConfigClient(tx.config)
+	tx.PipelineRule = NewPipelineRuleClient(tx.config)
+	tx.PipelineVersion = NewPipelineVersionClient(tx.config)
 	tx.Receipt = NewReceiptClient(tx.config)
 	tx.Transaction = NewTransactionClient(tx.config)
 }

@@ -10,6 +10,9 @@ import (
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
 	"clockzen-next/internal/ent/lineitem"
+	"clockzen-next/internal/ent/pipelineconfig"
+	"clockzen-next/internal/ent/pipelinerule"
+	"clockzen-next/internal/ent/pipelineversion"
 	"clockzen-next/internal/ent/receipt"
 	"clockzen-next/internal/ent/schema"
 	"clockzen-next/internal/ent/transaction"
@@ -264,6 +267,110 @@ func init() {
 	lineitem.DefaultUpdatedAt = lineitemDescUpdatedAt.Default.(func() time.Time)
 	// lineitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	lineitem.UpdateDefaultUpdatedAt = lineitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	pipelineconfigFields := schema.PipelineConfig{}.Fields()
+	_ = pipelineconfigFields
+	// pipelineconfigDescUserID is the schema descriptor for user_id field.
+	pipelineconfigDescUserID := pipelineconfigFields[1].Descriptor()
+	// pipelineconfig.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	pipelineconfig.UserIDValidator = pipelineconfigDescUserID.Validators[0].(func(string) error)
+	// pipelineconfigDescName is the schema descriptor for name field.
+	pipelineconfigDescName := pipelineconfigFields[2].Descriptor()
+	// pipelineconfig.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	pipelineconfig.NameValidator = pipelineconfigDescName.Validators[0].(func(string) error)
+	// pipelineconfigDescEnabled is the schema descriptor for enabled field.
+	pipelineconfigDescEnabled := pipelineconfigFields[7].Descriptor()
+	// pipelineconfig.DefaultEnabled holds the default value on creation for the enabled field.
+	pipelineconfig.DefaultEnabled = pipelineconfigDescEnabled.Default.(bool)
+	// pipelineconfigDescIsDefault is the schema descriptor for is_default field.
+	pipelineconfigDescIsDefault := pipelineconfigFields[8].Descriptor()
+	// pipelineconfig.DefaultIsDefault holds the default value on creation for the is_default field.
+	pipelineconfig.DefaultIsDefault = pipelineconfigDescIsDefault.Default.(bool)
+	// pipelineconfigDescCurrentVersion is the schema descriptor for current_version field.
+	pipelineconfigDescCurrentVersion := pipelineconfigFields[9].Descriptor()
+	// pipelineconfig.DefaultCurrentVersion holds the default value on creation for the current_version field.
+	pipelineconfig.DefaultCurrentVersion = pipelineconfigDescCurrentVersion.Default.(int)
+	// pipelineconfigDescExecutionCount is the schema descriptor for execution_count field.
+	pipelineconfigDescExecutionCount := pipelineconfigFields[14].Descriptor()
+	// pipelineconfig.DefaultExecutionCount holds the default value on creation for the execution_count field.
+	pipelineconfig.DefaultExecutionCount = pipelineconfigDescExecutionCount.Default.(int)
+	// pipelineconfigDescSuccessCount is the schema descriptor for success_count field.
+	pipelineconfigDescSuccessCount := pipelineconfigFields[15].Descriptor()
+	// pipelineconfig.DefaultSuccessCount holds the default value on creation for the success_count field.
+	pipelineconfig.DefaultSuccessCount = pipelineconfigDescSuccessCount.Default.(int)
+	// pipelineconfigDescFailureCount is the schema descriptor for failure_count field.
+	pipelineconfigDescFailureCount := pipelineconfigFields[16].Descriptor()
+	// pipelineconfig.DefaultFailureCount holds the default value on creation for the failure_count field.
+	pipelineconfig.DefaultFailureCount = pipelineconfigDescFailureCount.Default.(int)
+	// pipelineconfigDescCreatedAt is the schema descriptor for created_at field.
+	pipelineconfigDescCreatedAt := pipelineconfigFields[18].Descriptor()
+	// pipelineconfig.DefaultCreatedAt holds the default value on creation for the created_at field.
+	pipelineconfig.DefaultCreatedAt = pipelineconfigDescCreatedAt.Default.(func() time.Time)
+	// pipelineconfigDescUpdatedAt is the schema descriptor for updated_at field.
+	pipelineconfigDescUpdatedAt := pipelineconfigFields[19].Descriptor()
+	// pipelineconfig.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	pipelineconfig.DefaultUpdatedAt = pipelineconfigDescUpdatedAt.Default.(func() time.Time)
+	// pipelineconfig.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	pipelineconfig.UpdateDefaultUpdatedAt = pipelineconfigDescUpdatedAt.UpdateDefault.(func() time.Time)
+	pipelineruleFields := schema.PipelineRule{}.Fields()
+	_ = pipelineruleFields
+	// pipelineruleDescUserID is the schema descriptor for user_id field.
+	pipelineruleDescUserID := pipelineruleFields[1].Descriptor()
+	// pipelinerule.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	pipelinerule.UserIDValidator = pipelineruleDescUserID.Validators[0].(func(string) error)
+	// pipelineruleDescConfigID is the schema descriptor for config_id field.
+	pipelineruleDescConfigID := pipelineruleFields[2].Descriptor()
+	// pipelinerule.ConfigIDValidator is a validator for the "config_id" field. It is called by the builders before save.
+	pipelinerule.ConfigIDValidator = pipelineruleDescConfigID.Validators[0].(func(string) error)
+	// pipelineruleDescName is the schema descriptor for name field.
+	pipelineruleDescName := pipelineruleFields[3].Descriptor()
+	// pipelinerule.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	pipelinerule.NameValidator = pipelineruleDescName.Validators[0].(func(string) error)
+	// pipelineruleDescPriority is the schema descriptor for priority field.
+	pipelineruleDescPriority := pipelineruleFields[6].Descriptor()
+	// pipelinerule.DefaultPriority holds the default value on creation for the priority field.
+	pipelinerule.DefaultPriority = pipelineruleDescPriority.Default.(int)
+	// pipelineruleDescEnabled is the schema descriptor for enabled field.
+	pipelineruleDescEnabled := pipelineruleFields[7].Descriptor()
+	// pipelinerule.DefaultEnabled holds the default value on creation for the enabled field.
+	pipelinerule.DefaultEnabled = pipelineruleDescEnabled.Default.(bool)
+	// pipelineruleDescStopOnMatch is the schema descriptor for stop_on_match field.
+	pipelineruleDescStopOnMatch := pipelineruleFields[13].Descriptor()
+	// pipelinerule.DefaultStopOnMatch holds the default value on creation for the stop_on_match field.
+	pipelinerule.DefaultStopOnMatch = pipelineruleDescStopOnMatch.Default.(bool)
+	// pipelineruleDescExecutionCount is the schema descriptor for execution_count field.
+	pipelineruleDescExecutionCount := pipelineruleFields[14].Descriptor()
+	// pipelinerule.DefaultExecutionCount holds the default value on creation for the execution_count field.
+	pipelinerule.DefaultExecutionCount = pipelineruleDescExecutionCount.Default.(int)
+	// pipelineruleDescCreatedAt is the schema descriptor for created_at field.
+	pipelineruleDescCreatedAt := pipelineruleFields[16].Descriptor()
+	// pipelinerule.DefaultCreatedAt holds the default value on creation for the created_at field.
+	pipelinerule.DefaultCreatedAt = pipelineruleDescCreatedAt.Default.(func() time.Time)
+	// pipelineruleDescUpdatedAt is the schema descriptor for updated_at field.
+	pipelineruleDescUpdatedAt := pipelineruleFields[17].Descriptor()
+	// pipelinerule.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	pipelinerule.DefaultUpdatedAt = pipelineruleDescUpdatedAt.Default.(func() time.Time)
+	// pipelinerule.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	pipelinerule.UpdateDefaultUpdatedAt = pipelineruleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	pipelineversionFields := schema.PipelineVersion{}.Fields()
+	_ = pipelineversionFields
+	// pipelineversionDescConfigID is the schema descriptor for config_id field.
+	pipelineversionDescConfigID := pipelineversionFields[1].Descriptor()
+	// pipelineversion.ConfigIDValidator is a validator for the "config_id" field. It is called by the builders before save.
+	pipelineversion.ConfigIDValidator = pipelineversionDescConfigID.Validators[0].(func(string) error)
+	// pipelineversionDescIsCurrent is the schema descriptor for is_current field.
+	pipelineversionDescIsCurrent := pipelineversionFields[9].Descriptor()
+	// pipelineversion.DefaultIsCurrent holds the default value on creation for the is_current field.
+	pipelineversion.DefaultIsCurrent = pipelineversionDescIsCurrent.Default.(bool)
+	// pipelineversionDescCreatedAt is the schema descriptor for created_at field.
+	pipelineversionDescCreatedAt := pipelineversionFields[15].Descriptor()
+	// pipelineversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	pipelineversion.DefaultCreatedAt = pipelineversionDescCreatedAt.Default.(func() time.Time)
+	// pipelineversionDescUpdatedAt is the schema descriptor for updated_at field.
+	pipelineversionDescUpdatedAt := pipelineversionFields[16].Descriptor()
+	// pipelineversion.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	pipelineversion.DefaultUpdatedAt = pipelineversionDescUpdatedAt.Default.(func() time.Time)
+	// pipelineversion.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	pipelineversion.UpdateDefaultUpdatedAt = pipelineversionDescUpdatedAt.UpdateDefault.(func() time.Time)
 	receiptFields := schema.Receipt{}.Fields()
 	_ = receiptFields
 	// receiptDescUserID is the schema descriptor for user_id field.

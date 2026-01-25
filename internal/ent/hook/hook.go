@@ -92,6 +92,42 @@ func (f LineItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LineItemMutation", m)
 }
 
+// The PipelineConfigFunc type is an adapter to allow the use of ordinary
+// function as PipelineConfig mutator.
+type PipelineConfigFunc func(context.Context, *ent.PipelineConfigMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PipelineConfigFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PipelineConfigMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PipelineConfigMutation", m)
+}
+
+// The PipelineRuleFunc type is an adapter to allow the use of ordinary
+// function as PipelineRule mutator.
+type PipelineRuleFunc func(context.Context, *ent.PipelineRuleMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PipelineRuleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PipelineRuleMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PipelineRuleMutation", m)
+}
+
+// The PipelineVersionFunc type is an adapter to allow the use of ordinary
+// function as PipelineVersion mutator.
+type PipelineVersionFunc func(context.Context, *ent.PipelineVersionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PipelineVersionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PipelineVersionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PipelineVersionMutation", m)
+}
+
 // The ReceiptFunc type is an adapter to allow the use of ordinary
 // function as Receipt mutator.
 type ReceiptFunc func(context.Context, *ent.ReceiptMutation) (ent.Value, error)
