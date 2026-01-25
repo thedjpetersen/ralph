@@ -1,0 +1,50 @@
+=== RUN   TestRequireAdmin
+=== RUN   TestRequireAdmin/no_auth_header_returns_403
+=== RUN   TestRequireAdmin/valid_JWT_with_admin_role_returns_200
+=== RUN   TestRequireAdmin/valid_JWT_with_admin_in_roles_array_returns_200
+=== RUN   TestRequireAdmin/valid_JWT_without_admin_role_returns_403
+=== RUN   TestRequireAdmin/admin_API_key_returns_200
+=== RUN   TestRequireAdmin/non-admin_API_key_returns_403
+=== RUN   TestRequireAdmin/invalid_JWT_format_returns_403
+=== RUN   TestRequireAdmin/malformed_JWT_payload_returns_403
+--- PASS: TestRequireAdmin (0.00s)
+    --- PASS: TestRequireAdmin/no_auth_header_returns_403 (0.00s)
+    --- PASS: TestRequireAdmin/valid_JWT_with_admin_role_returns_200 (0.00s)
+    --- PASS: TestRequireAdmin/valid_JWT_with_admin_in_roles_array_returns_200 (0.00s)
+    --- PASS: TestRequireAdmin/valid_JWT_without_admin_role_returns_403 (0.00s)
+    --- PASS: TestRequireAdmin/admin_API_key_returns_200 (0.00s)
+    --- PASS: TestRequireAdmin/non-admin_API_key_returns_403 (0.00s)
+    --- PASS: TestRequireAdmin/invalid_JWT_format_returns_403 (0.00s)
+    --- PASS: TestRequireAdmin/malformed_JWT_payload_returns_403 (0.00s)
+=== RUN   TestRequireAdminFunc
+=== RUN   TestRequireAdminFunc/allows_admin_access
+=== RUN   TestRequireAdminFunc/denies_non-admin_access
+--- PASS: TestRequireAdminFunc (0.00s)
+    --- PASS: TestRequireAdminFunc/allows_admin_access (0.00s)
+    --- PASS: TestRequireAdminFunc/denies_non-admin_access (0.00s)
+=== RUN   TestExtractJWTClaims
+=== RUN   TestExtractJWTClaims/valid_token
+=== RUN   TestExtractJWTClaims/invalid_token_format
+=== RUN   TestExtractJWTClaims/invalid_base64
+=== RUN   TestExtractJWTClaims/invalid_JSON
+--- PASS: TestExtractJWTClaims (0.00s)
+    --- PASS: TestExtractJWTClaims/valid_token (0.00s)
+    --- PASS: TestExtractJWTClaims/invalid_token_format (0.00s)
+    --- PASS: TestExtractJWTClaims/invalid_base64 (0.00s)
+    --- PASS: TestExtractJWTClaims/invalid_JSON (0.00s)
+=== RUN   TestIsAdminAPIKey
+=== RUN   TestIsAdminAPIKey/admin_prefix
+=== RUN   TestIsAdminAPIKey/admin_prefix_with_complex_key
+=== RUN   TestIsAdminAPIKey/user_prefix
+=== RUN   TestIsAdminAPIKey/no_prefix
+=== RUN   TestIsAdminAPIKey/empty
+--- PASS: TestIsAdminAPIKey (0.00s)
+    --- PASS: TestIsAdminAPIKey/admin_prefix (0.00s)
+    --- PASS: TestIsAdminAPIKey/admin_prefix_with_complex_key (0.00s)
+    --- PASS: TestIsAdminAPIKey/user_prefix (0.00s)
+    --- PASS: TestIsAdminAPIKey/no_prefix (0.00s)
+    --- PASS: TestIsAdminAPIKey/empty (0.00s)
+=== RUN   TestMiddlewareError
+--- PASS: TestMiddlewareError (0.00s)
+PASS
+ok  	clockzen-next/internal/presentation/http/middleware	(cached)
