@@ -14,6 +14,7 @@ import (
 	"clockzen-next/internal/infrastructure/google"
 	"clockzen-next/internal/presentation/http/handlers/integration"
 	"clockzen-next/internal/presentation/http/handlers/retirement"
+	"clockzen-next/internal/presentation/http/handlers/rules"
 
 	_ "github.com/lib/pq"
 )
@@ -33,6 +34,10 @@ func main() {
 	// Register retirement routes (doesn't require DB)
 	retirementRouter := retirement.NewDefaultRouter()
 	retirementRouter.RegisterRoutes(mux)
+
+	// Register rules routes (doesn't require DB)
+	rulesRouter := rules.NewDefaultRouter()
+	rulesRouter.RegisterRoutes(mux)
 
 	// Register integration routes if database is configured
 	if dbURL != "" {
