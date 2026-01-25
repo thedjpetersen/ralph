@@ -34,6 +34,14 @@ const (
 	ScopeCalendarReadOnly = "https://www.googleapis.com/auth/calendar.readonly"
 	// ScopeCalendar provides full access to Google Calendar
 	ScopeCalendar = "https://www.googleapis.com/auth/calendar"
+	// ScopeGmailReadOnly provides read-only access to Gmail
+	ScopeGmailReadOnly = "https://www.googleapis.com/auth/gmail.readonly"
+	// ScopeGmailSend provides send-only access to Gmail
+	ScopeGmailSend = "https://www.googleapis.com/auth/gmail.send"
+	// ScopeGmailModify provides read/write access except delete
+	ScopeGmailModify = "https://www.googleapis.com/auth/gmail.modify"
+	// ScopeGmailFull provides full access to Gmail
+	ScopeGmailFull = "https://www.googleapis.com/auth/mail.google.com"
 )
 
 // OAuth2 endpoints
@@ -158,6 +166,10 @@ func NewScopeManager() *ScopeManager {
 		ScopeDriveMetadataReadOnly,
 		ScopeCalendarReadOnly,
 		ScopeCalendar,
+		ScopeGmailReadOnly,
+		ScopeGmailSend,
+		ScopeGmailModify,
+		ScopeGmailFull,
 	}
 	for _, scope := range defaultScopes {
 		sm.allowedScopes[scope] = true
