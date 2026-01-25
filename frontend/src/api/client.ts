@@ -1008,3 +1008,232 @@ export const discountsApi = {
     }
   },
 };
+
+// Receipt types
+export type ReceiptStatus = 'pending' | 'processing' | 'processed' | 'failed' | 'archived';
+export type ReceiptSourceType = 'email' | 'drive' | 'upload' | 'scan';
+
+export interface VLMAnalysisResult {
+  model?: string;
+  processed_at?: string;
+  confidence?: number;
+  extracted_fields?: {
+    merchant_name?: string;
+    merchant_address?: string;
+    receipt_date?: string;
+    total_amount?: number;
+    tax_amount?: number;
+    subtotal_amount?: number;
+    payment_method?: string;
+    receipt_number?: string;
+    line_items?: Array<{
+      description: string;
+      quantity?: number;
+      unit_price?: number;
+      total_price?: number;
+    }>;
+  };
+  raw_text?: string;
+  errors?: string[];
+}
+
+export interface Receipt {
+  id: string;
+  user_id: string;
+  source_type: ReceiptSourceType;
+  source_id?: string;
+  source_connection_id?: string;
+  file_name: string;
+  file_path?: string;
+  mime_type: string;
+  file_size: number;
+  storage_bucket?: string;
+  storage_key?: string;
+  thumbnail_path?: string;
+  status: ReceiptStatus;
+  ocr_completed: boolean;
+  ocr_text?: string;
+  ocr_confidence?: number;
+  merchant_name?: string;
+  merchant_address?: string;
+  receipt_date?: string;
+  total_amount?: number;
+  tax_amount?: number;
+  subtotal_amount?: number;
+  currency: string;
+  payment_method?: string;
+  receipt_number?: string;
+  category_tags?: string[];
+  extracted_data?: VLMAnalysisResult;
+  metadata?: Record<string, unknown>;
+  notes?: string;
+  legacy_id?: string;
+  created_at: string;
+  updated_at: string;
+  processed_at?: string;
+  // Linked transaction info
+  transaction_id?: string;
+  store_id?: string;
+  store_name?: string;
+}
+
+export interface ListReceiptsResponse {
+  receipts: Receipt[];
+  total: number;
+}
+
+export interface ListReceiptsParams {
+  status?: ReceiptStatus;
+  source_type?: ReceiptSourceType;
+  store_id?: string;
+  start_date?: string;
+  end_date?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateReceiptRequest {
+  source_type: ReceiptSourceType;
+  source_id?: string;
+  file_name: string;
+  mime_type: string;
+  file_size?: number;
+  merchant_name?: string;
+  merchant_address?: string;
+  receipt_date?: string;
+  total_amount?: number;
+  tax_amount?: number;
+  subtotal_amount?: number;
+  currency?: string;
+  payment_method?: string;
+  receipt_number?: string;
+  category_tags?: string[];
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateReceiptRequest {
+  merchant_name?: string;
+  merchant_address?: string;
+  receipt_date?: string;
+  total_amount?: number;
+  tax_amount?: number;
+  subtotal_amount?: number;
+  currency?: string;
+  payment_method?: string;
+  receipt_number?: string;
+  category_tags?: string[];
+  notes?: string;
+  status?: ReceiptStatus;
+  metadata?: Record<string, unknown>;
+}
+
+// Receipt API methods (account-scoped)
+export const receiptsApi = {
+  async list(accountId: string, params?: ListReceiptsParams): Promise<ListReceiptsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.source_type) searchParams.set('source_type', params.source_type);
+    if (params?.store_id) searchParams.set('store_id', params.store_id);
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/receipts${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch receipts');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<Receipt> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/receipts/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch receipt');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateReceiptRequest): Promise<Receipt> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/receipts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create receipt');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateReceiptRequest): Promise<Receipt> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/receipts/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update receipt');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/receipts/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete receipt');
+    }
+  },
+
+  async reprocess(accountId: string, id: string): Promise<Receipt> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/receipts/${id}/reprocess`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to reprocess receipt');
+    }
+    return response.json();
+  },
+
+  async linkTransaction(accountId: string, receiptId: string, transactionId: string): Promise<Receipt> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/receipts/${receiptId}/transaction`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ transaction_id: transactionId }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to link transaction to receipt');
+    }
+    return response.json();
+  },
+
+  async unlinkTransaction(accountId: string, receiptId: string): Promise<Receipt> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/receipts/${receiptId}/transaction`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to unlink transaction from receipt');
+    }
+    return response.json();
+  },
+
+  async getImageUrl(accountId: string, id: string): Promise<string> {
+    return `${API_BASE}/accounts/${accountId}/receipts/${id}/image`;
+  },
+
+  async getThumbnailUrl(accountId: string, id: string): Promise<string> {
+    return `${API_BASE}/accounts/${accountId}/receipts/${id}/thumbnail`;
+  },
+};

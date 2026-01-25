@@ -17,6 +17,8 @@ import { Categories } from './pages/Categories';
 import { Transactions } from './pages/Transactions';
 import { TransactionDetail } from './pages/TransactionDetail';
 import { TransactionForm } from './components/TransactionForm';
+import { Receipts } from './pages/Receipts';
+import { ReceiptDetail } from './pages/ReceiptDetail';
 import './App.css';
 
 function App() {
@@ -43,6 +45,8 @@ function App() {
         <Route path="/transactions/new" element={<TransactionForm />} />
         <Route path="/transactions/:id" element={<TransactionDetail />} />
         <Route path="/transactions/:id/edit" element={<TransactionForm />} />
+        <Route path="/receipts" element={<Receipts />} />
+        <Route path="/receipts/:id" element={<ReceiptDetail />} />
       </Route>
     </Routes>
   );
