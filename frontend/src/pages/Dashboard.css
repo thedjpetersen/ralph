@@ -1,0 +1,241 @@
+.dashboard-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.dashboard-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Dashboard grid layout */
+.dashboard-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto auto;
+  margin-bottom: 2rem;
+}
+
+.dashboard-widget {
+  min-height: 280px;
+}
+
+.widget-summary {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+.widget-category {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+
+.widget-trend {
+  grid-column: 1 / 3;
+  grid-row: 2 / 3;
+}
+
+/* Empty and error states */
+.dashboard-empty,
+.dashboard-error {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.dashboard-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.dashboard-empty h2 {
+  margin: 0 0 0.5rem;
+  color: inherit;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.select-account-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #646cff;
+  text-decoration: none;
+}
+
+.select-account-link:hover {
+  text-decoration: underline;
+}
+
+/* Other budgets section */
+.dashboard-section {
+  margin-top: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.view-all-link {
+  color: #646cff;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.other-budgets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.other-budget-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+
+.other-budget-card:hover {
+  border-color: #646cff;
+}
+
+.other-budget-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.other-budget-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.other-budget-amount {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+
+.other-budget-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.other-budget-status.status-active {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.other-budget-status.status-inactive {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.other-budget-status.status-archived {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .widget-summary,
+  .widget-category,
+  .widget-trend {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .dashboard-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .dashboard-empty,
+  .dashboard-error {
+    background-color: #f5f5f5;
+  }
+
+  .section-header h2 {
+    color: #213547;
+  }
+
+  .other-budget-card {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .other-budget-card:hover {
+    border-color: #646cff;
+  }
+
+  .other-budget-name {
+    color: #213547;
+  }
+
+  .other-budget-amount {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

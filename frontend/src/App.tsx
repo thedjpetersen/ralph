@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { Dashboard } from './pages/Dashboard';
 import { Accounts } from './pages/Accounts';
 import { AccountSettings } from './pages/AccountSettings';
 import { AccountMembers } from './pages/AccountMembers';
@@ -34,7 +35,8 @@ function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Navigate to="/accounts" replace />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/accounts/:id/settings" element={<AccountSettings />} />
         <Route path="/accounts/:id/members" element={<AccountMembers />} />
