@@ -33,6 +33,9 @@ import { Paychecks } from './pages/Paychecks';
 import { PaycheckDetail } from './pages/PaycheckDetail';
 import { PaycheckForm } from './components/PaycheckForm';
 import { Employers } from './pages/Employers';
+import { RetirementPlans } from './pages/RetirementPlans';
+import { RetirementPlanDetail } from './pages/RetirementPlanDetail';
+import { RetirementPlanForm } from './components/RetirementPlanForm';
 import './App.css';
 
 function App() {
@@ -78,6 +81,10 @@ function App() {
         <Route path="/paychecks/:id" element={<PaycheckDetail />} />
         <Route path="/paychecks/:id/edit" element={<PaycheckForm />} />
         <Route path="/employers" element={<Employers />} />
+        <Route path="/retirement-plans" element={<RetirementPlans />} />
+        <Route path="/retirement-plans/new" element={<RetirementPlanForm />} />
+        <Route path="/retirement-plans/:id" element={<RetirementPlanDetail />} />
+        <Route path="/retirement-plans/:id/edit" element={<RetirementPlanForm />} />
       </Route>
     </Routes>
   );
