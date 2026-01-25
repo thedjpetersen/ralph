@@ -6,12 +6,25 @@ export interface Account {
   name: string;
   email: string;
   createdAt: string;
+  currency?: string;
+  timezone?: string;
+}
+
+export interface AccountMember {
+  id: string;
+  accountId: string;
+  userId: string;
+  email: string;
+  name: string;
+  role: 'owner' | 'admin' | 'member';
+  joinedAt: string;
 }
 
 interface AccountState {
   // State
   currentAccount: Account | null;
   accounts: Account[];
+  members: AccountMember[];
   isLoading: boolean;
   error: string | null;
 
@@ -19,8 +32,13 @@ interface AccountState {
   setCurrentAccount: (account: Account | null) => void;
   setAccounts: (accounts: Account[]) => void;
   fetchAccounts: () => Promise<void>;
+  fetchAccount: (accountId: string) => Promise<Account>;
   createAccount: (data: Omit<Account, 'id' | 'createdAt'>) => Promise<Account>;
+  updateAccount: (accountId: string, data: Partial<Pick<Account, 'name' | 'currency' | 'timezone'>>) => Promise<Account>;
   switchAccount: (accountId: string) => void;
+  fetchMembers: (accountId: string) => Promise<void>;
+  inviteMember: (accountId: string, email: string, role: AccountMember['role']) => Promise<AccountMember>;
+  removeMember: (accountId: string, memberId: string) => Promise<void>;
 }
 
 const API_BASE = '/api';
@@ -31,6 +49,7 @@ export const useAccountStore = create<AccountState>()(
       // Initial state
       currentAccount: null,
       accounts: [],
+      members: [],
       isLoading: false,
       error: null,
 
@@ -103,6 +122,134 @@ export const useAccountStore = create<AccountState>()(
         const account = accounts.find((a) => a.id === accountId);
         if (account) {
           set({ currentAccount: account });
+        }
+      },
+
+      // Fetch a single account by ID
+      fetchAccount: async (accountId) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE}/accounts/${accountId}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch account');
+          }
+          const account: Account = await response.json();
+          set({ isLoading: false });
+          return account;
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
+        }
+      },
+
+      // Update account settings
+      updateAccount: async (accountId, data) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE}/accounts/${accountId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+          });
+          if (!response.ok) {
+            throw new Error('Failed to update account');
+          }
+          const updatedAccount: Account = await response.json();
+          set((state) => ({
+            accounts: state.accounts.map((a) =>
+              a.id === accountId ? updatedAccount : a
+            ),
+            currentAccount:
+              state.currentAccount?.id === accountId
+                ? updatedAccount
+                : state.currentAccount,
+            isLoading: false,
+          }));
+          return updatedAccount;
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
+        }
+      },
+
+      // Fetch members for an account
+      fetchMembers: async (accountId) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE}/accounts/${accountId}/members`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch members');
+          }
+          const members: AccountMember[] = await response.json();
+          set({ members, isLoading: false });
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+        }
+      },
+
+      // Invite a new member to the account
+      inviteMember: async (accountId, email, role) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE}/accounts/${accountId}/members`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, role }),
+          });
+          if (!response.ok) {
+            throw new Error('Failed to invite member');
+          }
+          const newMember: AccountMember = await response.json();
+          set((state) => ({
+            members: [...state.members, newMember],
+            isLoading: false,
+          }));
+          return newMember;
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
+        }
+      },
+
+      // Remove a member from the account
+      removeMember: async (accountId, memberId) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(
+            `${API_BASE}/accounts/${accountId}/members/${memberId}`,
+            {
+              method: 'DELETE',
+            }
+          );
+          if (!response.ok) {
+            throw new Error('Failed to remove member');
+          }
+          set((state) => ({
+            members: state.members.filter((m) => m.id !== memberId),
+            isLoading: false,
+          }));
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
         }
       },
     }),

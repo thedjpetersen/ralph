@@ -1,0 +1,195 @@
+.accounts-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.accounts-header {
+  margin-bottom: 2rem;
+}
+
+.accounts-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.accounts-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.accounts-loading,
+.accounts-error,
+.accounts-empty {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.accounts-error h2,
+.accounts-empty h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.accounts-empty h2 {
+  color: inherit;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.accounts-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.account-card {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: border-color 0.2s;
+}
+
+.account-card:hover {
+  border-color: #444;
+}
+
+.account-card-header {
+  margin-bottom: 1rem;
+}
+
+.account-card-name {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+}
+
+.account-card-email {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+.account-card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.account-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.detail-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.detail-value {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.account-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.action-button {
+  flex: 1;
+  min-width: 80px;
+  padding: 0.625rem 1rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.action-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+  color: #fff;
+}
+
+.action-button.primary {
+  background-color: #646cff;
+  border-color: #646cff;
+  color: white;
+}
+
+.action-button.primary:hover {
+  background-color: #747bff;
+  border-color: #747bff;
+}
+
+@media (prefers-color-scheme: light) {
+  .accounts-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .accounts-loading,
+  .accounts-error,
+  .accounts-empty {
+    background-color: #f5f5f5;
+  }
+
+  .account-card {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .account-card:hover {
+    border-color: #ccc;
+  }
+
+  .account-card-email {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .account-card-details {
+    background-color: #f5f5f5;
+  }
+
+  .detail-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .detail-value {
+    color: #213547;
+  }
+
+  .action-button {
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .action-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+    color: #000;
+  }
+}
