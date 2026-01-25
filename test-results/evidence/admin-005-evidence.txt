@@ -1,0 +1,32 @@
+=== Admin Handlers Build Verification ===
+
+Date: Sun Jan 25 03:39:58 PST 2026
+
+Handlers implemented:
+.rw-r--r--@  26k thedjpetersen 25 Jan 03:30 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/category_handler.go
+.rw-r--r--@  26k thedjpetersen 25 Jan 03:32 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/config_handler.go
+.rw-r--r--@  16k thedjpetersen 25 Jan 03:25 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/geocoding_handler.go
+.rw-r--r--@  17k thedjpetersen 25 Jan 03:26 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/ocr_handler.go
+.rw-r--r--@  19k thedjpetersen 25 Jan 03:20 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/pattern_handler.go
+.rw-r--r--@  27k thedjpetersen 25 Jan 03:29 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/product_handler.go
+.rw-r--r--@  16k thedjpetersen 25 Jan 03:16 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/queue_handler.go
+.rw-r--r--@  29k thedjpetersen 25 Jan 03:33 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/routes.go
+.rw-r--r--@  23k thedjpetersen 25 Jan 03:28 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/store_handler.go
+.rw-r--r--@ 9.9k thedjpetersen 25 Jan 03:10 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/admin/user_handler.go
+
+Build result:
+✅ Build successful!
+
+Total endpoints documented: 99
+
+=== Handler Method Counts ===
+category_handler.go: 18 methods
+config_handler.go: 20 methods
+geocoding_handler.go: 13 methods
+ocr_handler.go: 13 methods
+pattern_handler.go: 13 methods
+product_handler.go: 17 methods
+queue_handler.go: 17 methods
+routes.go: 9 methods
+store_handler.go: 15 methods
+user_handler.go: 11 methods
