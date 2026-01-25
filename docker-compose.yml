@@ -1,0 +1,107 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: clockzen-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-clockzen}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clockzen_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-clockzen}
+    ports:
+      - "${POSTGRES_PORT:-5435}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-clockzen} -d ${POSTGRES_DB:-clockzen}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - clockzen-network
+
+  # API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clockzen-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      PORT: 8080
+      DATABASE_URL: postgres://${POSTGRES_USER:-clockzen}:${POSTGRES_PASSWORD:-clockzen_dev_password}@postgres:5432/${POSTGRES_DB:-clockzen}?sslmode=disable
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL:-}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - clockzen-network
+
+  # Worker Service
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: clockzen-worker
+    restart: unless-stopped
+    ports:
+      - "${WORKER_PORT:-8081}:8081"
+    environment:
+      PORT: 8081
+      DATABASE_URL: postgres://${POSTGRES_USER:-clockzen}:${POSTGRES_PASSWORD:-clockzen_dev_password}@postgres:5432/${POSTGRES_DB:-clockzen}?sslmode=disable
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - clockzen-network
+
+  # Frontend Service (placeholder - uncomment when frontend is available)
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: clockzen-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${FRONTEND_PORT:-3000}:3000"
+  #   environment:
+  #     NEXT_PUBLIC_API_URL: http://api:8080
+  #   depends_on:
+  #     api:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./frontend/src:/app/src:ro
+  #     - ./frontend/public:/app/public:ro
+  #   networks:
+  #     - clockzen-network
+
+networks:
+  clockzen-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
