@@ -3,6 +3,7 @@ import { Layout } from './components/Layout';
 import { Accounts } from './pages/Accounts';
 import { AccountSettings } from './pages/AccountSettings';
 import { AccountMembers } from './pages/AccountMembers';
+import { SkeletonDemo } from './pages/SkeletonDemo';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/accounts/:id/settings" element={<AccountSettings />} />
         <Route path="/accounts/:id/members" element={<AccountMembers />} />
+        <Route path="/skeleton-demo" element={<SkeletonDemo />} />
       </Route>
     </Routes>
   );

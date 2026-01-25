@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
+import { AccountsListSkeleton } from '../components/skeletons';
 import './Accounts.css';
 
 export function Accounts() {
@@ -16,7 +17,11 @@ export function Accounts() {
     return (
       <PageTransition>
         <div className="accounts-page">
-          <div className="accounts-loading">Loading accounts...</div>
+          <div className="accounts-header">
+            <h1>Accounts</h1>
+            <p className="accounts-subtitle">Manage your accounts and settings</p>
+          </div>
+          <AccountsListSkeleton count={3} />
         </div>
       </PageTransition>
     );

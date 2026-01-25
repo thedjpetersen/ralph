@@ -1,0 +1,45 @@
+.settings-form-skeleton {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.settings-skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.settings-skeleton-form {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.settings-skeleton-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-skeleton-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+  margin-top: 1.5rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .settings-skeleton-form {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .settings-skeleton-actions {
+    border-top-color: #ddd;
+  }
+}

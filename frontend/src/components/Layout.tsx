@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useAccountStore } from '../stores/account';
+import { AccountSwitcherSkeleton } from './skeletons';
 import './Layout.css';
 
 export function Layout() {
@@ -48,7 +49,7 @@ export function Layout() {
           </nav>
           <div className="account-switcher">
             {isLoading ? (
-              <span className="loading-text">Loading...</span>
+              <AccountSwitcherSkeleton />
             ) : currentAccount ? (
               <div className="dropdown">
                 <button

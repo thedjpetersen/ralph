@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useUserStore } from '../stores/user';
+import { ProfileSkeleton } from '../components/skeletons';
 import './Profile.css';
 
 export function Profile() {
@@ -57,7 +58,7 @@ export function Profile() {
   if (isLoading && !user) {
     return (
       <div className="profile-page">
-        <div className="profile-loading">Loading profile...</div>
+        <ProfileSkeleton />
       </div>
     );
   }

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Account, AccountMember } from '../stores/account';
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
+import { MembersPageSkeleton } from '../components/skeletons';
 import './AccountMembers.css';
 
 export function AccountMembers() {
@@ -97,7 +98,7 @@ export function AccountMembers() {
     return (
       <PageTransition>
         <div className="account-members-page">
-          <div className="members-loading">Loading...</div>
+          <MembersPageSkeleton />
         </div>
       </PageTransition>
     );

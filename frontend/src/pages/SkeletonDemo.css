@@ -1,0 +1,39 @@
+.skeleton-demo-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.skeleton-demo-header {
+  margin-bottom: 2rem;
+}
+
+.skeleton-demo-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.skeleton-demo-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.skeleton-demo-section {
+  margin-bottom: 3rem;
+}
+
+.skeleton-demo-section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.section-description {
+  margin: 0 0 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (prefers-color-scheme: light) {
+  .skeleton-demo-subtitle,
+  .section-description {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

@@ -1,0 +1,80 @@
+.profile-skeleton {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.profile-skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.profile-skeleton-content {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.profile-skeleton-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #333;
+}
+
+.profile-skeleton-avatar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-skeleton-form {
+  margin-bottom: 2rem;
+}
+
+.profile-skeleton-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-skeleton-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+  margin-top: 1.5rem;
+}
+
+.profile-skeleton-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #333;
+}
+
+@media (prefers-color-scheme: light) {
+  .profile-skeleton-content {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .profile-skeleton-avatar-section {
+    border-bottom-color: #ddd;
+  }
+
+  .profile-skeleton-actions {
+    border-top-color: #ddd;
+  }
+
+  .profile-skeleton-links {
+    border-top-color: #ddd;
+  }
+}

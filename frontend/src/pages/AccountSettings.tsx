@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { Account } from '../stores/account';
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
+import { SettingsFormSkeleton } from '../components/skeletons';
 import './AccountSettings.css';
 
 const TIMEZONES = [
@@ -109,7 +110,7 @@ export function AccountSettings() {
     return (
       <PageTransition>
         <div className="account-settings-page">
-          <div className="settings-loading">Loading account...</div>
+          <SettingsFormSkeleton />
         </div>
       </PageTransition>
     );

@@ -1,0 +1,57 @@
+.account-card-skeleton {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.account-card-skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.account-card-skeleton-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.account-card-skeleton-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-card-skeleton-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.account-card-skeleton-actions .skeleton {
+  flex: 1;
+  min-width: 80px;
+}
+
+.accounts-skeleton-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+@media (prefers-color-scheme: light) {
+  .account-card-skeleton {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .account-card-skeleton-details {
+    background-color: #f5f5f5;
+  }
+}
