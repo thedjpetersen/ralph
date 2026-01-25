@@ -1,0 +1,238 @@
+=== RUN   TestOAuthTokenValidation
+=== RUN   TestOAuthTokenValidation/valid_token
+=== RUN   TestOAuthTokenValidation/expired_token
+=== RUN   TestOAuthTokenValidation/token_expiring_within_buffer
+=== RUN   TestOAuthTokenValidation/token_with_custom_buffer
+=== RUN   TestOAuthTokenValidation/token_with_zero_expiry_(non-expiring)
+=== RUN   TestOAuthTokenValidation/empty_access_token_is_invalid
+--- PASS: TestOAuthTokenValidation (0.00s)
+    --- PASS: TestOAuthTokenValidation/valid_token (0.00s)
+    --- PASS: TestOAuthTokenValidation/expired_token (0.00s)
+    --- PASS: TestOAuthTokenValidation/token_expiring_within_buffer (0.00s)
+    --- PASS: TestOAuthTokenValidation/token_with_custom_buffer (0.00s)
+    --- PASS: TestOAuthTokenValidation/token_with_zero_expiry_(non-expiring) (0.00s)
+    --- PASS: TestOAuthTokenValidation/empty_access_token_is_invalid (0.00s)
+=== RUN   TestOAuthConfigValidation
+=== RUN   TestOAuthConfigValidation/valid_config
+=== RUN   TestOAuthConfigValidation/missing_client_ID
+=== RUN   TestOAuthConfigValidation/missing_client_secret
+=== RUN   TestOAuthConfigValidation/missing_redirect_URL
+--- PASS: TestOAuthConfigValidation (0.00s)
+    --- PASS: TestOAuthConfigValidation/valid_config (0.00s)
+    --- PASS: TestOAuthConfigValidation/missing_client_ID (0.00s)
+    --- PASS: TestOAuthConfigValidation/missing_client_secret (0.00s)
+    --- PASS: TestOAuthConfigValidation/missing_redirect_URL (0.00s)
+=== RUN   TestScopeManager
+=== RUN   TestScopeManager/default_scopes_are_allowed
+=== RUN   TestScopeManager/validate_scopes_success
+=== RUN   TestScopeManager/validate_scopes_failure
+=== RUN   TestScopeManager/register_and_unregister_custom_scope
+=== RUN   TestScopeManager/list_allowed_scopes
+--- PASS: TestScopeManager (0.00s)
+    --- PASS: TestScopeManager/default_scopes_are_allowed (0.00s)
+    --- PASS: TestScopeManager/validate_scopes_success (0.00s)
+    --- PASS: TestScopeManager/validate_scopes_failure (0.00s)
+    --- PASS: TestScopeManager/register_and_unregister_custom_scope (0.00s)
+    --- PASS: TestScopeManager/list_allowed_scopes (0.00s)
+=== RUN   TestOAuthClient
+=== RUN   TestOAuthClient/create_client_with_valid_config
+=== RUN   TestOAuthClient/create_client_with_invalid_config_fails
+=== RUN   TestOAuthClient/generate_auth_URL
+=== RUN   TestOAuthClient/generate_auth_URL_with_options
+--- PASS: TestOAuthClient (0.00s)
+    --- PASS: TestOAuthClient/create_client_with_valid_config (0.00s)
+    --- PASS: TestOAuthClient/create_client_with_invalid_config_fails (0.00s)
+    --- PASS: TestOAuthClient/generate_auth_URL (0.00s)
+    --- PASS: TestOAuthClient/generate_auth_URL_with_options (0.00s)
+=== RUN   TestTokenSource
+=== RUN   TestTokenSource/returns_valid_token
+=== RUN   TestTokenSource/returns_error_for_nil_token
+=== RUN   TestTokenSource/returns_error_for_expired_token_without_refresh
+=== RUN   TestTokenSource/set_and_get_current_token
+--- PASS: TestTokenSource (0.00s)
+    --- PASS: TestTokenSource/returns_valid_token (0.00s)
+    --- PASS: TestTokenSource/returns_error_for_nil_token (0.00s)
+    --- PASS: TestTokenSource/returns_error_for_expired_token_without_refresh (0.00s)
+    --- PASS: TestTokenSource/set_and_get_current_token (0.00s)
+=== RUN   TestGoogleDriveConnectionIntegration
+2026/01/25 01:12:25 github.com/testcontainers/testcontainers-go - Connected to docker: 
+  Server Version: 28.5.2
+  API Version: 1.51
+  Operating System: OrbStack
+  Total Memory: 16030 MB
+  Testcontainers for Go Version: v0.40.0
+  Resolved Docker Host: unix:///var/run/docker.sock
+  Resolved Docker Socket Path: /var/run/docker.sock
+  Test SessionID: 6510818740aa8cfbc0c40c8a2b71dc9b92fc786ed5a619c620d4ce55f164893f
+  Test ProcessID: 6333428e-87ae-4be0-be50-4261d950b4d9
+2026/01/25 01:12:25 🐳 Creating container for image postgres:15-alpine
+2026/01/25 01:12:25 ✅ Container created: 036937e4bb56
+2026/01/25 01:12:25 🐳 Starting container: 036937e4bb56
+2026/01/25 01:12:25 ✅ Container started: 036937e4bb56
+2026/01/25 01:12:25 ⏳ Waiting for container id 036937e4bb56 image: postgres:15-alpine. Waiting for: all of: [log message "database system is ready to accept connections" (occurrence: 2)]
+2026/01/25 01:12:27 🔔 Container is ready: 036937e4bb56
+=== RUN   TestGoogleDriveConnectionIntegration/create_google_drive_connection
+=== RUN   TestGoogleDriveConnectionIntegration/query_connections_by_user
+=== RUN   TestGoogleDriveConnectionIntegration/update_connection_status
+=== RUN   TestGoogleDriveConnectionIntegration/delete_connection
+2026/01/25 01:12:27 🐳 Stopping container: 036937e4bb56
+2026/01/25 01:12:27 ✅ Container stopped: 036937e4bb56
+2026/01/25 01:12:27 🐳 Terminating container: 036937e4bb56
+2026/01/25 01:12:27 🚫 Container terminated: 036937e4bb56
+--- PASS: TestGoogleDriveConnectionIntegration (1.91s)
+    --- PASS: TestGoogleDriveConnectionIntegration/create_google_drive_connection (0.00s)
+    --- PASS: TestGoogleDriveConnectionIntegration/query_connections_by_user (0.00s)
+    --- PASS: TestGoogleDriveConnectionIntegration/update_connection_status (0.00s)
+    --- PASS: TestGoogleDriveConnectionIntegration/delete_connection (0.00s)
+=== RUN   TestEmailConnectionIntegration
+2026/01/25 01:12:27 🐳 Creating container for image postgres:15-alpine
+2026/01/25 01:12:27 ✅ Container created: 6f4544760d8e
+2026/01/25 01:12:27 🐳 Starting container: 6f4544760d8e
+2026/01/25 01:12:27 ✅ Container started: 6f4544760d8e
+2026/01/25 01:12:27 ⏳ Waiting for container id 6f4544760d8e image: postgres:15-alpine. Waiting for: all of: [log message "database system is ready to accept connections" (occurrence: 2)]
+2026/01/25 01:12:29 🔔 Container is ready: 6f4544760d8e
+=== RUN   TestEmailConnectionIntegration/create_email_connection
+=== RUN   TestEmailConnectionIntegration/query_by_provider
+=== RUN   TestEmailConnectionIntegration/update_token_expiry
+2026/01/25 01:12:29 🐳 Stopping container: 6f4544760d8e
+2026/01/25 01:12:29 ✅ Container stopped: 6f4544760d8e
+2026/01/25 01:12:29 🐳 Terminating container: 6f4544760d8e
+2026/01/25 01:12:29 🚫 Container terminated: 6f4544760d8e
+--- PASS: TestEmailConnectionIntegration (1.93s)
+    --- PASS: TestEmailConnectionIntegration/create_email_connection (0.00s)
+    --- PASS: TestEmailConnectionIntegration/query_by_provider (0.00s)
+    --- PASS: TestEmailConnectionIntegration/update_token_expiry (0.00s)
+=== RUN   TestOAuthExchangeMock
+=== RUN   TestOAuthExchangeMock/successful_token_exchange_(simulated)
+--- PASS: TestOAuthExchangeMock (0.00s)
+    --- PASS: TestOAuthExchangeMock/successful_token_exchange_(simulated) (0.00s)
+=== RUN   TestAuthAPIEndpoints
+2026/01/25 01:12:29 🐳 Creating container for image postgres:15-alpine
+2026/01/25 01:12:29 ✅ Container created: 1c6052a6125e
+2026/01/25 01:12:29 🐳 Starting container: 1c6052a6125e
+2026/01/25 01:12:29 ✅ Container started: 1c6052a6125e
+2026/01/25 01:12:29 ⏳ Waiting for container id 1c6052a6125e image: postgres:15-alpine. Waiting for: all of: [log message "database system is ready to accept connections" (occurrence: 2)]
+2026/01/25 01:12:31 🔔 Container is ready: 1c6052a6125e
+=== RUN   TestAuthAPIEndpoints/query_connection_via_database_client
+=== RUN   TestAuthAPIEndpoints/simulate_API_response_for_connection_list
+=== RUN   TestAuthAPIEndpoints/simulate_connection_status_update_API
+2026/01/25 01:12:31 🐳 Stopping container: 1c6052a6125e
+2026/01/25 01:12:31 ✅ Container stopped: 1c6052a6125e
+2026/01/25 01:12:31 🐳 Terminating container: 1c6052a6125e
+2026/01/25 01:12:31 🚫 Container terminated: 1c6052a6125e
+--- PASS: TestAuthAPIEndpoints (1.82s)
+    --- PASS: TestAuthAPIEndpoints/query_connection_via_database_client (0.00s)
+    --- PASS: TestAuthAPIEndpoints/simulate_API_response_for_connection_list (0.00s)
+    --- PASS: TestAuthAPIEndpoints/simulate_connection_status_update_API (0.00s)
+=== RUN   TestExpenseHandlerCreate
+=== RUN   TestExpenseHandlerCreate/create_valid_expense
+=== RUN   TestExpenseHandlerCreate/create_expense_with_invalid_method
+=== RUN   TestExpenseHandlerCreate/create_expense_with_invalid_JSON
+=== RUN   TestExpenseHandlerCreate/create_expense_with_missing_plan_id
+=== RUN   TestExpenseHandlerCreate/create_expense_with_missing_name
+=== RUN   TestExpenseHandlerCreate/create_expense_with_negative_amount
+=== RUN   TestExpenseHandlerCreate/create_expense_with_invalid_growth_rate
+--- PASS: TestExpenseHandlerCreate (0.00s)
+    --- PASS: TestExpenseHandlerCreate/create_valid_expense (0.00s)
+    --- PASS: TestExpenseHandlerCreate/create_expense_with_invalid_method (0.00s)
+    --- PASS: TestExpenseHandlerCreate/create_expense_with_invalid_JSON (0.00s)
+    --- PASS: TestExpenseHandlerCreate/create_expense_with_missing_plan_id (0.00s)
+    --- PASS: TestExpenseHandlerCreate/create_expense_with_missing_name (0.00s)
+    --- PASS: TestExpenseHandlerCreate/create_expense_with_negative_amount (0.00s)
+    --- PASS: TestExpenseHandlerCreate/create_expense_with_invalid_growth_rate (0.00s)
+=== RUN   TestExpenseHandlerGet
+=== RUN   TestExpenseHandlerGet/get_existing_expense
+=== RUN   TestExpenseHandlerGet/get_non-existent_expense
+=== RUN   TestExpenseHandlerGet/get_expense_with_wrong_method
+--- PASS: TestExpenseHandlerGet (0.00s)
+    --- PASS: TestExpenseHandlerGet/get_existing_expense (0.00s)
+    --- PASS: TestExpenseHandlerGet/get_non-existent_expense (0.00s)
+    --- PASS: TestExpenseHandlerGet/get_expense_with_wrong_method (0.00s)
+=== RUN   TestExpenseHandlerList
+=== RUN   TestExpenseHandlerList/list_all_expenses
+=== RUN   TestExpenseHandlerList/list_expenses_filtered_by_plan_id
+=== RUN   TestExpenseHandlerList/list_with_wrong_method
+--- PASS: TestExpenseHandlerList (0.00s)
+    --- PASS: TestExpenseHandlerList/list_all_expenses (0.00s)
+    --- PASS: TestExpenseHandlerList/list_expenses_filtered_by_plan_id (0.00s)
+    --- PASS: TestExpenseHandlerList/list_with_wrong_method (0.00s)
+=== RUN   TestExpenseHandlerListByPlan
+=== RUN   TestExpenseHandlerListByPlan/list_by_plan_ID
+=== RUN   TestExpenseHandlerListByPlan/list_by_non-existent_plan_ID
+--- PASS: TestExpenseHandlerListByPlan (0.00s)
+    --- PASS: TestExpenseHandlerListByPlan/list_by_plan_ID (0.00s)
+    --- PASS: TestExpenseHandlerListByPlan/list_by_non-existent_plan_ID (0.00s)
+=== RUN   TestExpenseHandlerUpdate
+=== RUN   TestExpenseHandlerUpdate/update_expense_amount
+=== RUN   TestExpenseHandlerUpdate/update_expense_name_and_category
+=== RUN   TestExpenseHandlerUpdate/update_non-existent_expense
+=== RUN   TestExpenseHandlerUpdate/update_with_invalid_JSON
+--- PASS: TestExpenseHandlerUpdate (0.00s)
+    --- PASS: TestExpenseHandlerUpdate/update_expense_amount (0.00s)
+    --- PASS: TestExpenseHandlerUpdate/update_expense_name_and_category (0.00s)
+    --- PASS: TestExpenseHandlerUpdate/update_non-existent_expense (0.00s)
+    --- PASS: TestExpenseHandlerUpdate/update_with_invalid_JSON (0.00s)
+=== RUN   TestExpenseHandlerDelete
+=== RUN   TestExpenseHandlerDelete/delete_existing_expense
+=== RUN   TestExpenseHandlerDelete/delete_non-existent_expense
+=== RUN   TestExpenseHandlerDelete/delete_with_wrong_method
+--- PASS: TestExpenseHandlerDelete (0.00s)
+    --- PASS: TestExpenseHandlerDelete/delete_existing_expense (0.00s)
+    --- PASS: TestExpenseHandlerDelete/delete_non-existent_expense (0.00s)
+    --- PASS: TestExpenseHandlerDelete/delete_with_wrong_method (0.00s)
+=== RUN   TestExpenseBreakdown
+=== RUN   TestExpenseBreakdown/get_expense_breakdown
+=== RUN   TestExpenseBreakdown/get_breakdown_for_empty_plan
+=== RUN   TestExpenseBreakdown/breakdown_with_wrong_method
+--- PASS: TestExpenseBreakdown (0.00s)
+    --- PASS: TestExpenseBreakdown/get_expense_breakdown (0.00s)
+    --- PASS: TestExpenseBreakdown/get_breakdown_for_empty_plan (0.00s)
+    --- PASS: TestExpenseBreakdown/breakdown_with_wrong_method (0.00s)
+=== RUN   TestExpenseCategories
+=== RUN   TestExpenseCategories/create_expense_with_category_housing
+=== RUN   TestExpenseCategories/create_expense_with_category_healthcare
+=== RUN   TestExpenseCategories/create_expense_with_category_food
+=== RUN   TestExpenseCategories/create_expense_with_category_transportation
+=== RUN   TestExpenseCategories/create_expense_with_category_utilities
+=== RUN   TestExpenseCategories/create_expense_with_category_insurance
+=== RUN   TestExpenseCategories/create_expense_with_category_discretionary
+=== RUN   TestExpenseCategories/create_expense_with_category_other
+--- PASS: TestExpenseCategories (0.00s)
+    --- PASS: TestExpenseCategories/create_expense_with_category_housing (0.00s)
+    --- PASS: TestExpenseCategories/create_expense_with_category_healthcare (0.00s)
+    --- PASS: TestExpenseCategories/create_expense_with_category_food (0.00s)
+    --- PASS: TestExpenseCategories/create_expense_with_category_transportation (0.00s)
+    --- PASS: TestExpenseCategories/create_expense_with_category_utilities (0.00s)
+    --- PASS: TestExpenseCategories/create_expense_with_category_insurance (0.00s)
+    --- PASS: TestExpenseCategories/create_expense_with_category_discretionary (0.00s)
+    --- PASS: TestExpenseCategories/create_expense_with_category_other (0.00s)
+=== RUN   TestRouterIntegration
+=== RUN   TestRouterIntegration/create_and_retrieve_expense_through_router
+=== RUN   TestRouterIntegration/full_CRUD_cycle_through_router
+--- PASS: TestRouterIntegration (0.00s)
+    --- PASS: TestRouterIntegration/create_and_retrieve_expense_through_router (0.00s)
+    --- PASS: TestRouterIntegration/full_CRUD_cycle_through_router (0.00s)
+=== RUN   TestBudgetDatabaseIntegration
+2026/01/25 01:12:31 🐳 Creating container for image postgres:15-alpine
+2026/01/25 01:12:31 ✅ Container created: 1fafa7263295
+2026/01/25 01:12:31 🐳 Starting container: 1fafa7263295
+2026/01/25 01:12:31 ✅ Container started: 1fafa7263295
+2026/01/25 01:12:31 ⏳ Waiting for container id 1fafa7263295 image: postgres:15-alpine. Waiting for: all of: [log message "database system is ready to accept connections" (occurrence: 2)]
+2026/01/25 01:12:32 🔔 Container is ready: 1fafa7263295
+=== RUN   TestBudgetDatabaseIntegration/database_connection_is_active
+=== RUN   TestBudgetDatabaseIntegration/database_schema_is_properly_migrated
+2026/01/25 01:12:32 🐳 Stopping container: 1fafa7263295
+2026/01/25 01:12:32 ✅ Container stopped: 1fafa7263295
+2026/01/25 01:12:32 🐳 Terminating container: 1fafa7263295
+2026/01/25 01:12:33 🚫 Container terminated: 1fafa7263295
+--- PASS: TestBudgetDatabaseIntegration (1.69s)
+    --- PASS: TestBudgetDatabaseIntegration/database_connection_is_active (0.00s)
+    --- PASS: TestBudgetDatabaseIntegration/database_schema_is_properly_migrated (0.00s)
+=== RUN   TestConcurrentExpenseOperations
+=== RUN   TestConcurrentExpenseOperations/concurrent_reads
+=== RUN   TestConcurrentExpenseOperations/concurrent_creates
+--- PASS: TestConcurrentExpenseOperations (0.00s)
+    --- PASS: TestConcurrentExpenseOperations/concurrent_reads (0.00s)
+    --- PASS: TestConcurrentExpenseOperations/concurrent_creates (0.00s)
+PASS
+ok  	clockzen-next/test/integration	(cached)
