@@ -10,6 +10,7 @@ import {
   formatTaskForPrompt,
   getTaskSummary,
   updateTaskValidation,
+  updateTaskJudgeResults,
 } from '../lib/prd.js';
 import { join, dirname } from 'path';
 import { buildTaskPrompt, checkForCompletion } from '../lib/claude.js';
@@ -41,11 +42,11 @@ import {
   processClaudeOutput,
 } from '../lib/learnings.js';
 import {
-  runJudges,
-  requiresJudge,
+  runJudgesCompat as runJudges,
+  requiresJudgeCompat as requiresJudge,
   formatJudgeResultsForConsole,
-  JudgeContext,
-} from '../lib/judge.js';
+  type LegacyJudgeContext as JudgeContext,
+} from '../plugins/judges/index.js';
 import type { AggregatedJudgeResult } from '../lib/prd.js';
 
 export interface RunOptions {
@@ -120,20 +121,26 @@ export async function runCommand(options: RunOptions): Promise<void> {
   }
 
   const summary = getTaskSummary(prdFiles);
-  logger.header('Ralph Wiggum - Autonomous Coding Loop');
-  logger.info(`Tasks: ${summary.pending} pending, ${summary.completed} completed, ${summary.total} total`);
   const providerName = getProviderDisplayName(config.providerConfig.taskProvider);
   const modelInfo = config.providerConfig.taskProvider === 'claude'
     ? config.providerConfig.claudeModel
     : config.providerConfig.taskProvider === 'gemini'
       ? config.providerConfig.geminiModel
       : config.providerConfig.cursorModel;
-  logger.info(`Provider: ${providerName} (${modelInfo})`);
-  logger.info(`Iterations: ${iterations}`);
-  if (config.consumeMode) {
-    logger.info(`Mode: CONSUME (tasks will be removed from PRD after completion)`);
-  }
-  logger.divider();
+
+  // Show rich session banner
+  logger.sessionBanner({
+    sessionId,
+    project: prdFiles[0]?.project,
+    prdFile: config.prdFile || config.prdDir,
+    pending: summary.pending,
+    completed: summary.completed,
+    total: summary.total,
+    provider: providerName,
+    model: modelInfo,
+    iterations,
+    consumeMode: config.consumeMode,
+  });
 
   // Send session start notification
   await notifier.sessionStarted(summary.pending, config.model);
@@ -193,12 +200,18 @@ export async function runCommand(options: RunOptions): Promise<void> {
     // Get previous validation attempts for this task
     const previousAttempts = validationAttempts.get(taskKey) || (item.validation_results?.attempts || 0);
 
-    logger.header(`Iteration ${i}/${iterations}`);
-    logger.info(`Task: ${taskName}`);
-    logger.info(`Category: ${prdFile.category} | Priority: ${item.priority}`);
-    if (previousAttempts > 0) {
-      logger.warning(`Validation attempt: ${previousAttempts + 1}`);
-    }
+    // Show rich task banner
+    logger.taskBanner({
+      iteration: i,
+      totalIterations: iterations,
+      id: item.id,
+      name: item.name || prdFile.category,
+      description: item.description,
+      category: prdFile.category,
+      priority: item.priority,
+      steps: item.steps || item.acceptance_criteria,
+      attempt: previousAttempts > 0 ? previousAttempts + 1 : undefined,
+    });
 
     // Mark as in progress
     markTaskInProgress(prdFile, item.id);
@@ -241,6 +254,7 @@ export async function runCommand(options: RunOptions): Promise<void> {
     const fullPrompt = buildTaskPrompt(taskPrompt, config, {
       taskId: item.id,
       previousValidationResult: item.validation_results,
+      previousJudgeResult: item.judge_results,
       targetPackages,
     });
 
@@ -353,6 +367,9 @@ export async function runCommand(options: RunOptions): Promise<void> {
         logger.warning(`Judge panel rejected task: ${judgeResult.summary}`);
         await notifier.judgeFailed(taskName, i, judgeResult);
 
+        // Store judge results so Claude can see feedback on retry
+        updateTaskJudgeResults(prdFile, item.id, judgeResult);
+
         // Continue to next iteration - task stays in_progress
         continue;
       }
@@ -384,15 +401,6 @@ export async function runCommand(options: RunOptions): Promise<void> {
     const gitStatusAfter = await git.getStatus(config.projectRoot);
     const changesStr = git.summarizeChanges(gitStatusAfter);
 
-    logger.success(`Completed in ${result.duration}s`);
-    logger.info(`Changes: ${changesStr}`);
-
-    // Log summary if available
-    if (result.summary) {
-      const summaryPreview = result.summary.substring(0, 200).replace(/\n/g, ' ');
-      logger.info(`Summary: ${summaryPreview}${result.summary.length > 200 ? '...' : ''}`);
-    }
-
     // Note: Claude handles task-level notifications and evidence capture via scripts
     // The wrapper only handles session-level notifications
 
@@ -421,15 +429,17 @@ export async function runCommand(options: RunOptions): Promise<void> {
       completedAt: new Date().toISOString(),
     });
 
-    logger.divider();
+    // Show task completion banner
+    logger.taskComplete(taskName, taskDuration, changesStr, commitHash);
+
+    console.log(); // spacing
   }
 
   // Session complete
   const totalDuration = Math.round((Date.now() - startTime) / 1000);
 
-  logger.header('Session Complete');
-  logger.info(`Completed: ${completedCount}/${iterations} tasks`);
-  logger.info(`Duration: ${Math.round(totalDuration / 60)}m ${totalDuration % 60}s`);
+  // Show session completion banner
+  logger.sessionComplete(completedCount, iterations, totalDuration);
 
   // Mark session as completed
   sessionManager.completeSession();

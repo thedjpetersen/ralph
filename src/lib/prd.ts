@@ -21,10 +21,12 @@ export interface JudgeConfig {
   requireEvidence?: boolean; // Whether evidence is required for judgment
   required?: boolean;        // If true, this judge must pass for task to complete (default: true)
   weight?: number;           // Weight for aggregated scoring (default: 1.0)
+  threshold?: number;        // Score threshold to pass (0-100, default: 70)
 }
 
 export interface JudgeResult {
   passed: boolean;
+  score?: number;            // 0-100 score
   persona: string;
   verdict: string;           // Short verdict
   reasoning: string;         // Detailed reasoning
@@ -35,6 +37,7 @@ export interface JudgeResult {
 
 export interface AggregatedJudgeResult {
   passed: boolean;           // Overall pass/fail
+  overallScore?: number;     // Weighted average 0-100 (optional for backward compat)
   results: JudgeResult[];    // Individual judge results
   summary: string;           // Aggregated summary
   timestamp: string;
@@ -68,6 +71,9 @@ export interface PrdFile {
   filepath: string;
   category: string;
   items: PrdItem[];
+  // Project-level metadata
+  project?: string;
+  description?: string;
   metadata?: {
     version?: string;
     created_at?: string;
@@ -92,6 +98,8 @@ export function loadPrdFile(filepath: string): PrdFile | null {
       filepath,
       category,
       items,
+      project: data.project,
+      description: data.description,
       metadata: data.metadata,
     };
   } catch (error) {
@@ -132,7 +140,8 @@ function isItemPending(item: PrdItem): boolean {
   }
   // If passes is not set, fall back to status check
   if (item.passes === undefined) {
-    if (item.status === 'pending' || item.status === undefined) {
+    // Include 'in_progress' to allow retry after validation/judge failures
+    if (item.status === 'pending' || item.status === 'in_progress' || item.status === undefined) {
       return true;
     }
   }
@@ -229,6 +238,31 @@ export function updateTaskValidation(
   if (!item) return false;
 
   item.validation_results = validationResults;
+
+  try {
+    const data = {
+      items: prdFile.items,
+      metadata: {
+        ...prdFile.metadata,
+        updated_at: new Date().toISOString(),
+      },
+    };
+    writeFileSync(prdFile.filepath, JSON.stringify(data, null, 2));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function updateTaskJudgeResults(
+  prdFile: PrdFile,
+  itemId: string,
+  judgeResults: AggregatedJudgeResult
+): boolean {
+  const item = prdFile.items.find(i => i.id === itemId);
+  if (!item) return false;
+
+  item.judge_results = judgeResults;
 
   try {
     const data = {

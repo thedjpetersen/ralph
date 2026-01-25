@@ -378,3 +378,223 @@ export function getJudgeCount(task: Task): number {
 export function getRequiredJudges(task: Task): JudgeConfig[] {
   return (task.judges || []).filter(j => j.required !== false);
 }
+
+// ============================================================================
+// Formatting Functions
+// ============================================================================
+
+/**
+ * Format a single judge result for console display
+ */
+export function formatSingleJudgeResult(result: JudgeResult): string {
+  const status = result.passed ? '✓ APPROVED' : '✗ REJECTED';
+  const statusColor = result.passed ? '\x1b[32m' : '\x1b[31m';
+  const reset = '\x1b[0m';
+
+  let output = `
+${statusColor}${status}${reset} by ${result.persona}
+  Score: ${result.score}/100
+  Verdict: ${result.verdict}
+  Confidence: ${Math.round(result.confidence * 100)}%
+
+  Reasoning:
+    ${result.reasoning.split('\n').join('\n    ')}
+`;
+
+  if (result.suggestions && result.suggestions.length > 0) {
+    output += `
+  Suggestions:
+${result.suggestions.map(s => `    - ${s}`).join('\n')}
+`;
+  }
+
+  return output;
+}
+
+/**
+ * Format aggregated judge results for console display
+ * Accepts both core/types.ts and lib/prd.ts AggregatedJudgeResult
+ */
+export function formatJudgeResultsForConsole(result: AggregatedJudgeResult | PrdAggregatedJudgeResult): string {
+  if (result.results.length === 0) {
+    return '\nNo judges configured\n';
+  }
+
+  const overallStatus = result.passed ? '\x1b[32m✓ APPROVED\x1b[0m' : '\x1b[31m✗ REJECTED\x1b[0m';
+
+  let output = `
+Judge Panel Results: ${overallStatus}
+${result.summary}
+${'─'.repeat(50)}
+`;
+
+  for (const judgeResult of result.results) {
+    const status = judgeResult.passed ? '\x1b[32m✓\x1b[0m' : '\x1b[31m✗\x1b[0m';
+    output += `
+${status} ${judgeResult.persona}: ${judgeResult.verdict}
+   Score: ${judgeResult.score}/100 | Confidence: ${Math.round(judgeResult.confidence * 100)}%
+   ${judgeResult.reasoning.split('\n')[0].substring(0, 80)}...
+`;
+  }
+
+  // Collect all suggestions
+  const allSuggestions = result.results
+    .flatMap(r => r.suggestions || [])
+    .filter((s, i, arr) => arr.indexOf(s) === i)  // Unique
+    .slice(0, 5);
+
+  if (allSuggestions.length > 0) {
+    output += `
+${'─'.repeat(50)}
+Combined Suggestions:
+${allSuggestions.map(s => `  • ${s}`).join('\n')}
+`;
+  }
+
+  return output;
+}
+
+/**
+ * Format aggregated judge results for Discord notification
+ * Accepts both core/types.ts and lib/prd.ts AggregatedJudgeResult
+ */
+export function formatJudgeResultsForDiscord(result: AggregatedJudgeResult | PrdAggregatedJudgeResult): string {
+  if (result.results.length === 0) {
+    return 'No judges configured';
+  }
+
+  const overallStatus = result.passed ? '✅ **APPROVED**' : '❌ **REJECTED**';
+
+  let output = `${overallStatus}\n${result.summary}\n\n`;
+
+  for (const judgeResult of result.results) {
+    const status = judgeResult.passed ? '✓' : '✗';
+    output += `${status} **${judgeResult.persona}** (${judgeResult.score}/100): ${judgeResult.verdict}\n`;
+  }
+
+  // Collect suggestions
+  const allSuggestions = result.results
+    .flatMap(r => r.suggestions || [])
+    .filter((s, i, arr) => arr.indexOf(s) === i)
+    .slice(0, 3);
+
+  if (allSuggestions.length > 0) {
+    output += `\n**Suggestions:**\n`;
+    output += allSuggestions.map(s => `• ${s}`).join('\n');
+  }
+
+  return output.substring(0, 1900);  // Discord limit
+}
+
+// ============================================================================
+// Compatibility Layer for run.ts
+// ============================================================================
+
+import type { PrdItem, AggregatedJudgeResult as PrdAggregatedJudgeResult } from '../../lib/prd.js';
+import type { ValidationResult } from '../../lib/validation/validation.types.js';
+import type { Logger } from '../../core/context.js';
+import { logger as defaultLogger } from '../../lib/logger.js';
+
+/**
+ * Legacy JudgeContext for compatibility with run.ts
+ */
+export interface LegacyJudgeContext {
+  taskDescription: string;
+  acceptanceCriteria: string[];
+  codeChanges: string;
+  validationResults?: ValidationResult;
+  evidencePath?: string;
+  claudeSummary?: string;
+}
+
+/**
+ * Legacy JudgeOptions for compatibility
+ */
+export interface LegacyJudgeOptions {
+  parallel?: boolean;
+  failFast?: boolean;
+  timeout?: number;
+}
+
+/**
+ * Compatibility function: Run judges using PrdItem (old run.ts interface)
+ * Converts to new Task-based interface internally
+ */
+export async function runJudgesCompat(
+  item: PrdItem,
+  context: LegacyJudgeContext,
+  projectRoot: string,
+  options: LegacyJudgeOptions = {}
+): Promise<PrdAggregatedJudgeResult> {
+  // Convert PrdItem to Task
+  const task: Task = {
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    priority: item.priority,
+    category: item.category,
+    status: item.status || 'pending',
+    dependencies: item.dependencies || [],
+    criteria: item.acceptance_criteria || item.steps,
+    notes: item.notes,
+    judges: item.judges,
+  };
+
+  // Convert legacy context to new context
+  const judgeCtx: JudgeContext = {
+    task,
+    codeChanges: context.codeChanges,
+    validationResults: context.validationResults,
+    providerSummary: context.claudeSummary,
+    evidencePath: context.evidencePath,
+  };
+
+  // Create a minimal execution context
+  const ctx: ExecutionContext = {
+    config: {
+      projectRoot,
+      dryRun: false,
+    } as ExecutionContext['config'],
+    sessionId: 'compat',
+    iteration: 0,
+    startTime: Date.now(),
+    getLogger: () => defaultLogger as Logger,
+    getNotifier: () => ({} as ExecutionContext extends { getNotifier(): infer R } ? R : never),
+    getSessionManager: () => ({} as ExecutionContext extends { getSessionManager(): infer R } ? R : never),
+    getLearningsManager: () => ({} as ExecutionContext extends { getLearningsManager(): infer R } ? R : never),
+    getEventEmitter: () => ({} as ExecutionContext extends { getEventEmitter(): infer R } ? R : never),
+    git: {} as ExecutionContext['git'],
+  };
+
+  // Run judges using the plugin system
+  const result = await runJudges(ctx, task, judgeCtx, {
+    parallel: options.parallel,
+    failFast: options.failFast,
+    timeout: options.timeout,
+  });
+
+  // Convert to legacy format (AggregatedJudgeResult from prd.ts)
+  return {
+    passed: result.passed,
+    overallScore: result.overallScore,
+    results: result.results.map(r => ({
+      passed: r.passed,
+      score: r.score,
+      persona: r.persona,
+      verdict: r.verdict,
+      reasoning: r.reasoning,
+      suggestions: r.suggestions,
+      confidence: r.confidence,
+      timestamp: r.timestamp,
+    })),
+    summary: result.summary,
+    timestamp: result.timestamp,
+  };
+}
+
+/**
+ * Check if PrdItem requires judge evaluation (compatibility)
+ */
+export function requiresJudgeCompat(item: PrdItem): boolean {
+  return Boolean(item.judges && item.judges.length > 0);
+}

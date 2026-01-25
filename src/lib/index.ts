@@ -7,6 +7,8 @@ export * from './notify.js';
 export * from './capture.js';
 export * from './session.js';
 export * from './learnings.js';
-export * from './judge.js';
 export * as git from './git.js';
 export * as validation from './validation/index.js';
+
+// Judge functionality is now in plugins/judges
+// Import from '../plugins/judges/index.js' instead

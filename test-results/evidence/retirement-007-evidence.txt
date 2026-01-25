@@ -1,0 +1,45 @@
+=== BUILD SUCCESS ===
+
+Files created:
+.rw-r--r--@ 40k thedjpetersen 24 Jan 23:12 plan_service.go
+
+Plan Service Stats:
+    1163 internal/application/retirement/plan_service.go
+
+Service methods:
+func (s *PlanService) CreatePlan(ctx context.Context, req CreatePlanRequest) (*Plan, error) {
+func (s *PlanService) GetPlan(ctx context.Context, id uuid.UUID) (*Plan, error) {
+func (s *PlanService) UpdatePlan(ctx context.Context, id uuid.UUID, req UpdatePlanRequest) (*Plan, error) {
+func (s *PlanService) DeletePlan(ctx context.Context, id uuid.UUID) error {
+func (s *PlanService) ListPlans(ctx context.Context, filter PlanFilter) ([]*Plan, error) {
+func (s *PlanService) ArchivePlan(ctx context.Context, id uuid.UUID) (*Plan, error) {
+func (s *PlanService) ActivatePlan(ctx context.Context, id uuid.UUID) (*Plan, error) {
+func (s *PlanService) CreateAccount(ctx context.Context, req CreateAccountRequest) (*Account, error) {
+func (s *PlanService) GetAccount(ctx context.Context, id uuid.UUID) (*Account, error) {
+func (s *PlanService) UpdateAccount(ctx context.Context, id uuid.UUID, req UpdateAccountRequest) (*Account, error) {
+func (s *PlanService) DeleteAccount(ctx context.Context, id uuid.UUID) error {
+func (s *PlanService) ListAccounts(ctx context.Context, planID uuid.UUID) ([]*Account, error) {
+func (s *PlanService) GetTotalAccountBalance(ctx context.Context, planID uuid.UUID) (float64, error) {
+func (s *PlanService) CreateIncomeSource(ctx context.Context, req CreateIncomeSourceRequest) (*IncomeSource, error) {
+func (s *PlanService) GetIncomeSource(ctx context.Context, id uuid.UUID) (*IncomeSource, error) {
+func (s *PlanService) UpdateIncomeSource(ctx context.Context, id uuid.UUID, req UpdateIncomeSourceRequest) (*IncomeSource, error) {
+func (s *PlanService) DeleteIncomeSource(ctx context.Context, id uuid.UUID) error {
+func (s *PlanService) ListIncomeSources(ctx context.Context, planID uuid.UUID) ([]*IncomeSource, error) {
+func (s *PlanService) GetAnnualIncome(ctx context.Context, planID uuid.UUID, age int) (float64, error) {
+func (s *PlanService) CreateExpense(ctx context.Context, req CreateExpenseRequest) (*Expense, error) {
+func (s *PlanService) GetExpense(ctx context.Context, id uuid.UUID) (*Expense, error) {
+func (s *PlanService) UpdateExpense(ctx context.Context, id uuid.UUID, req UpdateExpenseRequest) (*Expense, error) {
+func (s *PlanService) DeleteExpense(ctx context.Context, id uuid.UUID) error {
+func (s *PlanService) ListExpenses(ctx context.Context, planID uuid.UUID) ([]*Expense, error) {
+func (s *PlanService) GetAnnualExpenses(ctx context.Context, planID uuid.UUID, age int) (float64, error) {
+func (s *PlanService) GetEssentialExpenses(ctx context.Context, planID uuid.UUID) ([]*Expense, error) {
+func (s *PlanService) CreateMilestone(ctx context.Context, req CreateMilestoneRequest) (*Milestone, error) {
+func (s *PlanService) GetMilestone(ctx context.Context, id uuid.UUID) (*Milestone, error) {
+func (s *PlanService) UpdateMilestone(ctx context.Context, id uuid.UUID, req UpdateMilestoneRequest) (*Milestone, error) {
+func (s *PlanService) DeleteMilestone(ctx context.Context, id uuid.UUID) error {
+func (s *PlanService) ListMilestones(ctx context.Context, planID uuid.UUID) ([]*Milestone, error) {
+func (s *PlanService) UpdateMilestoneProgress(ctx context.Context, id uuid.UUID, currentValue float64) (*Milestone, error) {
+func (s *PlanService) GetMilestoneProgress(ctx context.Context, id uuid.UUID) (float64, error) {
+func (s *PlanService) GetFIREMilestones(ctx context.Context, planID uuid.UUID) ([]*Milestone, error) {
+func (s *PlanService) AbandonMilestone(ctx context.Context, id uuid.UUID) (*Milestone, error) {
+func (s *PlanService) CompleteMilestone(ctx context.Context, id uuid.UUID) (*Milestone, error) {

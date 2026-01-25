@@ -7,6 +7,7 @@
 
 import type { RalphConfig } from './config.js';
 import type { ValidationResult, Package } from './validation/validation.types.js';
+import type { AggregatedJudgeResult } from './prd.js';
 
 // Re-export Package type for convenience
 export type { Package } from './validation/validation.types.js';
@@ -14,6 +15,7 @@ export type { Package } from './validation/validation.types.js';
 export interface TaskPromptOptions {
   taskId?: string;
   previousValidationResult?: ValidationResult;
+  previousJudgeResult?: AggregatedJudgeResult;  // Judge results from previous attempt
   targetPackages?: Package[];  // Packages to validate before completion
 }
 
@@ -125,13 +127,33 @@ Fix these issues BEFORE marking the task complete.
 `;
   }
 
+  // Build judge feedback section if there was a previous rejection
+  let judgeFeedback = '';
+  if (options.previousJudgeResult && !options.previousJudgeResult.passed) {
+    const failedJudges = options.previousJudgeResult.results.filter(r => !r.passed);
+
+    judgeFeedback = `
+## ⚠️ PREVIOUS JUDGE EVALUATION REJECTED
+
+Your previous attempt was reviewed by AI judges and **REJECTED**. You MUST address their concerns:
+
+${failedJudges.map(r => `### ${r.persona} (Score: ${r.score || 'N/A'}/100)
+**Verdict:** ${r.verdict}
+**Reasoning:** ${r.reasoning}
+${r.suggestions && r.suggestions.length > 0 ? `**Suggestions:**\n${r.suggestions.map(s => `- ${s}`).join('\n')}` : ''}
+`).join('\n')}
+
+**You must improve the implementation to address these concerns before marking the task complete.**
+`;
+  }
+
   const validationSection = buildValidationSection(targetPackages);
 
   return `You are working on the clockzen-next project as part of an autonomous coding loop called "Ralph".
 
 Your task is:
 ${taskDescription}
-${validationFeedback}
+${validationFeedback}${judgeFeedback}
 ## Important Guidelines
 
 1. Make the necessary code changes to complete the task
