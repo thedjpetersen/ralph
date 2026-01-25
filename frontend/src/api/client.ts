@@ -2209,6 +2209,134 @@ export const bankTransactionsApi = {
   },
 };
 
+// Persona types
+export type PersonaStatus = 'active' | 'inactive';
+
+export interface Persona {
+  id: string;
+  account_id: string;
+  name: string;
+  description?: string;
+  avatar_url?: string;
+  status: PersonaStatus;
+  is_default: boolean;
+  spending_profile?: string;
+  preferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
+export interface ListPersonasResponse {
+  personas: Persona[];
+  total: number;
+}
+
+export interface ListPersonasParams {
+  status?: PersonaStatus;
+  is_default?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreatePersonaRequest {
+  name: string;
+  description?: string;
+  avatar_url?: string;
+  is_default?: boolean;
+  spending_profile?: string;
+  preferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdatePersonaRequest {
+  name?: string;
+  description?: string;
+  avatar_url?: string;
+  status?: PersonaStatus;
+  is_default?: boolean;
+  spending_profile?: string;
+  preferences?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+// Persona API methods (account-scoped)
+export const personasApi = {
+  async list(accountId: string, params?: ListPersonasParams): Promise<ListPersonasResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.is_default !== undefined) searchParams.set('is_default', params.is_default.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/personas${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch personas');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<Persona> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/personas/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch persona');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreatePersonaRequest): Promise<Persona> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/personas`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create persona');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdatePersonaRequest): Promise<Persona> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/personas/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update persona');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/personas/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete persona');
+    }
+  },
+
+  async setDefault(accountId: string, id: string): Promise<Persona> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/personas/${id}/default`, {
+      method: 'PUT',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to set persona as default');
+    }
+    return response.json();
+  },
+};
+
 // Sync types
 export interface SyncResult {
   connection_id?: string;

@@ -26,6 +26,8 @@ import { FinancialConnections } from './pages/FinancialConnections';
 import { FinancialAccounts } from './pages/FinancialAccounts';
 import { BankTransactions } from './pages/BankTransactions';
 import { BankTransactionDetail } from './pages/BankTransactionDetail';
+import { Personas } from './pages/Personas';
+import { PersonaForm } from './components/PersonaForm';
 import './App.css';
 
 function App() {
@@ -62,6 +64,9 @@ function App() {
         <Route path="/financial-accounts" element={<FinancialAccounts />} />
         <Route path="/bank-transactions" element={<BankTransactions />} />
         <Route path="/bank-transactions/:id" element={<BankTransactionDetail />} />
+        <Route path="/personas" element={<Personas />} />
+        <Route path="/personas/new" element={<PersonaForm />} />
+        <Route path="/personas/:id/edit" element={<PersonaForm />} />
       </Route>
     </Routes>
   );
