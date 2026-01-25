@@ -82,8 +82,9 @@ export interface RalphConfig {
 }
 
 export const defaultConfig: RalphConfig = {
-  projectRoot: resolve(__dirname, '../../../../'),
-  scriptsDir: resolve(__dirname, '../../../'),
+  // From dist/lib/config.js, go up 2 levels to reach project root
+  projectRoot: resolve(__dirname, '../../'),
+  scriptsDir: resolve(__dirname, '../../'),
   prdDir: '',
   prdFile: '',
   notifyScript: '',
