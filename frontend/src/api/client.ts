@@ -1751,3 +1751,514 @@ export const budgetGoalsApi = {
     }
   },
 };
+
+// Financial Connection types
+export type FinancialConnectionStatus = 'pending' | 'active' | 'error' | 'disconnected' | 'expired';
+export type FinancialConnectionProvider = 'plaid' | 'mx' | 'finicity' | 'yodlee' | 'manual';
+
+export interface FinancialConnection {
+  id: string;
+  account_id: string;
+  provider: FinancialConnectionProvider;
+  provider_connection_id?: string;
+  institution_id?: string;
+  institution_name?: string;
+  institution_logo?: string;
+  status: FinancialConnectionStatus;
+  error_code?: string;
+  error_message?: string;
+  last_sync_at?: string;
+  next_sync_at?: string;
+  consent_expires_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListFinancialConnectionsResponse {
+  connections: FinancialConnection[];
+  total: number;
+}
+
+export interface ListFinancialConnectionsParams {
+  status?: FinancialConnectionStatus;
+  provider?: FinancialConnectionProvider;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateLinkTokenRequest {
+  provider?: FinancialConnectionProvider;
+  redirect_uri?: string;
+  products?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateLinkTokenResponse {
+  link_token: string;
+  expiration: string;
+}
+
+export interface ConnectFinancialConnectionRequest {
+  provider: FinancialConnectionProvider;
+  public_token: string;
+  institution_id?: string;
+  metadata?: Record<string, unknown>;
+}
+
+// Financial Connections API methods (account-scoped)
+export const financialConnectionsApi = {
+  async list(accountId: string, params?: ListFinancialConnectionsParams): Promise<ListFinancialConnectionsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.provider) searchParams.set('provider', params.provider);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/connections${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch financial connections');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<FinancialConnection> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/connections/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch financial connection');
+    }
+    return response.json();
+  },
+
+  async createLinkToken(accountId: string, data?: CreateLinkTokenRequest): Promise<CreateLinkTokenResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/connections/link-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data || {}),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create link token');
+    }
+    return response.json();
+  },
+
+  async connect(accountId: string, data: ConnectFinancialConnectionRequest): Promise<FinancialConnection> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/connections`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to connect financial connection');
+    }
+    return response.json();
+  },
+
+  async disconnect(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/connections/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to disconnect financial connection');
+    }
+  },
+
+  async refresh(accountId: string, id: string): Promise<FinancialConnection> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/connections/${id}/refresh`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to refresh financial connection');
+    }
+    return response.json();
+  },
+};
+
+// Financial Account types
+export type FinancialAccountType = 'checking' | 'savings' | 'credit' | 'loan' | 'investment' | 'mortgage' | 'other';
+export type FinancialAccountSubtype = 'personal' | 'business' | 'joint' | 'trust' | 'ira' | '401k' | 'brokerage' | 'other';
+export type FinancialAccountStatus = 'active' | 'inactive' | 'closed' | 'pending';
+
+export interface FinancialAccount {
+  id: string;
+  account_id: string;
+  connection_id: string;
+  provider_account_id?: string;
+  name: string;
+  official_name?: string;
+  type: FinancialAccountType;
+  subtype?: FinancialAccountSubtype;
+  status: FinancialAccountStatus;
+  mask?: string;
+  currency: string;
+  current_balance?: number;
+  available_balance?: number;
+  limit_balance?: number;
+  is_active: boolean;
+  is_hidden: boolean;
+  last_balance_update?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListFinancialAccountsResponse {
+  accounts: FinancialAccount[];
+  total: number;
+}
+
+export interface ListFinancialAccountsParams {
+  connection_id?: string;
+  type?: FinancialAccountType;
+  status?: FinancialAccountStatus;
+  is_active?: boolean;
+  is_hidden?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface UpdateFinancialAccountRequest {
+  name?: string;
+  is_active?: boolean;
+  is_hidden?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface FinancialAccountsSummary {
+  total_accounts: number;
+  total_current_balance: number;
+  total_available_balance: number;
+  by_type: Record<FinancialAccountType, { count: number; balance: number }>;
+  currency: string;
+}
+
+export interface FinancialAccountBalance {
+  account_id: string;
+  current_balance?: number;
+  available_balance?: number;
+  limit_balance?: number;
+  currency: string;
+  last_updated: string;
+}
+
+// Financial Accounts API methods (account-scoped)
+export const financialAccountsApi = {
+  async list(accountId: string, params?: ListFinancialAccountsParams): Promise<ListFinancialAccountsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.connection_id) searchParams.set('connection_id', params.connection_id);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString());
+    if (params?.is_hidden !== undefined) searchParams.set('is_hidden', params.is_hidden.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/financial-accounts${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch financial accounts');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<FinancialAccount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/financial-accounts/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch financial account');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateFinancialAccountRequest): Promise<FinancialAccount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/financial-accounts/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update financial account');
+    }
+    return response.json();
+  },
+
+  async getSummary(accountId: string): Promise<FinancialAccountsSummary> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/financial-accounts/summary`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch financial accounts summary');
+    }
+    return response.json();
+  },
+
+  async setActive(accountId: string, id: string, isActive: boolean): Promise<FinancialAccount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/financial-accounts/${id}/active`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ is_active: isActive }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to set financial account active status');
+    }
+    return response.json();
+  },
+
+  async setHidden(accountId: string, id: string, isHidden: boolean): Promise<FinancialAccount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/financial-accounts/${id}/hidden`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ is_hidden: isHidden }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to set financial account hidden status');
+    }
+    return response.json();
+  },
+
+  async getBalance(accountId: string, id: string): Promise<FinancialAccountBalance> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/financial-accounts/${id}/balance`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch financial account balance');
+    }
+    return response.json();
+  },
+};
+
+// Bank Transaction types
+export type BankTransactionType = 'debit' | 'credit' | 'transfer' | 'fee' | 'interest' | 'adjustment' | 'other';
+export type BankTransactionStatus = 'pending' | 'posted' | 'cancelled';
+
+export interface BankTransaction {
+  id: string;
+  account_id: string;
+  financial_account_id: string;
+  provider_transaction_id?: string;
+  type: BankTransactionType;
+  status: BankTransactionStatus;
+  amount: number;
+  currency: string;
+  date: string;
+  posted_date?: string;
+  description: string;
+  original_description?: string;
+  merchant_name?: string;
+  merchant_category?: string;
+  category_id?: string;
+  category_name?: string;
+  is_pending: boolean;
+  is_recurring: boolean;
+  recurrence_pattern?: string;
+  linked_receipt_id?: string;
+  tags?: string[];
+  notes?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListBankTransactionsResponse {
+  transactions: BankTransaction[];
+  total: number;
+}
+
+export interface ListBankTransactionsParams {
+  financial_account_id?: string;
+  type?: BankTransactionType;
+  status?: BankTransactionStatus;
+  category_id?: string;
+  is_pending?: boolean;
+  is_recurring?: boolean;
+  start_date?: string;
+  end_date?: string;
+  min_amount?: number;
+  max_amount?: number;
+  limit?: number;
+  offset?: number;
+}
+
+export interface UpdateBankTransactionRequest {
+  description?: string;
+  category_id?: string;
+  is_recurring?: boolean;
+  recurrence_pattern?: string;
+  tags?: string[];
+  notes?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface BankTransactionsSummary {
+  total_count: number;
+  total_income: number;
+  total_expenses: number;
+  net_change: number;
+  currency: string;
+  by_type: Record<BankTransactionType, { count: number; amount: number }>;
+  by_category: Record<string, { count: number; amount: number }>;
+  date_range: {
+    start: string;
+    end: string;
+  };
+}
+
+// Bank Transactions API methods (account-scoped)
+export const bankTransactionsApi = {
+  async list(accountId: string, params?: ListBankTransactionsParams): Promise<ListBankTransactionsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.financial_account_id) searchParams.set('financial_account_id', params.financial_account_id);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.category_id) searchParams.set('category_id', params.category_id);
+    if (params?.is_pending !== undefined) searchParams.set('is_pending', params.is_pending.toString());
+    if (params?.is_recurring !== undefined) searchParams.set('is_recurring', params.is_recurring.toString());
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+    if (params?.min_amount !== undefined) searchParams.set('min_amount', params.min_amount.toString());
+    if (params?.max_amount !== undefined) searchParams.set('max_amount', params.max_amount.toString());
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/bank-transactions${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch bank transactions');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<BankTransaction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/bank-transactions/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch bank transaction');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateBankTransactionRequest): Promise<BankTransaction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/bank-transactions/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update bank transaction');
+    }
+    return response.json();
+  },
+
+  async getSummary(accountId: string, params?: { start_date?: string; end_date?: string; financial_account_id?: string }): Promise<BankTransactionsSummary> {
+    const searchParams = new URLSearchParams();
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+    if (params?.financial_account_id) searchParams.set('financial_account_id', params.financial_account_id);
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/bank-transactions/summary${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch bank transactions summary');
+    }
+    return response.json();
+  },
+
+  async listUncategorized(accountId: string, params?: { limit?: number; offset?: number }): Promise<ListBankTransactionsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/bank-transactions/uncategorized${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch uncategorized bank transactions');
+    }
+    return response.json();
+  },
+
+  async listRecurring(accountId: string, params?: { limit?: number; offset?: number }): Promise<ListBankTransactionsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/bank-transactions/recurring${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch recurring bank transactions');
+    }
+    return response.json();
+  },
+};
+
+// Sync types
+export interface SyncResult {
+  connection_id?: string;
+  financial_account_id?: string;
+  accounts_synced: number;
+  transactions_synced: number;
+  new_transactions: number;
+  updated_transactions: number;
+  started_at: string;
+  completed_at: string;
+  status: 'success' | 'partial' | 'failed';
+  errors?: string[];
+}
+
+export interface SyncAllResult {
+  results: SyncResult[];
+  total_connections: number;
+  total_accounts: number;
+  total_transactions_synced: number;
+}
+
+// Sync API methods (account-scoped)
+export const syncApi = {
+  async syncAll(accountId: string): Promise<SyncAllResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/sync`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to sync all connections');
+    }
+    return response.json();
+  },
+
+  async syncConnection(accountId: string, connectionId: string): Promise<SyncResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/connections/${connectionId}/sync`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to sync connection');
+    }
+    return response.json();
+  },
+
+  async syncAccount(accountId: string, financialAccountId: string): Promise<SyncResult> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/financial-accounts/${financialAccountId}/sync`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to sync financial account');
+    }
+    return response.json();
+  },
+};
