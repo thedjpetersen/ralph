@@ -1,0 +1,531 @@
+.financial-accounts-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.financial-accounts-header {
+  margin-bottom: 2rem;
+}
+
+.financial-accounts-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.financial-accounts-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.financial-accounts-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.manage-connections-button {
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  color: #646cff;
+  border: 1px solid #646cff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.manage-connections-button:hover {
+  background-color: rgba(100, 108, 255, 0.1);
+}
+
+/* Summary cards */
+.accounts-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Filters */
+.financial-accounts-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M2.5 4.5L6 8L9.5 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  min-width: 140px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.checkbox-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.checkbox-filter input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.clear-filters-button {
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.clear-filters-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+/* States */
+.financial-accounts-loading,
+.financial-accounts-error,
+.financial-accounts-empty {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.financial-accounts-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.financial-accounts-empty h2 {
+  margin: 0 0 0.5rem;
+  color: inherit;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.select-account-link,
+.connect-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #646cff;
+  text-decoration: none;
+}
+
+.select-account-link:hover,
+.connect-link:hover {
+  text-decoration: underline;
+}
+
+/* Account list */
+.financial-accounts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.financial-account-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  transition: border-color 0.15s;
+}
+
+.financial-account-card:hover {
+  border-color: #444;
+}
+
+.financial-account-card.hidden-account {
+  opacity: 0.6;
+}
+
+.account-card-main {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.account-card-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.account-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.account-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.account-name {
+  margin: 0;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.87);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.account-mask {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: monospace;
+}
+
+.account-status {
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+.account-status.status-active {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.account-status.status-inactive {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.account-status.status-closed {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+.account-status.status-pending {
+  background-color: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+}
+
+.account-card-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.account-type {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.account-official-name {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.account-card-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.balance-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.balance-label {
+  font-size: 0.625rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.balance-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+}
+
+.balance-value.available {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.balance-value.limit {
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.account-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #333;
+}
+
+.account-action-button {
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.account-action-button.activate {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  border: none;
+}
+
+.account-action-button.activate:hover {
+  background-color: rgba(46, 204, 113, 0.25);
+}
+
+.account-action-button.deactivate {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+  border: none;
+}
+
+.account-action-button.deactivate:hover {
+  background-color: rgba(241, 196, 15, 0.25);
+}
+
+.account-action-button.hide-button {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid #444;
+}
+
+.account-action-button.hide-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.account-card-footer {
+  margin-top: 0.75rem;
+}
+
+.last-updated {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+  .financial-accounts-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .manage-connections-button {
+    text-align: center;
+  }
+
+  .account-card-main {
+    flex-direction: column;
+  }
+
+  .account-card-balance {
+    align-items: flex-start;
+    text-align: left;
+    margin-top: 0.75rem;
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .balance-item {
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .financial-accounts-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .summary-card {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .summary-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .summary-value {
+    color: #213547;
+  }
+
+  .financial-accounts-filters {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .filter-select {
+    background-color: #fff;
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .checkbox-filter {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .clear-filters-button {
+    border-color: #ccc;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .clear-filters-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+  }
+
+  .financial-accounts-loading,
+  .financial-accounts-error,
+  .financial-accounts-empty {
+    background-color: #f5f5f5;
+  }
+
+  .financial-account-card {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .financial-account-card:hover {
+    border-color: #ccc;
+  }
+
+  .account-name {
+    color: #213547;
+  }
+
+  .account-mask {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .account-type {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .account-official-name {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .balance-label {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .balance-value {
+    color: #213547;
+  }
+
+  .balance-value.available {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .balance-value.limit {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .account-card-actions {
+    border-top-color: #eee;
+  }
+
+  .account-action-button.hide-button {
+    color: rgba(0, 0, 0, 0.5);
+    border-color: #ccc;
+  }
+
+  .account-action-button.hide-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .last-updated {
+    color: rgba(0, 0, 0, 0.4);
+  }
+}

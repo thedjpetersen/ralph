@@ -1,0 +1,243 @@
+.connection-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  transition: border-color 0.15s;
+}
+
+.connection-card:hover {
+  border-color: #444;
+}
+
+.connection-card.needs-attention {
+  border-color: #e74c3c;
+}
+
+.connection-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.connection-card-institution {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.institution-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: contain;
+  background-color: #fff;
+}
+
+.institution-logo-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background-color: #646cff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.institution-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.institution-name {
+  margin: 0;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.provider-badge {
+  padding: 0.125rem 0.5rem;
+  background-color: rgba(100, 108, 255, 0.15);
+  color: rgba(100, 108, 255, 0.9);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.connection-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+.connection-status.status-active {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.connection-status.status-pending {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.connection-status.status-error {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.connection-status.status-disconnected {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+.connection-status.status-expired {
+  background-color: rgba(230, 126, 34, 0.15);
+  color: #e67e22;
+}
+
+.connection-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: rgba(231, 76, 60, 0.1);
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.error-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.connection-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.connection-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.connection-detail-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.connection-detail-value {
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 0.875rem;
+}
+
+.connection-card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.connection-action-button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.refresh-button {
+  background-color: #646cff;
+  color: white;
+  border: none;
+}
+
+.refresh-button:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.refresh-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.disconnect-button {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid #444;
+}
+
+.disconnect-button:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+@media (prefers-color-scheme: light) {
+  .connection-card {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .connection-card:hover {
+    border-color: #ccc;
+  }
+
+  .connection-card.needs-attention {
+    border-color: #e74c3c;
+  }
+
+  .institution-name {
+    color: #213547;
+  }
+
+  .connection-detail-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .connection-detail-value {
+    color: #213547;
+  }
+
+  .disconnect-button {
+    color: rgba(0, 0, 0, 0.7);
+    border-color: #ccc;
+  }
+
+  .disconnect-button:hover {
+    background-color: rgba(231, 76, 60, 0.1);
+    border-color: #e74c3c;
+    color: #e74c3c;
+  }
+}
