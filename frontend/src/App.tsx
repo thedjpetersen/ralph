@@ -14,6 +14,9 @@ import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
 import { Brands } from './pages/Brands';
 import { Categories } from './pages/Categories';
+import { Transactions } from './pages/Transactions';
+import { TransactionDetail } from './pages/TransactionDetail';
+import { TransactionForm } from './components/TransactionForm';
 import './App.css';
 
 function App() {
@@ -36,6 +39,10 @@ function App() {
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/brands" element={<Brands />} />
         <Route path="/categories" element={<Categories />} />
+        <Route path="/transactions" element={<Transactions />} />
+        <Route path="/transactions/new" element={<TransactionForm />} />
+        <Route path="/transactions/:id" element={<TransactionDetail />} />
+        <Route path="/transactions/:id/edit" element={<TransactionForm />} />
       </Route>
     </Routes>
   );
