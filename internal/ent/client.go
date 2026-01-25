@@ -11,6 +11,9 @@ import (
 
 	"clockzen-next/internal/ent/migrate"
 
+	"clockzen-next/internal/ent/emailconnection"
+	"clockzen-next/internal/ent/emaillabel"
+	"clockzen-next/internal/ent/emailsync"
 	"clockzen-next/internal/ent/googledriveconnection"
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
@@ -26,6 +29,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// EmailConnection is the client for interacting with the EmailConnection builders.
+	EmailConnection *EmailConnectionClient
+	// EmailLabel is the client for interacting with the EmailLabel builders.
+	EmailLabel *EmailLabelClient
+	// EmailSync is the client for interacting with the EmailSync builders.
+	EmailSync *EmailSyncClient
 	// GoogleDriveConnection is the client for interacting with the GoogleDriveConnection builders.
 	GoogleDriveConnection *GoogleDriveConnectionClient
 	// GoogleDriveFolder is the client for interacting with the GoogleDriveFolder builders.
@@ -43,6 +52,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.EmailConnection = NewEmailConnectionClient(c.config)
+	c.EmailLabel = NewEmailLabelClient(c.config)
+	c.EmailSync = NewEmailSyncClient(c.config)
 	c.GoogleDriveConnection = NewGoogleDriveConnectionClient(c.config)
 	c.GoogleDriveFolder = NewGoogleDriveFolderClient(c.config)
 	c.GoogleDriveSync = NewGoogleDriveSyncClient(c.config)
@@ -138,6 +150,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:                   ctx,
 		config:                cfg,
+		EmailConnection:       NewEmailConnectionClient(cfg),
+		EmailLabel:            NewEmailLabelClient(cfg),
+		EmailSync:             NewEmailSyncClient(cfg),
 		GoogleDriveConnection: NewGoogleDriveConnectionClient(cfg),
 		GoogleDriveFolder:     NewGoogleDriveFolderClient(cfg),
 		GoogleDriveSync:       NewGoogleDriveSyncClient(cfg),
@@ -160,6 +175,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:                   ctx,
 		config:                cfg,
+		EmailConnection:       NewEmailConnectionClient(cfg),
+		EmailLabel:            NewEmailLabelClient(cfg),
+		EmailSync:             NewEmailSyncClient(cfg),
 		GoogleDriveConnection: NewGoogleDriveConnectionClient(cfg),
 		GoogleDriveFolder:     NewGoogleDriveFolderClient(cfg),
 		GoogleDriveSync:       NewGoogleDriveSyncClient(cfg),
@@ -169,7 +187,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		GoogleDriveConnection.
+//		EmailConnection.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -191,22 +209,34 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.GoogleDriveConnection.Use(hooks...)
-	c.GoogleDriveFolder.Use(hooks...)
-	c.GoogleDriveSync.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.EmailConnection, c.EmailLabel, c.EmailSync, c.GoogleDriveConnection,
+		c.GoogleDriveFolder, c.GoogleDriveSync,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.GoogleDriveConnection.Intercept(interceptors...)
-	c.GoogleDriveFolder.Intercept(interceptors...)
-	c.GoogleDriveSync.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.EmailConnection, c.EmailLabel, c.EmailSync, c.GoogleDriveConnection,
+		c.GoogleDriveFolder, c.GoogleDriveSync,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *EmailConnectionMutation:
+		return c.EmailConnection.mutate(ctx, m)
+	case *EmailLabelMutation:
+		return c.EmailLabel.mutate(ctx, m)
+	case *EmailSyncMutation:
+		return c.EmailSync.mutate(ctx, m)
 	case *GoogleDriveConnectionMutation:
 		return c.GoogleDriveConnection.mutate(ctx, m)
 	case *GoogleDriveFolderMutation:
@@ -215,6 +245,469 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GoogleDriveSync.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// EmailConnectionClient is a client for the EmailConnection schema.
+type EmailConnectionClient struct {
+	config
+}
+
+// NewEmailConnectionClient returns a client for the EmailConnection from the given config.
+func NewEmailConnectionClient(c config) *EmailConnectionClient {
+	return &EmailConnectionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `emailconnection.Hooks(f(g(h())))`.
+func (c *EmailConnectionClient) Use(hooks ...Hook) {
+	c.hooks.EmailConnection = append(c.hooks.EmailConnection, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `emailconnection.Intercept(f(g(h())))`.
+func (c *EmailConnectionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EmailConnection = append(c.inters.EmailConnection, interceptors...)
+}
+
+// Create returns a builder for creating a EmailConnection entity.
+func (c *EmailConnectionClient) Create() *EmailConnectionCreate {
+	mutation := newEmailConnectionMutation(c.config, OpCreate)
+	return &EmailConnectionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EmailConnection entities.
+func (c *EmailConnectionClient) CreateBulk(builders ...*EmailConnectionCreate) *EmailConnectionCreateBulk {
+	return &EmailConnectionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EmailConnectionClient) MapCreateBulk(slice any, setFunc func(*EmailConnectionCreate, int)) *EmailConnectionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EmailConnectionCreateBulk{err: fmt.Errorf("calling to EmailConnectionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EmailConnectionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EmailConnectionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EmailConnection.
+func (c *EmailConnectionClient) Update() *EmailConnectionUpdate {
+	mutation := newEmailConnectionMutation(c.config, OpUpdate)
+	return &EmailConnectionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EmailConnectionClient) UpdateOne(_m *EmailConnection) *EmailConnectionUpdateOne {
+	mutation := newEmailConnectionMutation(c.config, OpUpdateOne, withEmailConnection(_m))
+	return &EmailConnectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EmailConnectionClient) UpdateOneID(id string) *EmailConnectionUpdateOne {
+	mutation := newEmailConnectionMutation(c.config, OpUpdateOne, withEmailConnectionID(id))
+	return &EmailConnectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EmailConnection.
+func (c *EmailConnectionClient) Delete() *EmailConnectionDelete {
+	mutation := newEmailConnectionMutation(c.config, OpDelete)
+	return &EmailConnectionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EmailConnectionClient) DeleteOne(_m *EmailConnection) *EmailConnectionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EmailConnectionClient) DeleteOneID(id string) *EmailConnectionDeleteOne {
+	builder := c.Delete().Where(emailconnection.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EmailConnectionDeleteOne{builder}
+}
+
+// Query returns a query builder for EmailConnection.
+func (c *EmailConnectionClient) Query() *EmailConnectionQuery {
+	return &EmailConnectionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEmailConnection},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EmailConnection entity by its id.
+func (c *EmailConnectionClient) Get(ctx context.Context, id string) (*EmailConnection, error) {
+	return c.Query().Where(emailconnection.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EmailConnectionClient) GetX(ctx context.Context, id string) *EmailConnection {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryLabels queries the labels edge of a EmailConnection.
+func (c *EmailConnectionClient) QueryLabels(_m *EmailConnection) *EmailLabelQuery {
+	query := (&EmailLabelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emailconnection.Table, emailconnection.FieldID, id),
+			sqlgraph.To(emaillabel.Table, emaillabel.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, emailconnection.LabelsTable, emailconnection.LabelsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySyncs queries the syncs edge of a EmailConnection.
+func (c *EmailConnectionClient) QuerySyncs(_m *EmailConnection) *EmailSyncQuery {
+	query := (&EmailSyncClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emailconnection.Table, emailconnection.FieldID, id),
+			sqlgraph.To(emailsync.Table, emailsync.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, emailconnection.SyncsTable, emailconnection.SyncsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EmailConnectionClient) Hooks() []Hook {
+	return c.hooks.EmailConnection
+}
+
+// Interceptors returns the client interceptors.
+func (c *EmailConnectionClient) Interceptors() []Interceptor {
+	return c.inters.EmailConnection
+}
+
+func (c *EmailConnectionClient) mutate(ctx context.Context, m *EmailConnectionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EmailConnectionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EmailConnectionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EmailConnectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EmailConnectionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EmailConnection mutation op: %q", m.Op())
+	}
+}
+
+// EmailLabelClient is a client for the EmailLabel schema.
+type EmailLabelClient struct {
+	config
+}
+
+// NewEmailLabelClient returns a client for the EmailLabel from the given config.
+func NewEmailLabelClient(c config) *EmailLabelClient {
+	return &EmailLabelClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `emaillabel.Hooks(f(g(h())))`.
+func (c *EmailLabelClient) Use(hooks ...Hook) {
+	c.hooks.EmailLabel = append(c.hooks.EmailLabel, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `emaillabel.Intercept(f(g(h())))`.
+func (c *EmailLabelClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EmailLabel = append(c.inters.EmailLabel, interceptors...)
+}
+
+// Create returns a builder for creating a EmailLabel entity.
+func (c *EmailLabelClient) Create() *EmailLabelCreate {
+	mutation := newEmailLabelMutation(c.config, OpCreate)
+	return &EmailLabelCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EmailLabel entities.
+func (c *EmailLabelClient) CreateBulk(builders ...*EmailLabelCreate) *EmailLabelCreateBulk {
+	return &EmailLabelCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EmailLabelClient) MapCreateBulk(slice any, setFunc func(*EmailLabelCreate, int)) *EmailLabelCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EmailLabelCreateBulk{err: fmt.Errorf("calling to EmailLabelClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EmailLabelCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EmailLabelCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EmailLabel.
+func (c *EmailLabelClient) Update() *EmailLabelUpdate {
+	mutation := newEmailLabelMutation(c.config, OpUpdate)
+	return &EmailLabelUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EmailLabelClient) UpdateOne(_m *EmailLabel) *EmailLabelUpdateOne {
+	mutation := newEmailLabelMutation(c.config, OpUpdateOne, withEmailLabel(_m))
+	return &EmailLabelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EmailLabelClient) UpdateOneID(id string) *EmailLabelUpdateOne {
+	mutation := newEmailLabelMutation(c.config, OpUpdateOne, withEmailLabelID(id))
+	return &EmailLabelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EmailLabel.
+func (c *EmailLabelClient) Delete() *EmailLabelDelete {
+	mutation := newEmailLabelMutation(c.config, OpDelete)
+	return &EmailLabelDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EmailLabelClient) DeleteOne(_m *EmailLabel) *EmailLabelDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EmailLabelClient) DeleteOneID(id string) *EmailLabelDeleteOne {
+	builder := c.Delete().Where(emaillabel.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EmailLabelDeleteOne{builder}
+}
+
+// Query returns a query builder for EmailLabel.
+func (c *EmailLabelClient) Query() *EmailLabelQuery {
+	return &EmailLabelQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEmailLabel},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EmailLabel entity by its id.
+func (c *EmailLabelClient) Get(ctx context.Context, id string) (*EmailLabel, error) {
+	return c.Query().Where(emaillabel.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EmailLabelClient) GetX(ctx context.Context, id string) *EmailLabel {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryConnection queries the connection edge of a EmailLabel.
+func (c *EmailLabelClient) QueryConnection(_m *EmailLabel) *EmailConnectionQuery {
+	query := (&EmailConnectionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emaillabel.Table, emaillabel.FieldID, id),
+			sqlgraph.To(emailconnection.Table, emailconnection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, emaillabel.ConnectionTable, emaillabel.ConnectionColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EmailLabelClient) Hooks() []Hook {
+	return c.hooks.EmailLabel
+}
+
+// Interceptors returns the client interceptors.
+func (c *EmailLabelClient) Interceptors() []Interceptor {
+	return c.inters.EmailLabel
+}
+
+func (c *EmailLabelClient) mutate(ctx context.Context, m *EmailLabelMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EmailLabelCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EmailLabelUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EmailLabelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EmailLabelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EmailLabel mutation op: %q", m.Op())
+	}
+}
+
+// EmailSyncClient is a client for the EmailSync schema.
+type EmailSyncClient struct {
+	config
+}
+
+// NewEmailSyncClient returns a client for the EmailSync from the given config.
+func NewEmailSyncClient(c config) *EmailSyncClient {
+	return &EmailSyncClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `emailsync.Hooks(f(g(h())))`.
+func (c *EmailSyncClient) Use(hooks ...Hook) {
+	c.hooks.EmailSync = append(c.hooks.EmailSync, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `emailsync.Intercept(f(g(h())))`.
+func (c *EmailSyncClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EmailSync = append(c.inters.EmailSync, interceptors...)
+}
+
+// Create returns a builder for creating a EmailSync entity.
+func (c *EmailSyncClient) Create() *EmailSyncCreate {
+	mutation := newEmailSyncMutation(c.config, OpCreate)
+	return &EmailSyncCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EmailSync entities.
+func (c *EmailSyncClient) CreateBulk(builders ...*EmailSyncCreate) *EmailSyncCreateBulk {
+	return &EmailSyncCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EmailSyncClient) MapCreateBulk(slice any, setFunc func(*EmailSyncCreate, int)) *EmailSyncCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EmailSyncCreateBulk{err: fmt.Errorf("calling to EmailSyncClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EmailSyncCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EmailSyncCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EmailSync.
+func (c *EmailSyncClient) Update() *EmailSyncUpdate {
+	mutation := newEmailSyncMutation(c.config, OpUpdate)
+	return &EmailSyncUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EmailSyncClient) UpdateOne(_m *EmailSync) *EmailSyncUpdateOne {
+	mutation := newEmailSyncMutation(c.config, OpUpdateOne, withEmailSync(_m))
+	return &EmailSyncUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EmailSyncClient) UpdateOneID(id string) *EmailSyncUpdateOne {
+	mutation := newEmailSyncMutation(c.config, OpUpdateOne, withEmailSyncID(id))
+	return &EmailSyncUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EmailSync.
+func (c *EmailSyncClient) Delete() *EmailSyncDelete {
+	mutation := newEmailSyncMutation(c.config, OpDelete)
+	return &EmailSyncDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EmailSyncClient) DeleteOne(_m *EmailSync) *EmailSyncDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EmailSyncClient) DeleteOneID(id string) *EmailSyncDeleteOne {
+	builder := c.Delete().Where(emailsync.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EmailSyncDeleteOne{builder}
+}
+
+// Query returns a query builder for EmailSync.
+func (c *EmailSyncClient) Query() *EmailSyncQuery {
+	return &EmailSyncQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEmailSync},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EmailSync entity by its id.
+func (c *EmailSyncClient) Get(ctx context.Context, id string) (*EmailSync, error) {
+	return c.Query().Where(emailsync.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EmailSyncClient) GetX(ctx context.Context, id string) *EmailSync {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryConnection queries the connection edge of a EmailSync.
+func (c *EmailSyncClient) QueryConnection(_m *EmailSync) *EmailConnectionQuery {
+	query := (&EmailConnectionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(emailsync.Table, emailsync.FieldID, id),
+			sqlgraph.To(emailconnection.Table, emailconnection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, emailsync.ConnectionTable, emailsync.ConnectionColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *EmailSyncClient) Hooks() []Hook {
+	return c.hooks.EmailSync
+}
+
+// Interceptors returns the client interceptors.
+func (c *EmailSyncClient) Interceptors() []Interceptor {
+	return c.inters.EmailSync
+}
+
+func (c *EmailSyncClient) mutate(ctx context.Context, m *EmailSyncMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EmailSyncCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EmailSyncUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EmailSyncUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EmailSyncDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EmailSync mutation op: %q", m.Op())
 	}
 }
 
@@ -684,9 +1177,11 @@ func (c *GoogleDriveSyncClient) mutate(ctx context.Context, m *GoogleDriveSyncMu
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		GoogleDriveConnection, GoogleDriveFolder, GoogleDriveSync []ent.Hook
+		EmailConnection, EmailLabel, EmailSync, GoogleDriveConnection,
+		GoogleDriveFolder, GoogleDriveSync []ent.Hook
 	}
 	inters struct {
-		GoogleDriveConnection, GoogleDriveFolder, GoogleDriveSync []ent.Interceptor
+		EmailConnection, EmailLabel, EmailSync, GoogleDriveConnection,
+		GoogleDriveFolder, GoogleDriveSync []ent.Interceptor
 	}
 )

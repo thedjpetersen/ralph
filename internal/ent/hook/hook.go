@@ -8,6 +8,42 @@ import (
 	"fmt"
 )
 
+// The EmailConnectionFunc type is an adapter to allow the use of ordinary
+// function as EmailConnection mutator.
+type EmailConnectionFunc func(context.Context, *ent.EmailConnectionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EmailConnectionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EmailConnectionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EmailConnectionMutation", m)
+}
+
+// The EmailLabelFunc type is an adapter to allow the use of ordinary
+// function as EmailLabel mutator.
+type EmailLabelFunc func(context.Context, *ent.EmailLabelMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EmailLabelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EmailLabelMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EmailLabelMutation", m)
+}
+
+// The EmailSyncFunc type is an adapter to allow the use of ordinary
+// function as EmailSync mutator.
+type EmailSyncFunc func(context.Context, *ent.EmailSyncMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f EmailSyncFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.EmailSyncMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.EmailSyncMutation", m)
+}
+
 // The GoogleDriveConnectionFunc type is an adapter to allow the use of ordinary
 // function as GoogleDriveConnection mutator.
 type GoogleDriveConnectionFunc func(context.Context, *ent.GoogleDriveConnectionMutation) (ent.Value, error)

@@ -12,6 +12,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// EmailConnection is the client for interacting with the EmailConnection builders.
+	EmailConnection *EmailConnectionClient
+	// EmailLabel is the client for interacting with the EmailLabel builders.
+	EmailLabel *EmailLabelClient
+	// EmailSync is the client for interacting with the EmailSync builders.
+	EmailSync *EmailSyncClient
 	// GoogleDriveConnection is the client for interacting with the GoogleDriveConnection builders.
 	GoogleDriveConnection *GoogleDriveConnectionClient
 	// GoogleDriveFolder is the client for interacting with the GoogleDriveFolder builders.
@@ -149,6 +155,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.EmailConnection = NewEmailConnectionClient(tx.config)
+	tx.EmailLabel = NewEmailLabelClient(tx.config)
+	tx.EmailSync = NewEmailSyncClient(tx.config)
 	tx.GoogleDriveConnection = NewGoogleDriveConnectionClient(tx.config)
 	tx.GoogleDriveFolder = NewGoogleDriveFolderClient(tx.config)
 	tx.GoogleDriveSync = NewGoogleDriveSyncClient(tx.config)
@@ -161,7 +170,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: GoogleDriveConnection.QueryXXX(), the query will be executed
+// applies a query, for example: EmailConnection.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

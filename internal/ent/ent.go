@@ -3,6 +3,9 @@
 package ent
 
 import (
+	"clockzen-next/internal/ent/emailconnection"
+	"clockzen-next/internal/ent/emaillabel"
+	"clockzen-next/internal/ent/emailsync"
 	"clockzen-next/internal/ent/googledriveconnection"
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
@@ -75,6 +78,9 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			emailconnection.Table:       emailconnection.ValidColumn,
+			emaillabel.Table:            emaillabel.ValidColumn,
+			emailsync.Table:             emailsync.ValidColumn,
 			googledriveconnection.Table: googledriveconnection.ValidColumn,
 			googledrivefolder.Table:     googledrivefolder.ValidColumn,
 			googledrivesync.Table:       googledrivesync.ValidColumn,

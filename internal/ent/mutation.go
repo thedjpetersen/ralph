@@ -3,6 +3,9 @@
 package ent
 
 import (
+	"clockzen-next/internal/ent/emailconnection"
+	"clockzen-next/internal/ent/emaillabel"
+	"clockzen-next/internal/ent/emailsync"
 	"clockzen-next/internal/ent/googledriveconnection"
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
@@ -26,10 +29,3833 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeEmailConnection       = "EmailConnection"
+	TypeEmailLabel            = "EmailLabel"
+	TypeEmailSync             = "EmailSync"
 	TypeGoogleDriveConnection = "GoogleDriveConnection"
 	TypeGoogleDriveFolder     = "GoogleDriveFolder"
 	TypeGoogleDriveSync       = "GoogleDriveSync"
 )
+
+// EmailConnectionMutation represents an operation that mutates the EmailConnection nodes in the graph.
+type EmailConnectionMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *string
+	user_id             *string
+	provider_account_id *string
+	email               *string
+	provider            *emailconnection.Provider
+	access_token        *string
+	refresh_token       *string
+	token_expiry        *time.Time
+	status              *emailconnection.Status
+	created_at          *time.Time
+	updated_at          *time.Time
+	last_sync_at        *time.Time
+	clearedFields       map[string]struct{}
+	labels              map[string]struct{}
+	removedlabels       map[string]struct{}
+	clearedlabels       bool
+	syncs               map[string]struct{}
+	removedsyncs        map[string]struct{}
+	clearedsyncs        bool
+	done                bool
+	oldValue            func(context.Context) (*EmailConnection, error)
+	predicates          []predicate.EmailConnection
+}
+
+var _ ent.Mutation = (*EmailConnectionMutation)(nil)
+
+// emailconnectionOption allows management of the mutation configuration using functional options.
+type emailconnectionOption func(*EmailConnectionMutation)
+
+// newEmailConnectionMutation creates new mutation for the EmailConnection entity.
+func newEmailConnectionMutation(c config, op Op, opts ...emailconnectionOption) *EmailConnectionMutation {
+	m := &EmailConnectionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEmailConnection,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEmailConnectionID sets the ID field of the mutation.
+func withEmailConnectionID(id string) emailconnectionOption {
+	return func(m *EmailConnectionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EmailConnection
+		)
+		m.oldValue = func(ctx context.Context) (*EmailConnection, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EmailConnection.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEmailConnection sets the old EmailConnection of the mutation.
+func withEmailConnection(node *EmailConnection) emailconnectionOption {
+	return func(m *EmailConnectionMutation) {
+		m.oldValue = func(context.Context) (*EmailConnection, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EmailConnectionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EmailConnectionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of EmailConnection entities.
+func (m *EmailConnectionMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EmailConnectionMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EmailConnectionMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EmailConnection.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetUserID sets the "user_id" field.
+func (m *EmailConnectionMutation) SetUserID(s string) {
+	m.user_id = &s
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *EmailConnectionMutation) UserID() (r string, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldUserID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *EmailConnectionMutation) ResetUserID() {
+	m.user_id = nil
+}
+
+// SetProviderAccountID sets the "provider_account_id" field.
+func (m *EmailConnectionMutation) SetProviderAccountID(s string) {
+	m.provider_account_id = &s
+}
+
+// ProviderAccountID returns the value of the "provider_account_id" field in the mutation.
+func (m *EmailConnectionMutation) ProviderAccountID() (r string, exists bool) {
+	v := m.provider_account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProviderAccountID returns the old "provider_account_id" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldProviderAccountID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProviderAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProviderAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProviderAccountID: %w", err)
+	}
+	return oldValue.ProviderAccountID, nil
+}
+
+// ResetProviderAccountID resets all changes to the "provider_account_id" field.
+func (m *EmailConnectionMutation) ResetProviderAccountID() {
+	m.provider_account_id = nil
+}
+
+// SetEmail sets the "email" field.
+func (m *EmailConnectionMutation) SetEmail(s string) {
+	m.email = &s
+}
+
+// Email returns the value of the "email" field in the mutation.
+func (m *EmailConnectionMutation) Email() (r string, exists bool) {
+	v := m.email
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEmail returns the old "email" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldEmail(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEmail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEmail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
+	}
+	return oldValue.Email, nil
+}
+
+// ResetEmail resets all changes to the "email" field.
+func (m *EmailConnectionMutation) ResetEmail() {
+	m.email = nil
+}
+
+// SetProvider sets the "provider" field.
+func (m *EmailConnectionMutation) SetProvider(e emailconnection.Provider) {
+	m.provider = &e
+}
+
+// Provider returns the value of the "provider" field in the mutation.
+func (m *EmailConnectionMutation) Provider() (r emailconnection.Provider, exists bool) {
+	v := m.provider
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProvider returns the old "provider" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldProvider(ctx context.Context) (v emailconnection.Provider, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProvider requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProvider: %w", err)
+	}
+	return oldValue.Provider, nil
+}
+
+// ResetProvider resets all changes to the "provider" field.
+func (m *EmailConnectionMutation) ResetProvider() {
+	m.provider = nil
+}
+
+// SetAccessToken sets the "access_token" field.
+func (m *EmailConnectionMutation) SetAccessToken(s string) {
+	m.access_token = &s
+}
+
+// AccessToken returns the value of the "access_token" field in the mutation.
+func (m *EmailConnectionMutation) AccessToken() (r string, exists bool) {
+	v := m.access_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccessToken returns the old "access_token" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldAccessToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccessToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccessToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccessToken: %w", err)
+	}
+	return oldValue.AccessToken, nil
+}
+
+// ResetAccessToken resets all changes to the "access_token" field.
+func (m *EmailConnectionMutation) ResetAccessToken() {
+	m.access_token = nil
+}
+
+// SetRefreshToken sets the "refresh_token" field.
+func (m *EmailConnectionMutation) SetRefreshToken(s string) {
+	m.refresh_token = &s
+}
+
+// RefreshToken returns the value of the "refresh_token" field in the mutation.
+func (m *EmailConnectionMutation) RefreshToken() (r string, exists bool) {
+	v := m.refresh_token
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRefreshToken returns the old "refresh_token" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldRefreshToken(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRefreshToken is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRefreshToken requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRefreshToken: %w", err)
+	}
+	return oldValue.RefreshToken, nil
+}
+
+// ResetRefreshToken resets all changes to the "refresh_token" field.
+func (m *EmailConnectionMutation) ResetRefreshToken() {
+	m.refresh_token = nil
+}
+
+// SetTokenExpiry sets the "token_expiry" field.
+func (m *EmailConnectionMutation) SetTokenExpiry(t time.Time) {
+	m.token_expiry = &t
+}
+
+// TokenExpiry returns the value of the "token_expiry" field in the mutation.
+func (m *EmailConnectionMutation) TokenExpiry() (r time.Time, exists bool) {
+	v := m.token_expiry
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTokenExpiry returns the old "token_expiry" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldTokenExpiry(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTokenExpiry is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTokenExpiry requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTokenExpiry: %w", err)
+	}
+	return oldValue.TokenExpiry, nil
+}
+
+// ResetTokenExpiry resets all changes to the "token_expiry" field.
+func (m *EmailConnectionMutation) ResetTokenExpiry() {
+	m.token_expiry = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *EmailConnectionMutation) SetStatus(e emailconnection.Status) {
+	m.status = &e
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *EmailConnectionMutation) Status() (r emailconnection.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldStatus(ctx context.Context) (v emailconnection.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *EmailConnectionMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *EmailConnectionMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *EmailConnectionMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *EmailConnectionMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *EmailConnectionMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *EmailConnectionMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *EmailConnectionMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetLastSyncAt sets the "last_sync_at" field.
+func (m *EmailConnectionMutation) SetLastSyncAt(t time.Time) {
+	m.last_sync_at = &t
+}
+
+// LastSyncAt returns the value of the "last_sync_at" field in the mutation.
+func (m *EmailConnectionMutation) LastSyncAt() (r time.Time, exists bool) {
+	v := m.last_sync_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastSyncAt returns the old "last_sync_at" field's value of the EmailConnection entity.
+// If the EmailConnection object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailConnectionMutation) OldLastSyncAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastSyncAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastSyncAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastSyncAt: %w", err)
+	}
+	return oldValue.LastSyncAt, nil
+}
+
+// ClearLastSyncAt clears the value of the "last_sync_at" field.
+func (m *EmailConnectionMutation) ClearLastSyncAt() {
+	m.last_sync_at = nil
+	m.clearedFields[emailconnection.FieldLastSyncAt] = struct{}{}
+}
+
+// LastSyncAtCleared returns if the "last_sync_at" field was cleared in this mutation.
+func (m *EmailConnectionMutation) LastSyncAtCleared() bool {
+	_, ok := m.clearedFields[emailconnection.FieldLastSyncAt]
+	return ok
+}
+
+// ResetLastSyncAt resets all changes to the "last_sync_at" field.
+func (m *EmailConnectionMutation) ResetLastSyncAt() {
+	m.last_sync_at = nil
+	delete(m.clearedFields, emailconnection.FieldLastSyncAt)
+}
+
+// AddLabelIDs adds the "labels" edge to the EmailLabel entity by ids.
+func (m *EmailConnectionMutation) AddLabelIDs(ids ...string) {
+	if m.labels == nil {
+		m.labels = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.labels[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLabels clears the "labels" edge to the EmailLabel entity.
+func (m *EmailConnectionMutation) ClearLabels() {
+	m.clearedlabels = true
+}
+
+// LabelsCleared reports if the "labels" edge to the EmailLabel entity was cleared.
+func (m *EmailConnectionMutation) LabelsCleared() bool {
+	return m.clearedlabels
+}
+
+// RemoveLabelIDs removes the "labels" edge to the EmailLabel entity by IDs.
+func (m *EmailConnectionMutation) RemoveLabelIDs(ids ...string) {
+	if m.removedlabels == nil {
+		m.removedlabels = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.labels, ids[i])
+		m.removedlabels[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLabels returns the removed IDs of the "labels" edge to the EmailLabel entity.
+func (m *EmailConnectionMutation) RemovedLabelsIDs() (ids []string) {
+	for id := range m.removedlabels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LabelsIDs returns the "labels" edge IDs in the mutation.
+func (m *EmailConnectionMutation) LabelsIDs() (ids []string) {
+	for id := range m.labels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLabels resets all changes to the "labels" edge.
+func (m *EmailConnectionMutation) ResetLabels() {
+	m.labels = nil
+	m.clearedlabels = false
+	m.removedlabels = nil
+}
+
+// AddSyncIDs adds the "syncs" edge to the EmailSync entity by ids.
+func (m *EmailConnectionMutation) AddSyncIDs(ids ...string) {
+	if m.syncs == nil {
+		m.syncs = make(map[string]struct{})
+	}
+	for i := range ids {
+		m.syncs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSyncs clears the "syncs" edge to the EmailSync entity.
+func (m *EmailConnectionMutation) ClearSyncs() {
+	m.clearedsyncs = true
+}
+
+// SyncsCleared reports if the "syncs" edge to the EmailSync entity was cleared.
+func (m *EmailConnectionMutation) SyncsCleared() bool {
+	return m.clearedsyncs
+}
+
+// RemoveSyncIDs removes the "syncs" edge to the EmailSync entity by IDs.
+func (m *EmailConnectionMutation) RemoveSyncIDs(ids ...string) {
+	if m.removedsyncs == nil {
+		m.removedsyncs = make(map[string]struct{})
+	}
+	for i := range ids {
+		delete(m.syncs, ids[i])
+		m.removedsyncs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSyncs returns the removed IDs of the "syncs" edge to the EmailSync entity.
+func (m *EmailConnectionMutation) RemovedSyncsIDs() (ids []string) {
+	for id := range m.removedsyncs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SyncsIDs returns the "syncs" edge IDs in the mutation.
+func (m *EmailConnectionMutation) SyncsIDs() (ids []string) {
+	for id := range m.syncs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSyncs resets all changes to the "syncs" edge.
+func (m *EmailConnectionMutation) ResetSyncs() {
+	m.syncs = nil
+	m.clearedsyncs = false
+	m.removedsyncs = nil
+}
+
+// Where appends a list predicates to the EmailConnectionMutation builder.
+func (m *EmailConnectionMutation) Where(ps ...predicate.EmailConnection) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EmailConnectionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EmailConnectionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EmailConnection, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EmailConnectionMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EmailConnectionMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EmailConnection).
+func (m *EmailConnectionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EmailConnectionMutation) Fields() []string {
+	fields := make([]string, 0, 11)
+	if m.user_id != nil {
+		fields = append(fields, emailconnection.FieldUserID)
+	}
+	if m.provider_account_id != nil {
+		fields = append(fields, emailconnection.FieldProviderAccountID)
+	}
+	if m.email != nil {
+		fields = append(fields, emailconnection.FieldEmail)
+	}
+	if m.provider != nil {
+		fields = append(fields, emailconnection.FieldProvider)
+	}
+	if m.access_token != nil {
+		fields = append(fields, emailconnection.FieldAccessToken)
+	}
+	if m.refresh_token != nil {
+		fields = append(fields, emailconnection.FieldRefreshToken)
+	}
+	if m.token_expiry != nil {
+		fields = append(fields, emailconnection.FieldTokenExpiry)
+	}
+	if m.status != nil {
+		fields = append(fields, emailconnection.FieldStatus)
+	}
+	if m.created_at != nil {
+		fields = append(fields, emailconnection.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, emailconnection.FieldUpdatedAt)
+	}
+	if m.last_sync_at != nil {
+		fields = append(fields, emailconnection.FieldLastSyncAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EmailConnectionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case emailconnection.FieldUserID:
+		return m.UserID()
+	case emailconnection.FieldProviderAccountID:
+		return m.ProviderAccountID()
+	case emailconnection.FieldEmail:
+		return m.Email()
+	case emailconnection.FieldProvider:
+		return m.Provider()
+	case emailconnection.FieldAccessToken:
+		return m.AccessToken()
+	case emailconnection.FieldRefreshToken:
+		return m.RefreshToken()
+	case emailconnection.FieldTokenExpiry:
+		return m.TokenExpiry()
+	case emailconnection.FieldStatus:
+		return m.Status()
+	case emailconnection.FieldCreatedAt:
+		return m.CreatedAt()
+	case emailconnection.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case emailconnection.FieldLastSyncAt:
+		return m.LastSyncAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EmailConnectionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case emailconnection.FieldUserID:
+		return m.OldUserID(ctx)
+	case emailconnection.FieldProviderAccountID:
+		return m.OldProviderAccountID(ctx)
+	case emailconnection.FieldEmail:
+		return m.OldEmail(ctx)
+	case emailconnection.FieldProvider:
+		return m.OldProvider(ctx)
+	case emailconnection.FieldAccessToken:
+		return m.OldAccessToken(ctx)
+	case emailconnection.FieldRefreshToken:
+		return m.OldRefreshToken(ctx)
+	case emailconnection.FieldTokenExpiry:
+		return m.OldTokenExpiry(ctx)
+	case emailconnection.FieldStatus:
+		return m.OldStatus(ctx)
+	case emailconnection.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case emailconnection.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case emailconnection.FieldLastSyncAt:
+		return m.OldLastSyncAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown EmailConnection field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EmailConnectionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case emailconnection.FieldUserID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case emailconnection.FieldProviderAccountID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProviderAccountID(v)
+		return nil
+	case emailconnection.FieldEmail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEmail(v)
+		return nil
+	case emailconnection.FieldProvider:
+		v, ok := value.(emailconnection.Provider)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProvider(v)
+		return nil
+	case emailconnection.FieldAccessToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccessToken(v)
+		return nil
+	case emailconnection.FieldRefreshToken:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRefreshToken(v)
+		return nil
+	case emailconnection.FieldTokenExpiry:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTokenExpiry(v)
+		return nil
+	case emailconnection.FieldStatus:
+		v, ok := value.(emailconnection.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case emailconnection.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case emailconnection.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case emailconnection.FieldLastSyncAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastSyncAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EmailConnection field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EmailConnectionMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EmailConnectionMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EmailConnectionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown EmailConnection numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EmailConnectionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(emailconnection.FieldLastSyncAt) {
+		fields = append(fields, emailconnection.FieldLastSyncAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EmailConnectionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EmailConnectionMutation) ClearField(name string) error {
+	switch name {
+	case emailconnection.FieldLastSyncAt:
+		m.ClearLastSyncAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailConnection nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EmailConnectionMutation) ResetField(name string) error {
+	switch name {
+	case emailconnection.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case emailconnection.FieldProviderAccountID:
+		m.ResetProviderAccountID()
+		return nil
+	case emailconnection.FieldEmail:
+		m.ResetEmail()
+		return nil
+	case emailconnection.FieldProvider:
+		m.ResetProvider()
+		return nil
+	case emailconnection.FieldAccessToken:
+		m.ResetAccessToken()
+		return nil
+	case emailconnection.FieldRefreshToken:
+		m.ResetRefreshToken()
+		return nil
+	case emailconnection.FieldTokenExpiry:
+		m.ResetTokenExpiry()
+		return nil
+	case emailconnection.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case emailconnection.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case emailconnection.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case emailconnection.FieldLastSyncAt:
+		m.ResetLastSyncAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailConnection field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EmailConnectionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.labels != nil {
+		edges = append(edges, emailconnection.EdgeLabels)
+	}
+	if m.syncs != nil {
+		edges = append(edges, emailconnection.EdgeSyncs)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EmailConnectionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case emailconnection.EdgeLabels:
+		ids := make([]ent.Value, 0, len(m.labels))
+		for id := range m.labels {
+			ids = append(ids, id)
+		}
+		return ids
+	case emailconnection.EdgeSyncs:
+		ids := make([]ent.Value, 0, len(m.syncs))
+		for id := range m.syncs {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EmailConnectionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedlabels != nil {
+		edges = append(edges, emailconnection.EdgeLabels)
+	}
+	if m.removedsyncs != nil {
+		edges = append(edges, emailconnection.EdgeSyncs)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EmailConnectionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case emailconnection.EdgeLabels:
+		ids := make([]ent.Value, 0, len(m.removedlabels))
+		for id := range m.removedlabels {
+			ids = append(ids, id)
+		}
+		return ids
+	case emailconnection.EdgeSyncs:
+		ids := make([]ent.Value, 0, len(m.removedsyncs))
+		for id := range m.removedsyncs {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EmailConnectionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedlabels {
+		edges = append(edges, emailconnection.EdgeLabels)
+	}
+	if m.clearedsyncs {
+		edges = append(edges, emailconnection.EdgeSyncs)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EmailConnectionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case emailconnection.EdgeLabels:
+		return m.clearedlabels
+	case emailconnection.EdgeSyncs:
+		return m.clearedsyncs
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EmailConnectionMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown EmailConnection unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EmailConnectionMutation) ResetEdge(name string) error {
+	switch name {
+	case emailconnection.EdgeLabels:
+		m.ResetLabels()
+		return nil
+	case emailconnection.EdgeSyncs:
+		m.ResetSyncs()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailConnection edge %s", name)
+}
+
+// EmailLabelMutation represents an operation that mutates the EmailLabel nodes in the graph.
+type EmailLabelMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *string
+	provider_label_id *string
+	name              *string
+	display_name      *string
+	label_type        *emaillabel.LabelType
+	parent_label_id   *string
+	sync_enabled      *bool
+	message_count     *int64
+	addmessage_count  *int64
+	unread_count      *int64
+	addunread_count   *int64
+	color             *string
+	created_at        *time.Time
+	updated_at        *time.Time
+	last_scanned_at   *time.Time
+	clearedFields     map[string]struct{}
+	connection        *string
+	clearedconnection bool
+	done              bool
+	oldValue          func(context.Context) (*EmailLabel, error)
+	predicates        []predicate.EmailLabel
+}
+
+var _ ent.Mutation = (*EmailLabelMutation)(nil)
+
+// emaillabelOption allows management of the mutation configuration using functional options.
+type emaillabelOption func(*EmailLabelMutation)
+
+// newEmailLabelMutation creates new mutation for the EmailLabel entity.
+func newEmailLabelMutation(c config, op Op, opts ...emaillabelOption) *EmailLabelMutation {
+	m := &EmailLabelMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEmailLabel,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEmailLabelID sets the ID field of the mutation.
+func withEmailLabelID(id string) emaillabelOption {
+	return func(m *EmailLabelMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EmailLabel
+		)
+		m.oldValue = func(ctx context.Context) (*EmailLabel, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EmailLabel.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEmailLabel sets the old EmailLabel of the mutation.
+func withEmailLabel(node *EmailLabel) emaillabelOption {
+	return func(m *EmailLabelMutation) {
+		m.oldValue = func(context.Context) (*EmailLabel, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EmailLabelMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EmailLabelMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of EmailLabel entities.
+func (m *EmailLabelMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EmailLabelMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EmailLabelMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EmailLabel.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetConnectionID sets the "connection_id" field.
+func (m *EmailLabelMutation) SetConnectionID(s string) {
+	m.connection = &s
+}
+
+// ConnectionID returns the value of the "connection_id" field in the mutation.
+func (m *EmailLabelMutation) ConnectionID() (r string, exists bool) {
+	v := m.connection
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConnectionID returns the old "connection_id" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldConnectionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConnectionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConnectionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConnectionID: %w", err)
+	}
+	return oldValue.ConnectionID, nil
+}
+
+// ResetConnectionID resets all changes to the "connection_id" field.
+func (m *EmailLabelMutation) ResetConnectionID() {
+	m.connection = nil
+}
+
+// SetProviderLabelID sets the "provider_label_id" field.
+func (m *EmailLabelMutation) SetProviderLabelID(s string) {
+	m.provider_label_id = &s
+}
+
+// ProviderLabelID returns the value of the "provider_label_id" field in the mutation.
+func (m *EmailLabelMutation) ProviderLabelID() (r string, exists bool) {
+	v := m.provider_label_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProviderLabelID returns the old "provider_label_id" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldProviderLabelID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProviderLabelID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProviderLabelID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProviderLabelID: %w", err)
+	}
+	return oldValue.ProviderLabelID, nil
+}
+
+// ResetProviderLabelID resets all changes to the "provider_label_id" field.
+func (m *EmailLabelMutation) ResetProviderLabelID() {
+	m.provider_label_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *EmailLabelMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *EmailLabelMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *EmailLabelMutation) ResetName() {
+	m.name = nil
+}
+
+// SetDisplayName sets the "display_name" field.
+func (m *EmailLabelMutation) SetDisplayName(s string) {
+	m.display_name = &s
+}
+
+// DisplayName returns the value of the "display_name" field in the mutation.
+func (m *EmailLabelMutation) DisplayName() (r string, exists bool) {
+	v := m.display_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplayName returns the old "display_name" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldDisplayName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplayName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplayName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplayName: %w", err)
+	}
+	return oldValue.DisplayName, nil
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (m *EmailLabelMutation) ClearDisplayName() {
+	m.display_name = nil
+	m.clearedFields[emaillabel.FieldDisplayName] = struct{}{}
+}
+
+// DisplayNameCleared returns if the "display_name" field was cleared in this mutation.
+func (m *EmailLabelMutation) DisplayNameCleared() bool {
+	_, ok := m.clearedFields[emaillabel.FieldDisplayName]
+	return ok
+}
+
+// ResetDisplayName resets all changes to the "display_name" field.
+func (m *EmailLabelMutation) ResetDisplayName() {
+	m.display_name = nil
+	delete(m.clearedFields, emaillabel.FieldDisplayName)
+}
+
+// SetLabelType sets the "label_type" field.
+func (m *EmailLabelMutation) SetLabelType(et emaillabel.LabelType) {
+	m.label_type = &et
+}
+
+// LabelType returns the value of the "label_type" field in the mutation.
+func (m *EmailLabelMutation) LabelType() (r emaillabel.LabelType, exists bool) {
+	v := m.label_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLabelType returns the old "label_type" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldLabelType(ctx context.Context) (v emaillabel.LabelType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLabelType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLabelType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLabelType: %w", err)
+	}
+	return oldValue.LabelType, nil
+}
+
+// ResetLabelType resets all changes to the "label_type" field.
+func (m *EmailLabelMutation) ResetLabelType() {
+	m.label_type = nil
+}
+
+// SetParentLabelID sets the "parent_label_id" field.
+func (m *EmailLabelMutation) SetParentLabelID(s string) {
+	m.parent_label_id = &s
+}
+
+// ParentLabelID returns the value of the "parent_label_id" field in the mutation.
+func (m *EmailLabelMutation) ParentLabelID() (r string, exists bool) {
+	v := m.parent_label_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldParentLabelID returns the old "parent_label_id" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldParentLabelID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldParentLabelID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldParentLabelID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldParentLabelID: %w", err)
+	}
+	return oldValue.ParentLabelID, nil
+}
+
+// ClearParentLabelID clears the value of the "parent_label_id" field.
+func (m *EmailLabelMutation) ClearParentLabelID() {
+	m.parent_label_id = nil
+	m.clearedFields[emaillabel.FieldParentLabelID] = struct{}{}
+}
+
+// ParentLabelIDCleared returns if the "parent_label_id" field was cleared in this mutation.
+func (m *EmailLabelMutation) ParentLabelIDCleared() bool {
+	_, ok := m.clearedFields[emaillabel.FieldParentLabelID]
+	return ok
+}
+
+// ResetParentLabelID resets all changes to the "parent_label_id" field.
+func (m *EmailLabelMutation) ResetParentLabelID() {
+	m.parent_label_id = nil
+	delete(m.clearedFields, emaillabel.FieldParentLabelID)
+}
+
+// SetSyncEnabled sets the "sync_enabled" field.
+func (m *EmailLabelMutation) SetSyncEnabled(b bool) {
+	m.sync_enabled = &b
+}
+
+// SyncEnabled returns the value of the "sync_enabled" field in the mutation.
+func (m *EmailLabelMutation) SyncEnabled() (r bool, exists bool) {
+	v := m.sync_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSyncEnabled returns the old "sync_enabled" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldSyncEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSyncEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSyncEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSyncEnabled: %w", err)
+	}
+	return oldValue.SyncEnabled, nil
+}
+
+// ResetSyncEnabled resets all changes to the "sync_enabled" field.
+func (m *EmailLabelMutation) ResetSyncEnabled() {
+	m.sync_enabled = nil
+}
+
+// SetMessageCount sets the "message_count" field.
+func (m *EmailLabelMutation) SetMessageCount(i int64) {
+	m.message_count = &i
+	m.addmessage_count = nil
+}
+
+// MessageCount returns the value of the "message_count" field in the mutation.
+func (m *EmailLabelMutation) MessageCount() (r int64, exists bool) {
+	v := m.message_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessageCount returns the old "message_count" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldMessageCount(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessageCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessageCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessageCount: %w", err)
+	}
+	return oldValue.MessageCount, nil
+}
+
+// AddMessageCount adds i to the "message_count" field.
+func (m *EmailLabelMutation) AddMessageCount(i int64) {
+	if m.addmessage_count != nil {
+		*m.addmessage_count += i
+	} else {
+		m.addmessage_count = &i
+	}
+}
+
+// AddedMessageCount returns the value that was added to the "message_count" field in this mutation.
+func (m *EmailLabelMutation) AddedMessageCount() (r int64, exists bool) {
+	v := m.addmessage_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMessageCount resets all changes to the "message_count" field.
+func (m *EmailLabelMutation) ResetMessageCount() {
+	m.message_count = nil
+	m.addmessage_count = nil
+}
+
+// SetUnreadCount sets the "unread_count" field.
+func (m *EmailLabelMutation) SetUnreadCount(i int64) {
+	m.unread_count = &i
+	m.addunread_count = nil
+}
+
+// UnreadCount returns the value of the "unread_count" field in the mutation.
+func (m *EmailLabelMutation) UnreadCount() (r int64, exists bool) {
+	v := m.unread_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUnreadCount returns the old "unread_count" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldUnreadCount(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUnreadCount is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUnreadCount requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUnreadCount: %w", err)
+	}
+	return oldValue.UnreadCount, nil
+}
+
+// AddUnreadCount adds i to the "unread_count" field.
+func (m *EmailLabelMutation) AddUnreadCount(i int64) {
+	if m.addunread_count != nil {
+		*m.addunread_count += i
+	} else {
+		m.addunread_count = &i
+	}
+}
+
+// AddedUnreadCount returns the value that was added to the "unread_count" field in this mutation.
+func (m *EmailLabelMutation) AddedUnreadCount() (r int64, exists bool) {
+	v := m.addunread_count
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUnreadCount resets all changes to the "unread_count" field.
+func (m *EmailLabelMutation) ResetUnreadCount() {
+	m.unread_count = nil
+	m.addunread_count = nil
+}
+
+// SetColor sets the "color" field.
+func (m *EmailLabelMutation) SetColor(s string) {
+	m.color = &s
+}
+
+// Color returns the value of the "color" field in the mutation.
+func (m *EmailLabelMutation) Color() (r string, exists bool) {
+	v := m.color
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldColor returns the old "color" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldColor(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldColor is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldColor requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldColor: %w", err)
+	}
+	return oldValue.Color, nil
+}
+
+// ClearColor clears the value of the "color" field.
+func (m *EmailLabelMutation) ClearColor() {
+	m.color = nil
+	m.clearedFields[emaillabel.FieldColor] = struct{}{}
+}
+
+// ColorCleared returns if the "color" field was cleared in this mutation.
+func (m *EmailLabelMutation) ColorCleared() bool {
+	_, ok := m.clearedFields[emaillabel.FieldColor]
+	return ok
+}
+
+// ResetColor resets all changes to the "color" field.
+func (m *EmailLabelMutation) ResetColor() {
+	m.color = nil
+	delete(m.clearedFields, emaillabel.FieldColor)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *EmailLabelMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *EmailLabelMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *EmailLabelMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *EmailLabelMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *EmailLabelMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *EmailLabelMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// SetLastScannedAt sets the "last_scanned_at" field.
+func (m *EmailLabelMutation) SetLastScannedAt(t time.Time) {
+	m.last_scanned_at = &t
+}
+
+// LastScannedAt returns the value of the "last_scanned_at" field in the mutation.
+func (m *EmailLabelMutation) LastScannedAt() (r time.Time, exists bool) {
+	v := m.last_scanned_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastScannedAt returns the old "last_scanned_at" field's value of the EmailLabel entity.
+// If the EmailLabel object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailLabelMutation) OldLastScannedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastScannedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastScannedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastScannedAt: %w", err)
+	}
+	return oldValue.LastScannedAt, nil
+}
+
+// ClearLastScannedAt clears the value of the "last_scanned_at" field.
+func (m *EmailLabelMutation) ClearLastScannedAt() {
+	m.last_scanned_at = nil
+	m.clearedFields[emaillabel.FieldLastScannedAt] = struct{}{}
+}
+
+// LastScannedAtCleared returns if the "last_scanned_at" field was cleared in this mutation.
+func (m *EmailLabelMutation) LastScannedAtCleared() bool {
+	_, ok := m.clearedFields[emaillabel.FieldLastScannedAt]
+	return ok
+}
+
+// ResetLastScannedAt resets all changes to the "last_scanned_at" field.
+func (m *EmailLabelMutation) ResetLastScannedAt() {
+	m.last_scanned_at = nil
+	delete(m.clearedFields, emaillabel.FieldLastScannedAt)
+}
+
+// ClearConnection clears the "connection" edge to the EmailConnection entity.
+func (m *EmailLabelMutation) ClearConnection() {
+	m.clearedconnection = true
+	m.clearedFields[emaillabel.FieldConnectionID] = struct{}{}
+}
+
+// ConnectionCleared reports if the "connection" edge to the EmailConnection entity was cleared.
+func (m *EmailLabelMutation) ConnectionCleared() bool {
+	return m.clearedconnection
+}
+
+// ConnectionIDs returns the "connection" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ConnectionID instead. It exists only for internal usage by the builders.
+func (m *EmailLabelMutation) ConnectionIDs() (ids []string) {
+	if id := m.connection; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetConnection resets all changes to the "connection" edge.
+func (m *EmailLabelMutation) ResetConnection() {
+	m.connection = nil
+	m.clearedconnection = false
+}
+
+// Where appends a list predicates to the EmailLabelMutation builder.
+func (m *EmailLabelMutation) Where(ps ...predicate.EmailLabel) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EmailLabelMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EmailLabelMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EmailLabel, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EmailLabelMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EmailLabelMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EmailLabel).
+func (m *EmailLabelMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EmailLabelMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m.connection != nil {
+		fields = append(fields, emaillabel.FieldConnectionID)
+	}
+	if m.provider_label_id != nil {
+		fields = append(fields, emaillabel.FieldProviderLabelID)
+	}
+	if m.name != nil {
+		fields = append(fields, emaillabel.FieldName)
+	}
+	if m.display_name != nil {
+		fields = append(fields, emaillabel.FieldDisplayName)
+	}
+	if m.label_type != nil {
+		fields = append(fields, emaillabel.FieldLabelType)
+	}
+	if m.parent_label_id != nil {
+		fields = append(fields, emaillabel.FieldParentLabelID)
+	}
+	if m.sync_enabled != nil {
+		fields = append(fields, emaillabel.FieldSyncEnabled)
+	}
+	if m.message_count != nil {
+		fields = append(fields, emaillabel.FieldMessageCount)
+	}
+	if m.unread_count != nil {
+		fields = append(fields, emaillabel.FieldUnreadCount)
+	}
+	if m.color != nil {
+		fields = append(fields, emaillabel.FieldColor)
+	}
+	if m.created_at != nil {
+		fields = append(fields, emaillabel.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, emaillabel.FieldUpdatedAt)
+	}
+	if m.last_scanned_at != nil {
+		fields = append(fields, emaillabel.FieldLastScannedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EmailLabelMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case emaillabel.FieldConnectionID:
+		return m.ConnectionID()
+	case emaillabel.FieldProviderLabelID:
+		return m.ProviderLabelID()
+	case emaillabel.FieldName:
+		return m.Name()
+	case emaillabel.FieldDisplayName:
+		return m.DisplayName()
+	case emaillabel.FieldLabelType:
+		return m.LabelType()
+	case emaillabel.FieldParentLabelID:
+		return m.ParentLabelID()
+	case emaillabel.FieldSyncEnabled:
+		return m.SyncEnabled()
+	case emaillabel.FieldMessageCount:
+		return m.MessageCount()
+	case emaillabel.FieldUnreadCount:
+		return m.UnreadCount()
+	case emaillabel.FieldColor:
+		return m.Color()
+	case emaillabel.FieldCreatedAt:
+		return m.CreatedAt()
+	case emaillabel.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case emaillabel.FieldLastScannedAt:
+		return m.LastScannedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EmailLabelMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case emaillabel.FieldConnectionID:
+		return m.OldConnectionID(ctx)
+	case emaillabel.FieldProviderLabelID:
+		return m.OldProviderLabelID(ctx)
+	case emaillabel.FieldName:
+		return m.OldName(ctx)
+	case emaillabel.FieldDisplayName:
+		return m.OldDisplayName(ctx)
+	case emaillabel.FieldLabelType:
+		return m.OldLabelType(ctx)
+	case emaillabel.FieldParentLabelID:
+		return m.OldParentLabelID(ctx)
+	case emaillabel.FieldSyncEnabled:
+		return m.OldSyncEnabled(ctx)
+	case emaillabel.FieldMessageCount:
+		return m.OldMessageCount(ctx)
+	case emaillabel.FieldUnreadCount:
+		return m.OldUnreadCount(ctx)
+	case emaillabel.FieldColor:
+		return m.OldColor(ctx)
+	case emaillabel.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case emaillabel.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case emaillabel.FieldLastScannedAt:
+		return m.OldLastScannedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown EmailLabel field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EmailLabelMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case emaillabel.FieldConnectionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConnectionID(v)
+		return nil
+	case emaillabel.FieldProviderLabelID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProviderLabelID(v)
+		return nil
+	case emaillabel.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case emaillabel.FieldDisplayName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplayName(v)
+		return nil
+	case emaillabel.FieldLabelType:
+		v, ok := value.(emaillabel.LabelType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLabelType(v)
+		return nil
+	case emaillabel.FieldParentLabelID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetParentLabelID(v)
+		return nil
+	case emaillabel.FieldSyncEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSyncEnabled(v)
+		return nil
+	case emaillabel.FieldMessageCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessageCount(v)
+		return nil
+	case emaillabel.FieldUnreadCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUnreadCount(v)
+		return nil
+	case emaillabel.FieldColor:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetColor(v)
+		return nil
+	case emaillabel.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case emaillabel.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case emaillabel.FieldLastScannedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastScannedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EmailLabel field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EmailLabelMutation) AddedFields() []string {
+	var fields []string
+	if m.addmessage_count != nil {
+		fields = append(fields, emaillabel.FieldMessageCount)
+	}
+	if m.addunread_count != nil {
+		fields = append(fields, emaillabel.FieldUnreadCount)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EmailLabelMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case emaillabel.FieldMessageCount:
+		return m.AddedMessageCount()
+	case emaillabel.FieldUnreadCount:
+		return m.AddedUnreadCount()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EmailLabelMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case emaillabel.FieldMessageCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMessageCount(v)
+		return nil
+	case emaillabel.FieldUnreadCount:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUnreadCount(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EmailLabel numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EmailLabelMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(emaillabel.FieldDisplayName) {
+		fields = append(fields, emaillabel.FieldDisplayName)
+	}
+	if m.FieldCleared(emaillabel.FieldParentLabelID) {
+		fields = append(fields, emaillabel.FieldParentLabelID)
+	}
+	if m.FieldCleared(emaillabel.FieldColor) {
+		fields = append(fields, emaillabel.FieldColor)
+	}
+	if m.FieldCleared(emaillabel.FieldLastScannedAt) {
+		fields = append(fields, emaillabel.FieldLastScannedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EmailLabelMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EmailLabelMutation) ClearField(name string) error {
+	switch name {
+	case emaillabel.FieldDisplayName:
+		m.ClearDisplayName()
+		return nil
+	case emaillabel.FieldParentLabelID:
+		m.ClearParentLabelID()
+		return nil
+	case emaillabel.FieldColor:
+		m.ClearColor()
+		return nil
+	case emaillabel.FieldLastScannedAt:
+		m.ClearLastScannedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailLabel nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EmailLabelMutation) ResetField(name string) error {
+	switch name {
+	case emaillabel.FieldConnectionID:
+		m.ResetConnectionID()
+		return nil
+	case emaillabel.FieldProviderLabelID:
+		m.ResetProviderLabelID()
+		return nil
+	case emaillabel.FieldName:
+		m.ResetName()
+		return nil
+	case emaillabel.FieldDisplayName:
+		m.ResetDisplayName()
+		return nil
+	case emaillabel.FieldLabelType:
+		m.ResetLabelType()
+		return nil
+	case emaillabel.FieldParentLabelID:
+		m.ResetParentLabelID()
+		return nil
+	case emaillabel.FieldSyncEnabled:
+		m.ResetSyncEnabled()
+		return nil
+	case emaillabel.FieldMessageCount:
+		m.ResetMessageCount()
+		return nil
+	case emaillabel.FieldUnreadCount:
+		m.ResetUnreadCount()
+		return nil
+	case emaillabel.FieldColor:
+		m.ResetColor()
+		return nil
+	case emaillabel.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case emaillabel.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case emaillabel.FieldLastScannedAt:
+		m.ResetLastScannedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailLabel field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EmailLabelMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.connection != nil {
+		edges = append(edges, emaillabel.EdgeConnection)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EmailLabelMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case emaillabel.EdgeConnection:
+		if id := m.connection; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EmailLabelMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EmailLabelMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EmailLabelMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedconnection {
+		edges = append(edges, emaillabel.EdgeConnection)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EmailLabelMutation) EdgeCleared(name string) bool {
+	switch name {
+	case emaillabel.EdgeConnection:
+		return m.clearedconnection
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EmailLabelMutation) ClearEdge(name string) error {
+	switch name {
+	case emaillabel.EdgeConnection:
+		m.ClearConnection()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailLabel unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EmailLabelMutation) ResetEdge(name string) error {
+	switch name {
+	case emaillabel.EdgeConnection:
+		m.ResetConnection()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailLabel edge %s", name)
+}
+
+// EmailSyncMutation represents an operation that mutates the EmailSync nodes in the graph.
+type EmailSyncMutation struct {
+	config
+	op                        Op
+	typ                       string
+	id                        *string
+	label_id                  *string
+	sync_type                 *emailsync.SyncType
+	status                    *emailsync.Status
+	started_at                *time.Time
+	completed_at              *time.Time
+	messages_scanned          *int
+	addmessages_scanned       *int
+	messages_downloaded       *int
+	addmessages_downloaded    *int
+	messages_indexed          *int
+	addmessages_indexed       *int
+	messages_failed           *int
+	addmessages_failed        *int
+	attachments_downloaded    *int
+	addattachments_downloaded *int
+	bytes_transferred         *int64
+	addbytes_transferred      *int64
+	error_message             *string
+	error_details             *map[string]interface{}
+	history_id                *string
+	created_at                *time.Time
+	updated_at                *time.Time
+	clearedFields             map[string]struct{}
+	connection                *string
+	clearedconnection         bool
+	done                      bool
+	oldValue                  func(context.Context) (*EmailSync, error)
+	predicates                []predicate.EmailSync
+}
+
+var _ ent.Mutation = (*EmailSyncMutation)(nil)
+
+// emailsyncOption allows management of the mutation configuration using functional options.
+type emailsyncOption func(*EmailSyncMutation)
+
+// newEmailSyncMutation creates new mutation for the EmailSync entity.
+func newEmailSyncMutation(c config, op Op, opts ...emailsyncOption) *EmailSyncMutation {
+	m := &EmailSyncMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeEmailSync,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withEmailSyncID sets the ID field of the mutation.
+func withEmailSyncID(id string) emailsyncOption {
+	return func(m *EmailSyncMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *EmailSync
+		)
+		m.oldValue = func(ctx context.Context) (*EmailSync, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().EmailSync.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withEmailSync sets the old EmailSync of the mutation.
+func withEmailSync(node *EmailSync) emailsyncOption {
+	return func(m *EmailSyncMutation) {
+		m.oldValue = func(context.Context) (*EmailSync, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m EmailSyncMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m EmailSyncMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of EmailSync entities.
+func (m *EmailSyncMutation) SetID(id string) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *EmailSyncMutation) ID() (id string, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *EmailSyncMutation) IDs(ctx context.Context) ([]string, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []string{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().EmailSync.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetConnectionID sets the "connection_id" field.
+func (m *EmailSyncMutation) SetConnectionID(s string) {
+	m.connection = &s
+}
+
+// ConnectionID returns the value of the "connection_id" field in the mutation.
+func (m *EmailSyncMutation) ConnectionID() (r string, exists bool) {
+	v := m.connection
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConnectionID returns the old "connection_id" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldConnectionID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConnectionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConnectionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConnectionID: %w", err)
+	}
+	return oldValue.ConnectionID, nil
+}
+
+// ResetConnectionID resets all changes to the "connection_id" field.
+func (m *EmailSyncMutation) ResetConnectionID() {
+	m.connection = nil
+}
+
+// SetLabelID sets the "label_id" field.
+func (m *EmailSyncMutation) SetLabelID(s string) {
+	m.label_id = &s
+}
+
+// LabelID returns the value of the "label_id" field in the mutation.
+func (m *EmailSyncMutation) LabelID() (r string, exists bool) {
+	v := m.label_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLabelID returns the old "label_id" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldLabelID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLabelID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLabelID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLabelID: %w", err)
+	}
+	return oldValue.LabelID, nil
+}
+
+// ClearLabelID clears the value of the "label_id" field.
+func (m *EmailSyncMutation) ClearLabelID() {
+	m.label_id = nil
+	m.clearedFields[emailsync.FieldLabelID] = struct{}{}
+}
+
+// LabelIDCleared returns if the "label_id" field was cleared in this mutation.
+func (m *EmailSyncMutation) LabelIDCleared() bool {
+	_, ok := m.clearedFields[emailsync.FieldLabelID]
+	return ok
+}
+
+// ResetLabelID resets all changes to the "label_id" field.
+func (m *EmailSyncMutation) ResetLabelID() {
+	m.label_id = nil
+	delete(m.clearedFields, emailsync.FieldLabelID)
+}
+
+// SetSyncType sets the "sync_type" field.
+func (m *EmailSyncMutation) SetSyncType(et emailsync.SyncType) {
+	m.sync_type = &et
+}
+
+// SyncType returns the value of the "sync_type" field in the mutation.
+func (m *EmailSyncMutation) SyncType() (r emailsync.SyncType, exists bool) {
+	v := m.sync_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSyncType returns the old "sync_type" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldSyncType(ctx context.Context) (v emailsync.SyncType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSyncType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSyncType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSyncType: %w", err)
+	}
+	return oldValue.SyncType, nil
+}
+
+// ResetSyncType resets all changes to the "sync_type" field.
+func (m *EmailSyncMutation) ResetSyncType() {
+	m.sync_type = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *EmailSyncMutation) SetStatus(e emailsync.Status) {
+	m.status = &e
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *EmailSyncMutation) Status() (r emailsync.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldStatus(ctx context.Context) (v emailsync.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *EmailSyncMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetStartedAt sets the "started_at" field.
+func (m *EmailSyncMutation) SetStartedAt(t time.Time) {
+	m.started_at = &t
+}
+
+// StartedAt returns the value of the "started_at" field in the mutation.
+func (m *EmailSyncMutation) StartedAt() (r time.Time, exists bool) {
+	v := m.started_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartedAt returns the old "started_at" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldStartedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartedAt: %w", err)
+	}
+	return oldValue.StartedAt, nil
+}
+
+// ClearStartedAt clears the value of the "started_at" field.
+func (m *EmailSyncMutation) ClearStartedAt() {
+	m.started_at = nil
+	m.clearedFields[emailsync.FieldStartedAt] = struct{}{}
+}
+
+// StartedAtCleared returns if the "started_at" field was cleared in this mutation.
+func (m *EmailSyncMutation) StartedAtCleared() bool {
+	_, ok := m.clearedFields[emailsync.FieldStartedAt]
+	return ok
+}
+
+// ResetStartedAt resets all changes to the "started_at" field.
+func (m *EmailSyncMutation) ResetStartedAt() {
+	m.started_at = nil
+	delete(m.clearedFields, emailsync.FieldStartedAt)
+}
+
+// SetCompletedAt sets the "completed_at" field.
+func (m *EmailSyncMutation) SetCompletedAt(t time.Time) {
+	m.completed_at = &t
+}
+
+// CompletedAt returns the value of the "completed_at" field in the mutation.
+func (m *EmailSyncMutation) CompletedAt() (r time.Time, exists bool) {
+	v := m.completed_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCompletedAt returns the old "completed_at" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldCompletedAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCompletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCompletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCompletedAt: %w", err)
+	}
+	return oldValue.CompletedAt, nil
+}
+
+// ClearCompletedAt clears the value of the "completed_at" field.
+func (m *EmailSyncMutation) ClearCompletedAt() {
+	m.completed_at = nil
+	m.clearedFields[emailsync.FieldCompletedAt] = struct{}{}
+}
+
+// CompletedAtCleared returns if the "completed_at" field was cleared in this mutation.
+func (m *EmailSyncMutation) CompletedAtCleared() bool {
+	_, ok := m.clearedFields[emailsync.FieldCompletedAt]
+	return ok
+}
+
+// ResetCompletedAt resets all changes to the "completed_at" field.
+func (m *EmailSyncMutation) ResetCompletedAt() {
+	m.completed_at = nil
+	delete(m.clearedFields, emailsync.FieldCompletedAt)
+}
+
+// SetMessagesScanned sets the "messages_scanned" field.
+func (m *EmailSyncMutation) SetMessagesScanned(i int) {
+	m.messages_scanned = &i
+	m.addmessages_scanned = nil
+}
+
+// MessagesScanned returns the value of the "messages_scanned" field in the mutation.
+func (m *EmailSyncMutation) MessagesScanned() (r int, exists bool) {
+	v := m.messages_scanned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessagesScanned returns the old "messages_scanned" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldMessagesScanned(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessagesScanned is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessagesScanned requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessagesScanned: %w", err)
+	}
+	return oldValue.MessagesScanned, nil
+}
+
+// AddMessagesScanned adds i to the "messages_scanned" field.
+func (m *EmailSyncMutation) AddMessagesScanned(i int) {
+	if m.addmessages_scanned != nil {
+		*m.addmessages_scanned += i
+	} else {
+		m.addmessages_scanned = &i
+	}
+}
+
+// AddedMessagesScanned returns the value that was added to the "messages_scanned" field in this mutation.
+func (m *EmailSyncMutation) AddedMessagesScanned() (r int, exists bool) {
+	v := m.addmessages_scanned
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMessagesScanned resets all changes to the "messages_scanned" field.
+func (m *EmailSyncMutation) ResetMessagesScanned() {
+	m.messages_scanned = nil
+	m.addmessages_scanned = nil
+}
+
+// SetMessagesDownloaded sets the "messages_downloaded" field.
+func (m *EmailSyncMutation) SetMessagesDownloaded(i int) {
+	m.messages_downloaded = &i
+	m.addmessages_downloaded = nil
+}
+
+// MessagesDownloaded returns the value of the "messages_downloaded" field in the mutation.
+func (m *EmailSyncMutation) MessagesDownloaded() (r int, exists bool) {
+	v := m.messages_downloaded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessagesDownloaded returns the old "messages_downloaded" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldMessagesDownloaded(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessagesDownloaded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessagesDownloaded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessagesDownloaded: %w", err)
+	}
+	return oldValue.MessagesDownloaded, nil
+}
+
+// AddMessagesDownloaded adds i to the "messages_downloaded" field.
+func (m *EmailSyncMutation) AddMessagesDownloaded(i int) {
+	if m.addmessages_downloaded != nil {
+		*m.addmessages_downloaded += i
+	} else {
+		m.addmessages_downloaded = &i
+	}
+}
+
+// AddedMessagesDownloaded returns the value that was added to the "messages_downloaded" field in this mutation.
+func (m *EmailSyncMutation) AddedMessagesDownloaded() (r int, exists bool) {
+	v := m.addmessages_downloaded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMessagesDownloaded resets all changes to the "messages_downloaded" field.
+func (m *EmailSyncMutation) ResetMessagesDownloaded() {
+	m.messages_downloaded = nil
+	m.addmessages_downloaded = nil
+}
+
+// SetMessagesIndexed sets the "messages_indexed" field.
+func (m *EmailSyncMutation) SetMessagesIndexed(i int) {
+	m.messages_indexed = &i
+	m.addmessages_indexed = nil
+}
+
+// MessagesIndexed returns the value of the "messages_indexed" field in the mutation.
+func (m *EmailSyncMutation) MessagesIndexed() (r int, exists bool) {
+	v := m.messages_indexed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessagesIndexed returns the old "messages_indexed" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldMessagesIndexed(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessagesIndexed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessagesIndexed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessagesIndexed: %w", err)
+	}
+	return oldValue.MessagesIndexed, nil
+}
+
+// AddMessagesIndexed adds i to the "messages_indexed" field.
+func (m *EmailSyncMutation) AddMessagesIndexed(i int) {
+	if m.addmessages_indexed != nil {
+		*m.addmessages_indexed += i
+	} else {
+		m.addmessages_indexed = &i
+	}
+}
+
+// AddedMessagesIndexed returns the value that was added to the "messages_indexed" field in this mutation.
+func (m *EmailSyncMutation) AddedMessagesIndexed() (r int, exists bool) {
+	v := m.addmessages_indexed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMessagesIndexed resets all changes to the "messages_indexed" field.
+func (m *EmailSyncMutation) ResetMessagesIndexed() {
+	m.messages_indexed = nil
+	m.addmessages_indexed = nil
+}
+
+// SetMessagesFailed sets the "messages_failed" field.
+func (m *EmailSyncMutation) SetMessagesFailed(i int) {
+	m.messages_failed = &i
+	m.addmessages_failed = nil
+}
+
+// MessagesFailed returns the value of the "messages_failed" field in the mutation.
+func (m *EmailSyncMutation) MessagesFailed() (r int, exists bool) {
+	v := m.messages_failed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessagesFailed returns the old "messages_failed" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldMessagesFailed(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessagesFailed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessagesFailed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessagesFailed: %w", err)
+	}
+	return oldValue.MessagesFailed, nil
+}
+
+// AddMessagesFailed adds i to the "messages_failed" field.
+func (m *EmailSyncMutation) AddMessagesFailed(i int) {
+	if m.addmessages_failed != nil {
+		*m.addmessages_failed += i
+	} else {
+		m.addmessages_failed = &i
+	}
+}
+
+// AddedMessagesFailed returns the value that was added to the "messages_failed" field in this mutation.
+func (m *EmailSyncMutation) AddedMessagesFailed() (r int, exists bool) {
+	v := m.addmessages_failed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMessagesFailed resets all changes to the "messages_failed" field.
+func (m *EmailSyncMutation) ResetMessagesFailed() {
+	m.messages_failed = nil
+	m.addmessages_failed = nil
+}
+
+// SetAttachmentsDownloaded sets the "attachments_downloaded" field.
+func (m *EmailSyncMutation) SetAttachmentsDownloaded(i int) {
+	m.attachments_downloaded = &i
+	m.addattachments_downloaded = nil
+}
+
+// AttachmentsDownloaded returns the value of the "attachments_downloaded" field in the mutation.
+func (m *EmailSyncMutation) AttachmentsDownloaded() (r int, exists bool) {
+	v := m.attachments_downloaded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAttachmentsDownloaded returns the old "attachments_downloaded" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldAttachmentsDownloaded(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAttachmentsDownloaded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAttachmentsDownloaded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAttachmentsDownloaded: %w", err)
+	}
+	return oldValue.AttachmentsDownloaded, nil
+}
+
+// AddAttachmentsDownloaded adds i to the "attachments_downloaded" field.
+func (m *EmailSyncMutation) AddAttachmentsDownloaded(i int) {
+	if m.addattachments_downloaded != nil {
+		*m.addattachments_downloaded += i
+	} else {
+		m.addattachments_downloaded = &i
+	}
+}
+
+// AddedAttachmentsDownloaded returns the value that was added to the "attachments_downloaded" field in this mutation.
+func (m *EmailSyncMutation) AddedAttachmentsDownloaded() (r int, exists bool) {
+	v := m.addattachments_downloaded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAttachmentsDownloaded resets all changes to the "attachments_downloaded" field.
+func (m *EmailSyncMutation) ResetAttachmentsDownloaded() {
+	m.attachments_downloaded = nil
+	m.addattachments_downloaded = nil
+}
+
+// SetBytesTransferred sets the "bytes_transferred" field.
+func (m *EmailSyncMutation) SetBytesTransferred(i int64) {
+	m.bytes_transferred = &i
+	m.addbytes_transferred = nil
+}
+
+// BytesTransferred returns the value of the "bytes_transferred" field in the mutation.
+func (m *EmailSyncMutation) BytesTransferred() (r int64, exists bool) {
+	v := m.bytes_transferred
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBytesTransferred returns the old "bytes_transferred" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldBytesTransferred(ctx context.Context) (v int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBytesTransferred is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBytesTransferred requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBytesTransferred: %w", err)
+	}
+	return oldValue.BytesTransferred, nil
+}
+
+// AddBytesTransferred adds i to the "bytes_transferred" field.
+func (m *EmailSyncMutation) AddBytesTransferred(i int64) {
+	if m.addbytes_transferred != nil {
+		*m.addbytes_transferred += i
+	} else {
+		m.addbytes_transferred = &i
+	}
+}
+
+// AddedBytesTransferred returns the value that was added to the "bytes_transferred" field in this mutation.
+func (m *EmailSyncMutation) AddedBytesTransferred() (r int64, exists bool) {
+	v := m.addbytes_transferred
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBytesTransferred resets all changes to the "bytes_transferred" field.
+func (m *EmailSyncMutation) ResetBytesTransferred() {
+	m.bytes_transferred = nil
+	m.addbytes_transferred = nil
+}
+
+// SetErrorMessage sets the "error_message" field.
+func (m *EmailSyncMutation) SetErrorMessage(s string) {
+	m.error_message = &s
+}
+
+// ErrorMessage returns the value of the "error_message" field in the mutation.
+func (m *EmailSyncMutation) ErrorMessage() (r string, exists bool) {
+	v := m.error_message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorMessage returns the old "error_message" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldErrorMessage(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
+	}
+	return oldValue.ErrorMessage, nil
+}
+
+// ClearErrorMessage clears the value of the "error_message" field.
+func (m *EmailSyncMutation) ClearErrorMessage() {
+	m.error_message = nil
+	m.clearedFields[emailsync.FieldErrorMessage] = struct{}{}
+}
+
+// ErrorMessageCleared returns if the "error_message" field was cleared in this mutation.
+func (m *EmailSyncMutation) ErrorMessageCleared() bool {
+	_, ok := m.clearedFields[emailsync.FieldErrorMessage]
+	return ok
+}
+
+// ResetErrorMessage resets all changes to the "error_message" field.
+func (m *EmailSyncMutation) ResetErrorMessage() {
+	m.error_message = nil
+	delete(m.clearedFields, emailsync.FieldErrorMessage)
+}
+
+// SetErrorDetails sets the "error_details" field.
+func (m *EmailSyncMutation) SetErrorDetails(value map[string]interface{}) {
+	m.error_details = &value
+}
+
+// ErrorDetails returns the value of the "error_details" field in the mutation.
+func (m *EmailSyncMutation) ErrorDetails() (r map[string]interface{}, exists bool) {
+	v := m.error_details
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldErrorDetails returns the old "error_details" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldErrorDetails(ctx context.Context) (v map[string]interface{}, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldErrorDetails is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldErrorDetails requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldErrorDetails: %w", err)
+	}
+	return oldValue.ErrorDetails, nil
+}
+
+// ClearErrorDetails clears the value of the "error_details" field.
+func (m *EmailSyncMutation) ClearErrorDetails() {
+	m.error_details = nil
+	m.clearedFields[emailsync.FieldErrorDetails] = struct{}{}
+}
+
+// ErrorDetailsCleared returns if the "error_details" field was cleared in this mutation.
+func (m *EmailSyncMutation) ErrorDetailsCleared() bool {
+	_, ok := m.clearedFields[emailsync.FieldErrorDetails]
+	return ok
+}
+
+// ResetErrorDetails resets all changes to the "error_details" field.
+func (m *EmailSyncMutation) ResetErrorDetails() {
+	m.error_details = nil
+	delete(m.clearedFields, emailsync.FieldErrorDetails)
+}
+
+// SetHistoryID sets the "history_id" field.
+func (m *EmailSyncMutation) SetHistoryID(s string) {
+	m.history_id = &s
+}
+
+// HistoryID returns the value of the "history_id" field in the mutation.
+func (m *EmailSyncMutation) HistoryID() (r string, exists bool) {
+	v := m.history_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHistoryID returns the old "history_id" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldHistoryID(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHistoryID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHistoryID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHistoryID: %w", err)
+	}
+	return oldValue.HistoryID, nil
+}
+
+// ClearHistoryID clears the value of the "history_id" field.
+func (m *EmailSyncMutation) ClearHistoryID() {
+	m.history_id = nil
+	m.clearedFields[emailsync.FieldHistoryID] = struct{}{}
+}
+
+// HistoryIDCleared returns if the "history_id" field was cleared in this mutation.
+func (m *EmailSyncMutation) HistoryIDCleared() bool {
+	_, ok := m.clearedFields[emailsync.FieldHistoryID]
+	return ok
+}
+
+// ResetHistoryID resets all changes to the "history_id" field.
+func (m *EmailSyncMutation) ResetHistoryID() {
+	m.history_id = nil
+	delete(m.clearedFields, emailsync.FieldHistoryID)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *EmailSyncMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *EmailSyncMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *EmailSyncMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *EmailSyncMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *EmailSyncMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the EmailSync entity.
+// If the EmailSync object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EmailSyncMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *EmailSyncMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// ClearConnection clears the "connection" edge to the EmailConnection entity.
+func (m *EmailSyncMutation) ClearConnection() {
+	m.clearedconnection = true
+	m.clearedFields[emailsync.FieldConnectionID] = struct{}{}
+}
+
+// ConnectionCleared reports if the "connection" edge to the EmailConnection entity was cleared.
+func (m *EmailSyncMutation) ConnectionCleared() bool {
+	return m.clearedconnection
+}
+
+// ConnectionIDs returns the "connection" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ConnectionID instead. It exists only for internal usage by the builders.
+func (m *EmailSyncMutation) ConnectionIDs() (ids []string) {
+	if id := m.connection; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetConnection resets all changes to the "connection" edge.
+func (m *EmailSyncMutation) ResetConnection() {
+	m.connection = nil
+	m.clearedconnection = false
+}
+
+// Where appends a list predicates to the EmailSyncMutation builder.
+func (m *EmailSyncMutation) Where(ps ...predicate.EmailSync) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the EmailSyncMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *EmailSyncMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.EmailSync, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *EmailSyncMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *EmailSyncMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (EmailSync).
+func (m *EmailSyncMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *EmailSyncMutation) Fields() []string {
+	fields := make([]string, 0, 17)
+	if m.connection != nil {
+		fields = append(fields, emailsync.FieldConnectionID)
+	}
+	if m.label_id != nil {
+		fields = append(fields, emailsync.FieldLabelID)
+	}
+	if m.sync_type != nil {
+		fields = append(fields, emailsync.FieldSyncType)
+	}
+	if m.status != nil {
+		fields = append(fields, emailsync.FieldStatus)
+	}
+	if m.started_at != nil {
+		fields = append(fields, emailsync.FieldStartedAt)
+	}
+	if m.completed_at != nil {
+		fields = append(fields, emailsync.FieldCompletedAt)
+	}
+	if m.messages_scanned != nil {
+		fields = append(fields, emailsync.FieldMessagesScanned)
+	}
+	if m.messages_downloaded != nil {
+		fields = append(fields, emailsync.FieldMessagesDownloaded)
+	}
+	if m.messages_indexed != nil {
+		fields = append(fields, emailsync.FieldMessagesIndexed)
+	}
+	if m.messages_failed != nil {
+		fields = append(fields, emailsync.FieldMessagesFailed)
+	}
+	if m.attachments_downloaded != nil {
+		fields = append(fields, emailsync.FieldAttachmentsDownloaded)
+	}
+	if m.bytes_transferred != nil {
+		fields = append(fields, emailsync.FieldBytesTransferred)
+	}
+	if m.error_message != nil {
+		fields = append(fields, emailsync.FieldErrorMessage)
+	}
+	if m.error_details != nil {
+		fields = append(fields, emailsync.FieldErrorDetails)
+	}
+	if m.history_id != nil {
+		fields = append(fields, emailsync.FieldHistoryID)
+	}
+	if m.created_at != nil {
+		fields = append(fields, emailsync.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, emailsync.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *EmailSyncMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case emailsync.FieldConnectionID:
+		return m.ConnectionID()
+	case emailsync.FieldLabelID:
+		return m.LabelID()
+	case emailsync.FieldSyncType:
+		return m.SyncType()
+	case emailsync.FieldStatus:
+		return m.Status()
+	case emailsync.FieldStartedAt:
+		return m.StartedAt()
+	case emailsync.FieldCompletedAt:
+		return m.CompletedAt()
+	case emailsync.FieldMessagesScanned:
+		return m.MessagesScanned()
+	case emailsync.FieldMessagesDownloaded:
+		return m.MessagesDownloaded()
+	case emailsync.FieldMessagesIndexed:
+		return m.MessagesIndexed()
+	case emailsync.FieldMessagesFailed:
+		return m.MessagesFailed()
+	case emailsync.FieldAttachmentsDownloaded:
+		return m.AttachmentsDownloaded()
+	case emailsync.FieldBytesTransferred:
+		return m.BytesTransferred()
+	case emailsync.FieldErrorMessage:
+		return m.ErrorMessage()
+	case emailsync.FieldErrorDetails:
+		return m.ErrorDetails()
+	case emailsync.FieldHistoryID:
+		return m.HistoryID()
+	case emailsync.FieldCreatedAt:
+		return m.CreatedAt()
+	case emailsync.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *EmailSyncMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case emailsync.FieldConnectionID:
+		return m.OldConnectionID(ctx)
+	case emailsync.FieldLabelID:
+		return m.OldLabelID(ctx)
+	case emailsync.FieldSyncType:
+		return m.OldSyncType(ctx)
+	case emailsync.FieldStatus:
+		return m.OldStatus(ctx)
+	case emailsync.FieldStartedAt:
+		return m.OldStartedAt(ctx)
+	case emailsync.FieldCompletedAt:
+		return m.OldCompletedAt(ctx)
+	case emailsync.FieldMessagesScanned:
+		return m.OldMessagesScanned(ctx)
+	case emailsync.FieldMessagesDownloaded:
+		return m.OldMessagesDownloaded(ctx)
+	case emailsync.FieldMessagesIndexed:
+		return m.OldMessagesIndexed(ctx)
+	case emailsync.FieldMessagesFailed:
+		return m.OldMessagesFailed(ctx)
+	case emailsync.FieldAttachmentsDownloaded:
+		return m.OldAttachmentsDownloaded(ctx)
+	case emailsync.FieldBytesTransferred:
+		return m.OldBytesTransferred(ctx)
+	case emailsync.FieldErrorMessage:
+		return m.OldErrorMessage(ctx)
+	case emailsync.FieldErrorDetails:
+		return m.OldErrorDetails(ctx)
+	case emailsync.FieldHistoryID:
+		return m.OldHistoryID(ctx)
+	case emailsync.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case emailsync.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown EmailSync field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EmailSyncMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case emailsync.FieldConnectionID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConnectionID(v)
+		return nil
+	case emailsync.FieldLabelID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLabelID(v)
+		return nil
+	case emailsync.FieldSyncType:
+		v, ok := value.(emailsync.SyncType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSyncType(v)
+		return nil
+	case emailsync.FieldStatus:
+		v, ok := value.(emailsync.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	case emailsync.FieldStartedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartedAt(v)
+		return nil
+	case emailsync.FieldCompletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCompletedAt(v)
+		return nil
+	case emailsync.FieldMessagesScanned:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessagesScanned(v)
+		return nil
+	case emailsync.FieldMessagesDownloaded:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessagesDownloaded(v)
+		return nil
+	case emailsync.FieldMessagesIndexed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessagesIndexed(v)
+		return nil
+	case emailsync.FieldMessagesFailed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessagesFailed(v)
+		return nil
+	case emailsync.FieldAttachmentsDownloaded:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAttachmentsDownloaded(v)
+		return nil
+	case emailsync.FieldBytesTransferred:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBytesTransferred(v)
+		return nil
+	case emailsync.FieldErrorMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorMessage(v)
+		return nil
+	case emailsync.FieldErrorDetails:
+		v, ok := value.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetErrorDetails(v)
+		return nil
+	case emailsync.FieldHistoryID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHistoryID(v)
+		return nil
+	case emailsync.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case emailsync.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EmailSync field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *EmailSyncMutation) AddedFields() []string {
+	var fields []string
+	if m.addmessages_scanned != nil {
+		fields = append(fields, emailsync.FieldMessagesScanned)
+	}
+	if m.addmessages_downloaded != nil {
+		fields = append(fields, emailsync.FieldMessagesDownloaded)
+	}
+	if m.addmessages_indexed != nil {
+		fields = append(fields, emailsync.FieldMessagesIndexed)
+	}
+	if m.addmessages_failed != nil {
+		fields = append(fields, emailsync.FieldMessagesFailed)
+	}
+	if m.addattachments_downloaded != nil {
+		fields = append(fields, emailsync.FieldAttachmentsDownloaded)
+	}
+	if m.addbytes_transferred != nil {
+		fields = append(fields, emailsync.FieldBytesTransferred)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *EmailSyncMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case emailsync.FieldMessagesScanned:
+		return m.AddedMessagesScanned()
+	case emailsync.FieldMessagesDownloaded:
+		return m.AddedMessagesDownloaded()
+	case emailsync.FieldMessagesIndexed:
+		return m.AddedMessagesIndexed()
+	case emailsync.FieldMessagesFailed:
+		return m.AddedMessagesFailed()
+	case emailsync.FieldAttachmentsDownloaded:
+		return m.AddedAttachmentsDownloaded()
+	case emailsync.FieldBytesTransferred:
+		return m.AddedBytesTransferred()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *EmailSyncMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case emailsync.FieldMessagesScanned:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMessagesScanned(v)
+		return nil
+	case emailsync.FieldMessagesDownloaded:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMessagesDownloaded(v)
+		return nil
+	case emailsync.FieldMessagesIndexed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMessagesIndexed(v)
+		return nil
+	case emailsync.FieldMessagesFailed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMessagesFailed(v)
+		return nil
+	case emailsync.FieldAttachmentsDownloaded:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAttachmentsDownloaded(v)
+		return nil
+	case emailsync.FieldBytesTransferred:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBytesTransferred(v)
+		return nil
+	}
+	return fmt.Errorf("unknown EmailSync numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *EmailSyncMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(emailsync.FieldLabelID) {
+		fields = append(fields, emailsync.FieldLabelID)
+	}
+	if m.FieldCleared(emailsync.FieldStartedAt) {
+		fields = append(fields, emailsync.FieldStartedAt)
+	}
+	if m.FieldCleared(emailsync.FieldCompletedAt) {
+		fields = append(fields, emailsync.FieldCompletedAt)
+	}
+	if m.FieldCleared(emailsync.FieldErrorMessage) {
+		fields = append(fields, emailsync.FieldErrorMessage)
+	}
+	if m.FieldCleared(emailsync.FieldErrorDetails) {
+		fields = append(fields, emailsync.FieldErrorDetails)
+	}
+	if m.FieldCleared(emailsync.FieldHistoryID) {
+		fields = append(fields, emailsync.FieldHistoryID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *EmailSyncMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *EmailSyncMutation) ClearField(name string) error {
+	switch name {
+	case emailsync.FieldLabelID:
+		m.ClearLabelID()
+		return nil
+	case emailsync.FieldStartedAt:
+		m.ClearStartedAt()
+		return nil
+	case emailsync.FieldCompletedAt:
+		m.ClearCompletedAt()
+		return nil
+	case emailsync.FieldErrorMessage:
+		m.ClearErrorMessage()
+		return nil
+	case emailsync.FieldErrorDetails:
+		m.ClearErrorDetails()
+		return nil
+	case emailsync.FieldHistoryID:
+		m.ClearHistoryID()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailSync nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *EmailSyncMutation) ResetField(name string) error {
+	switch name {
+	case emailsync.FieldConnectionID:
+		m.ResetConnectionID()
+		return nil
+	case emailsync.FieldLabelID:
+		m.ResetLabelID()
+		return nil
+	case emailsync.FieldSyncType:
+		m.ResetSyncType()
+		return nil
+	case emailsync.FieldStatus:
+		m.ResetStatus()
+		return nil
+	case emailsync.FieldStartedAt:
+		m.ResetStartedAt()
+		return nil
+	case emailsync.FieldCompletedAt:
+		m.ResetCompletedAt()
+		return nil
+	case emailsync.FieldMessagesScanned:
+		m.ResetMessagesScanned()
+		return nil
+	case emailsync.FieldMessagesDownloaded:
+		m.ResetMessagesDownloaded()
+		return nil
+	case emailsync.FieldMessagesIndexed:
+		m.ResetMessagesIndexed()
+		return nil
+	case emailsync.FieldMessagesFailed:
+		m.ResetMessagesFailed()
+		return nil
+	case emailsync.FieldAttachmentsDownloaded:
+		m.ResetAttachmentsDownloaded()
+		return nil
+	case emailsync.FieldBytesTransferred:
+		m.ResetBytesTransferred()
+		return nil
+	case emailsync.FieldErrorMessage:
+		m.ResetErrorMessage()
+		return nil
+	case emailsync.FieldErrorDetails:
+		m.ResetErrorDetails()
+		return nil
+	case emailsync.FieldHistoryID:
+		m.ResetHistoryID()
+		return nil
+	case emailsync.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case emailsync.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailSync field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *EmailSyncMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.connection != nil {
+		edges = append(edges, emailsync.EdgeConnection)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *EmailSyncMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case emailsync.EdgeConnection:
+		if id := m.connection; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *EmailSyncMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *EmailSyncMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *EmailSyncMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedconnection {
+		edges = append(edges, emailsync.EdgeConnection)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *EmailSyncMutation) EdgeCleared(name string) bool {
+	switch name {
+	case emailsync.EdgeConnection:
+		return m.clearedconnection
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *EmailSyncMutation) ClearEdge(name string) error {
+	switch name {
+	case emailsync.EdgeConnection:
+		m.ClearConnection()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailSync unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *EmailSyncMutation) ResetEdge(name string) error {
+	switch name {
+	case emailsync.EdgeConnection:
+		m.ResetConnection()
+		return nil
+	}
+	return fmt.Errorf("unknown EmailSync edge %s", name)
+}
 
 // GoogleDriveConnectionMutation represents an operation that mutates the GoogleDriveConnection nodes in the graph.
 type GoogleDriveConnectionMutation struct {

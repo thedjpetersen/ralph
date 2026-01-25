@@ -6,6 +6,15 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// EmailConnection is the predicate function for emailconnection builders.
+type EmailConnection func(*sql.Selector)
+
+// EmailLabel is the predicate function for emaillabel builders.
+type EmailLabel func(*sql.Selector)
+
+// EmailSync is the predicate function for emailsync builders.
+type EmailSync func(*sql.Selector)
+
 // GoogleDriveConnection is the predicate function for googledriveconnection builders.
 type GoogleDriveConnection func(*sql.Selector)
 

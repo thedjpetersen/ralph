@@ -3,6 +3,9 @@
 package ent
 
 import (
+	"clockzen-next/internal/ent/emailconnection"
+	"clockzen-next/internal/ent/emaillabel"
+	"clockzen-next/internal/ent/emailsync"
 	"clockzen-next/internal/ent/googledriveconnection"
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
@@ -14,6 +17,106 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	emailconnectionFields := schema.EmailConnection{}.Fields()
+	_ = emailconnectionFields
+	// emailconnectionDescUserID is the schema descriptor for user_id field.
+	emailconnectionDescUserID := emailconnectionFields[1].Descriptor()
+	// emailconnection.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	emailconnection.UserIDValidator = emailconnectionDescUserID.Validators[0].(func(string) error)
+	// emailconnectionDescProviderAccountID is the schema descriptor for provider_account_id field.
+	emailconnectionDescProviderAccountID := emailconnectionFields[2].Descriptor()
+	// emailconnection.ProviderAccountIDValidator is a validator for the "provider_account_id" field. It is called by the builders before save.
+	emailconnection.ProviderAccountIDValidator = emailconnectionDescProviderAccountID.Validators[0].(func(string) error)
+	// emailconnectionDescEmail is the schema descriptor for email field.
+	emailconnectionDescEmail := emailconnectionFields[3].Descriptor()
+	// emailconnection.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	emailconnection.EmailValidator = emailconnectionDescEmail.Validators[0].(func(string) error)
+	// emailconnectionDescCreatedAt is the schema descriptor for created_at field.
+	emailconnectionDescCreatedAt := emailconnectionFields[9].Descriptor()
+	// emailconnection.DefaultCreatedAt holds the default value on creation for the created_at field.
+	emailconnection.DefaultCreatedAt = emailconnectionDescCreatedAt.Default.(func() time.Time)
+	// emailconnectionDescUpdatedAt is the schema descriptor for updated_at field.
+	emailconnectionDescUpdatedAt := emailconnectionFields[10].Descriptor()
+	// emailconnection.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	emailconnection.DefaultUpdatedAt = emailconnectionDescUpdatedAt.Default.(func() time.Time)
+	// emailconnection.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	emailconnection.UpdateDefaultUpdatedAt = emailconnectionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	emaillabelFields := schema.EmailLabel{}.Fields()
+	_ = emaillabelFields
+	// emaillabelDescConnectionID is the schema descriptor for connection_id field.
+	emaillabelDescConnectionID := emaillabelFields[1].Descriptor()
+	// emaillabel.ConnectionIDValidator is a validator for the "connection_id" field. It is called by the builders before save.
+	emaillabel.ConnectionIDValidator = emaillabelDescConnectionID.Validators[0].(func(string) error)
+	// emaillabelDescProviderLabelID is the schema descriptor for provider_label_id field.
+	emaillabelDescProviderLabelID := emaillabelFields[2].Descriptor()
+	// emaillabel.ProviderLabelIDValidator is a validator for the "provider_label_id" field. It is called by the builders before save.
+	emaillabel.ProviderLabelIDValidator = emaillabelDescProviderLabelID.Validators[0].(func(string) error)
+	// emaillabelDescName is the schema descriptor for name field.
+	emaillabelDescName := emaillabelFields[3].Descriptor()
+	// emaillabel.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	emaillabel.NameValidator = emaillabelDescName.Validators[0].(func(string) error)
+	// emaillabelDescSyncEnabled is the schema descriptor for sync_enabled field.
+	emaillabelDescSyncEnabled := emaillabelFields[7].Descriptor()
+	// emaillabel.DefaultSyncEnabled holds the default value on creation for the sync_enabled field.
+	emaillabel.DefaultSyncEnabled = emaillabelDescSyncEnabled.Default.(bool)
+	// emaillabelDescMessageCount is the schema descriptor for message_count field.
+	emaillabelDescMessageCount := emaillabelFields[8].Descriptor()
+	// emaillabel.DefaultMessageCount holds the default value on creation for the message_count field.
+	emaillabel.DefaultMessageCount = emaillabelDescMessageCount.Default.(int64)
+	// emaillabelDescUnreadCount is the schema descriptor for unread_count field.
+	emaillabelDescUnreadCount := emaillabelFields[9].Descriptor()
+	// emaillabel.DefaultUnreadCount holds the default value on creation for the unread_count field.
+	emaillabel.DefaultUnreadCount = emaillabelDescUnreadCount.Default.(int64)
+	// emaillabelDescCreatedAt is the schema descriptor for created_at field.
+	emaillabelDescCreatedAt := emaillabelFields[11].Descriptor()
+	// emaillabel.DefaultCreatedAt holds the default value on creation for the created_at field.
+	emaillabel.DefaultCreatedAt = emaillabelDescCreatedAt.Default.(func() time.Time)
+	// emaillabelDescUpdatedAt is the schema descriptor for updated_at field.
+	emaillabelDescUpdatedAt := emaillabelFields[12].Descriptor()
+	// emaillabel.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	emaillabel.DefaultUpdatedAt = emaillabelDescUpdatedAt.Default.(func() time.Time)
+	// emaillabel.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	emaillabel.UpdateDefaultUpdatedAt = emaillabelDescUpdatedAt.UpdateDefault.(func() time.Time)
+	emailsyncFields := schema.EmailSync{}.Fields()
+	_ = emailsyncFields
+	// emailsyncDescConnectionID is the schema descriptor for connection_id field.
+	emailsyncDescConnectionID := emailsyncFields[1].Descriptor()
+	// emailsync.ConnectionIDValidator is a validator for the "connection_id" field. It is called by the builders before save.
+	emailsync.ConnectionIDValidator = emailsyncDescConnectionID.Validators[0].(func(string) error)
+	// emailsyncDescMessagesScanned is the schema descriptor for messages_scanned field.
+	emailsyncDescMessagesScanned := emailsyncFields[7].Descriptor()
+	// emailsync.DefaultMessagesScanned holds the default value on creation for the messages_scanned field.
+	emailsync.DefaultMessagesScanned = emailsyncDescMessagesScanned.Default.(int)
+	// emailsyncDescMessagesDownloaded is the schema descriptor for messages_downloaded field.
+	emailsyncDescMessagesDownloaded := emailsyncFields[8].Descriptor()
+	// emailsync.DefaultMessagesDownloaded holds the default value on creation for the messages_downloaded field.
+	emailsync.DefaultMessagesDownloaded = emailsyncDescMessagesDownloaded.Default.(int)
+	// emailsyncDescMessagesIndexed is the schema descriptor for messages_indexed field.
+	emailsyncDescMessagesIndexed := emailsyncFields[9].Descriptor()
+	// emailsync.DefaultMessagesIndexed holds the default value on creation for the messages_indexed field.
+	emailsync.DefaultMessagesIndexed = emailsyncDescMessagesIndexed.Default.(int)
+	// emailsyncDescMessagesFailed is the schema descriptor for messages_failed field.
+	emailsyncDescMessagesFailed := emailsyncFields[10].Descriptor()
+	// emailsync.DefaultMessagesFailed holds the default value on creation for the messages_failed field.
+	emailsync.DefaultMessagesFailed = emailsyncDescMessagesFailed.Default.(int)
+	// emailsyncDescAttachmentsDownloaded is the schema descriptor for attachments_downloaded field.
+	emailsyncDescAttachmentsDownloaded := emailsyncFields[11].Descriptor()
+	// emailsync.DefaultAttachmentsDownloaded holds the default value on creation for the attachments_downloaded field.
+	emailsync.DefaultAttachmentsDownloaded = emailsyncDescAttachmentsDownloaded.Default.(int)
+	// emailsyncDescBytesTransferred is the schema descriptor for bytes_transferred field.
+	emailsyncDescBytesTransferred := emailsyncFields[12].Descriptor()
+	// emailsync.DefaultBytesTransferred holds the default value on creation for the bytes_transferred field.
+	emailsync.DefaultBytesTransferred = emailsyncDescBytesTransferred.Default.(int64)
+	// emailsyncDescCreatedAt is the schema descriptor for created_at field.
+	emailsyncDescCreatedAt := emailsyncFields[16].Descriptor()
+	// emailsync.DefaultCreatedAt holds the default value on creation for the created_at field.
+	emailsync.DefaultCreatedAt = emailsyncDescCreatedAt.Default.(func() time.Time)
+	// emailsyncDescUpdatedAt is the schema descriptor for updated_at field.
+	emailsyncDescUpdatedAt := emailsyncFields[17].Descriptor()
+	// emailsync.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	emailsync.DefaultUpdatedAt = emailsyncDescUpdatedAt.Default.(func() time.Time)
+	// emailsync.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	emailsync.UpdateDefaultUpdatedAt = emailsyncDescUpdatedAt.UpdateDefault.(func() time.Time)
 	googledriveconnectionFields := schema.GoogleDriveConnection{}.Fields()
 	_ = googledriveconnectionFields
 	// googledriveconnectionDescUserID is the schema descriptor for user_id field.

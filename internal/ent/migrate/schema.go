@@ -8,6 +8,169 @@ import (
 )
 
 var (
+	// EmailConnectionsColumns holds the columns for the "email_connections" table.
+	EmailConnectionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "provider_account_id", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeEnum, Enums: []string{"gmail", "outlook", "imap"}},
+		{Name: "access_token", Type: field.TypeString},
+		{Name: "refresh_token", Type: field.TypeString},
+		{Name: "token_expiry", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"active", "inactive", "revoked", "expired"}, Default: "active"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "last_sync_at", Type: field.TypeTime, Nullable: true},
+	}
+	// EmailConnectionsTable holds the schema information for the "email_connections" table.
+	EmailConnectionsTable = &schema.Table{
+		Name:       "email_connections",
+		Columns:    EmailConnectionsColumns,
+		PrimaryKey: []*schema.Column{EmailConnectionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "emailconnection_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{EmailConnectionsColumns[1]},
+			},
+			{
+				Name:    "emailconnection_provider_account_id",
+				Unique:  true,
+				Columns: []*schema.Column{EmailConnectionsColumns[2]},
+			},
+			{
+				Name:    "emailconnection_status",
+				Unique:  false,
+				Columns: []*schema.Column{EmailConnectionsColumns[8]},
+			},
+			{
+				Name:    "emailconnection_provider",
+				Unique:  false,
+				Columns: []*schema.Column{EmailConnectionsColumns[4]},
+			},
+		},
+	}
+	// EmailLabelsColumns holds the columns for the "email_labels" table.
+	EmailLabelsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "provider_label_id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "display_name", Type: field.TypeString, Nullable: true},
+		{Name: "label_type", Type: field.TypeEnum, Enums: []string{"system", "user", "category"}, Default: "user"},
+		{Name: "parent_label_id", Type: field.TypeString, Nullable: true},
+		{Name: "sync_enabled", Type: field.TypeBool, Default: true},
+		{Name: "message_count", Type: field.TypeInt64, Default: 0},
+		{Name: "unread_count", Type: field.TypeInt64, Default: 0},
+		{Name: "color", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "last_scanned_at", Type: field.TypeTime, Nullable: true},
+		{Name: "connection_id", Type: field.TypeString},
+	}
+	// EmailLabelsTable holds the schema information for the "email_labels" table.
+	EmailLabelsTable = &schema.Table{
+		Name:       "email_labels",
+		Columns:    EmailLabelsColumns,
+		PrimaryKey: []*schema.Column{EmailLabelsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "email_labels_email_connections_labels",
+				Columns:    []*schema.Column{EmailLabelsColumns[13]},
+				RefColumns: []*schema.Column{EmailConnectionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "emaillabel_connection_id",
+				Unique:  false,
+				Columns: []*schema.Column{EmailLabelsColumns[13]},
+			},
+			{
+				Name:    "emaillabel_provider_label_id",
+				Unique:  false,
+				Columns: []*schema.Column{EmailLabelsColumns[1]},
+			},
+			{
+				Name:    "emaillabel_connection_id_provider_label_id",
+				Unique:  true,
+				Columns: []*schema.Column{EmailLabelsColumns[13], EmailLabelsColumns[1]},
+			},
+			{
+				Name:    "emaillabel_sync_enabled",
+				Unique:  false,
+				Columns: []*schema.Column{EmailLabelsColumns[6]},
+			},
+			{
+				Name:    "emaillabel_label_type",
+				Unique:  false,
+				Columns: []*schema.Column{EmailLabelsColumns[4]},
+			},
+		},
+	}
+	// EmailSyncsColumns holds the columns for the "email_syncs" table.
+	EmailSyncsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "label_id", Type: field.TypeString, Nullable: true},
+		{Name: "sync_type", Type: field.TypeEnum, Enums: []string{"full", "incremental", "manual"}, Default: "incremental"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "running", "completed", "failed", "cancelled"}, Default: "pending"},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "messages_scanned", Type: field.TypeInt, Default: 0},
+		{Name: "messages_downloaded", Type: field.TypeInt, Default: 0},
+		{Name: "messages_indexed", Type: field.TypeInt, Default: 0},
+		{Name: "messages_failed", Type: field.TypeInt, Default: 0},
+		{Name: "attachments_downloaded", Type: field.TypeInt, Default: 0},
+		{Name: "bytes_transferred", Type: field.TypeInt64, Default: 0},
+		{Name: "error_message", Type: field.TypeString, Nullable: true},
+		{Name: "error_details", Type: field.TypeJSON, Nullable: true},
+		{Name: "history_id", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "connection_id", Type: field.TypeString},
+	}
+	// EmailSyncsTable holds the schema information for the "email_syncs" table.
+	EmailSyncsTable = &schema.Table{
+		Name:       "email_syncs",
+		Columns:    EmailSyncsColumns,
+		PrimaryKey: []*schema.Column{EmailSyncsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "email_syncs_email_connections_syncs",
+				Columns:    []*schema.Column{EmailSyncsColumns[17]},
+				RefColumns: []*schema.Column{EmailConnectionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "emailsync_connection_id",
+				Unique:  false,
+				Columns: []*schema.Column{EmailSyncsColumns[17]},
+			},
+			{
+				Name:    "emailsync_status",
+				Unique:  false,
+				Columns: []*schema.Column{EmailSyncsColumns[3]},
+			},
+			{
+				Name:    "emailsync_sync_type",
+				Unique:  false,
+				Columns: []*schema.Column{EmailSyncsColumns[2]},
+			},
+			{
+				Name:    "emailsync_connection_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{EmailSyncsColumns[17], EmailSyncsColumns[3]},
+			},
+			{
+				Name:    "emailsync_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{EmailSyncsColumns[15]},
+			},
+		},
+	}
 	// GoogleDriveConnectionsColumns holds the columns for the "google_drive_connections" table.
 	GoogleDriveConnectionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString, Unique: true},
@@ -162,6 +325,9 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		EmailConnectionsTable,
+		EmailLabelsTable,
+		EmailSyncsTable,
 		GoogleDriveConnectionsTable,
 		GoogleDriveFoldersTable,
 		GoogleDriveSyncsTable,
@@ -169,6 +335,8 @@ var (
 )
 
 func init() {
+	EmailLabelsTable.ForeignKeys[0].RefTable = EmailConnectionsTable
+	EmailSyncsTable.ForeignKeys[0].RefTable = EmailConnectionsTable
 	GoogleDriveFoldersTable.ForeignKeys[0].RefTable = GoogleDriveConnectionsTable
 	GoogleDriveSyncsTable.ForeignKeys[0].RefTable = GoogleDriveConnectionsTable
 }
