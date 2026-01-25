@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+api
+*.exe
+*.test
+*.out
+
+# Test and coverage files
+coverage.out
+coverage.html
+*.prof
+
+# Frontend (if any)
+frontend/node_modules
+frontend/dist
+frontend/.next
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Local development files
+.env
+.env.local
+.env.*.local
+*.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
