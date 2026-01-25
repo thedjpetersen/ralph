@@ -1,0 +1,489 @@
+.google-drive-settings-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.google-drive-settings-header {
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.back-link:hover {
+  color: #646cff;
+}
+
+.google-drive-settings-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.google-drive-settings-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.google-drive-settings-loading,
+.google-drive-settings-error,
+.google-drive-settings-empty {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.google-drive-settings-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.google-drive-settings-empty h2 {
+  margin: 0 0 0.5rem;
+  color: inherit;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.select-account-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #646cff;
+  text-decoration: none;
+}
+
+.select-account-link:hover {
+  text-decoration: underline;
+}
+
+/* Settings Sections */
+.settings-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+/* Connections Grid */
+.connections-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.connection-card {
+  padding: 1.25rem;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+
+.connection-card.needs-attention {
+  border-color: rgba(231, 76, 60, 0.5);
+}
+
+.connection-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.connection-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.connection-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #646cff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+}
+
+.connection-details {
+  min-width: 0;
+}
+
+.connection-name {
+  margin: 0 0 0.125rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.connection-email {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connection-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.connection-status.status-active {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.connection-status.status-pending {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.connection-status.status-error {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.connection-status.status-disconnected {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.connection-status.status-expired {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.connection-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.connection-error .error-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.connection-error .error-message {
+  font-size: 0.8125rem;
+  color: #e74c3c;
+}
+
+.connection-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.meta-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.meta-value {
+  font-size: 0.875rem;
+}
+
+.connection-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.disconnect-button {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid rgba(231, 76, 60, 0.5);
+  border-radius: 6px;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.disconnect-button:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-color: #e74c3c;
+}
+
+/* No Connections */
+.no-connections {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background-color: #1a1a1a;
+  border: 2px dashed #333;
+  border-radius: 10px;
+}
+
+.no-connections-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #2a2a2a;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #646cff;
+  margin: 0 auto 1rem;
+}
+
+.no-connections h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+.no-connections p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+/* Sync Now Button */
+.sync-now-button {
+  padding: 0.5rem 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.sync-now-button:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.sync-now-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Disconnect confirmation modal */
+.disconnect-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.disconnect-confirm-modal {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 90%;
+}
+
+.disconnect-confirm-modal h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.disconnect-confirm-modal p {
+  margin: 0 0 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+.disconnect-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  padding: 0.625rem 1.25rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+.confirm-disconnect-button {
+  padding: 0.625rem 1.25rem;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.confirm-disconnect-button:hover {
+  background-color: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .connection-card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .connection-meta {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .back-link {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .google-drive-settings-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .google-drive-settings-loading,
+  .google-drive-settings-error,
+  .google-drive-settings-empty {
+    background-color: #f5f5f5;
+  }
+
+  .settings-section {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .connection-card {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .connection-card.needs-attention {
+    border-color: rgba(231, 76, 60, 0.4);
+  }
+
+  .connection-email {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .connection-status.status-disconnected {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .meta-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .no-connections {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .no-connections-icon {
+    background-color: #e0e0e0;
+  }
+
+  .no-connections p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .disconnect-confirm-modal {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .disconnect-confirm-modal h3 {
+    color: #213547;
+  }
+
+  .disconnect-confirm-modal p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .cancel-button {
+    border-color: #ccc;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .cancel-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+  }
+}

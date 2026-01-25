@@ -1,0 +1,352 @@
+.integrations-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.integrations-header {
+  margin-bottom: 2rem;
+}
+
+.integrations-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.integrations-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.integrations-loading,
+.integrations-error,
+.integrations-empty {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.integrations-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.integrations-empty h2 {
+  margin: 0 0 0.5rem;
+  color: inherit;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.select-account-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #646cff;
+  text-decoration: none;
+}
+
+.select-account-link:hover {
+  text-decoration: underline;
+}
+
+.integrations-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  margin-bottom: 2rem;
+}
+
+.integration-card {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: border-color 0.2s;
+}
+
+.integration-card:hover {
+  border-color: #444;
+}
+
+.integration-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.integration-icon {
+  width: 48px;
+  height: 48px;
+  background-color: #1a1a1a;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #646cff;
+  flex-shrink: 0;
+}
+
+.integration-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.integration-name {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.integration-description {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.integration-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  flex-shrink: 0;
+}
+
+.integration-status.status-connected {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.integration-status.status-disconnected {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.integration-status.status-error {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.integration-connections {
+  padding: 1rem;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.connections-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.connections-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.connection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.connection-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.connection-item.more-connections {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.875rem;
+  padding-top: 0.75rem;
+}
+
+.connection-email {
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.connection-status {
+  padding: 0.125rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.connection-status.status-active {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.connection-status.status-pending {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.connection-status.status-error {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.connection-status.status-disconnected {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.connection-status.status-expired {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.integration-card-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.integration-settings-button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.integration-settings-button:hover {
+  background-color: #747bff;
+}
+
+.integrations-info {
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+}
+
+.integrations-info h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.integrations-info p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .integrations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .integration-card-header {
+    flex-wrap: wrap;
+  }
+
+  .integration-status {
+    width: 100%;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .integrations-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .integrations-loading,
+  .integrations-error,
+  .integrations-empty {
+    background-color: #f5f5f5;
+  }
+
+  .integration-card {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .integration-card:hover {
+    border-color: #ccc;
+  }
+
+  .integration-icon {
+    background-color: #f5f5f5;
+  }
+
+  .integration-description {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .integration-status.status-disconnected {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .integration-connections {
+    background-color: #f5f5f5;
+  }
+
+  .connections-title {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .connection-item {
+    border-bottom-color: #ddd;
+  }
+
+  .connection-item.more-connections {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .connection-status.status-disconnected {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .integrations-info {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .integrations-info h3 {
+    color: rgba(0, 0, 0, 0.8);
+  }
+
+  .integrations-info p {
+    color: rgba(0, 0, 0, 0.5);
+  }
+}

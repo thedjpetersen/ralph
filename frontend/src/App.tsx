@@ -41,6 +41,8 @@ import { FIREHistory } from './pages/FIREHistory';
 import { RetirementProjections } from './pages/RetirementProjections';
 import { WithdrawalStrategy } from './pages/WithdrawalStrategy';
 import { RetirementBacktest } from './pages/RetirementBacktest';
+import { Integrations } from './pages/Integrations';
+import { GoogleDriveSettings } from './pages/GoogleDriveSettings';
 import './App.css';
 
 function App() {
@@ -95,6 +97,9 @@ function App() {
         <Route path="/retirement-projections" element={<RetirementProjections />} />
         <Route path="/withdrawal-strategy" element={<WithdrawalStrategy />} />
         <Route path="/retirement-backtest" element={<RetirementBacktest />} />
+        <Route path="/integrations" element={<Integrations />} />
+        <Route path="/integrations/google-drive" element={<GoogleDriveSettings />} />
+        <Route path="/integrations/google-drive/callback" element={<GoogleDriveSettings />} />
       </Route>
     </Routes>
   );

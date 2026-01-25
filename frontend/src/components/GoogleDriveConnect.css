@@ -1,0 +1,75 @@
+.google-drive-connect-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #fff;
+  color: #1f1f1f;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.google-drive-connect-button:hover:not(:disabled) {
+  background-color: #f8f9fa;
+  border-color: #d2d3d7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.google-drive-connect-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-drive-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.google-drive-icon svg {
+  display: block;
+}
+
+.google-drive-connect-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(31, 31, 31, 0.2);
+  border-top-color: #1f1f1f;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Dark mode styling */
+@media (prefers-color-scheme: dark) {
+  .google-drive-connect-button {
+    background-color: #1a1a1a;
+    color: rgba(255, 255, 255, 0.87);
+    border-color: #444;
+  }
+
+  .google-drive-connect-button:hover:not(:disabled) {
+    background-color: #2a2a2a;
+    border-color: #555;
+  }
+
+  .loading-spinner {
+    border-color: rgba(255, 255, 255, 0.2);
+    border-top-color: rgba(255, 255, 255, 0.87);
+  }
+}
