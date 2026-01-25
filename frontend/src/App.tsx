@@ -10,6 +10,10 @@ import { SkeletonDemo } from './pages/SkeletonDemo';
 import { Stores } from './pages/Stores';
 import { StoreDetail } from './pages/StoreDetail';
 import { StoreForm } from './components/StoreForm';
+import { Products } from './pages/Products';
+import { ProductDetail } from './pages/ProductDetail';
+import { Brands } from './pages/Brands';
+import { Categories } from './pages/Categories';
 import './App.css';
 
 function App() {
@@ -28,6 +32,10 @@ function App() {
         <Route path="/stores/new" element={<StoreForm />} />
         <Route path="/stores/:id" element={<StoreDetail />} />
         <Route path="/stores/:id/edit" element={<StoreForm />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/brands" element={<Brands />} />
+        <Route path="/categories" element={<Categories />} />
       </Route>
     </Routes>
   );
