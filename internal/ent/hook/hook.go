@@ -80,6 +80,42 @@ func (f GoogleDriveSyncFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GoogleDriveSyncMutation", m)
 }
 
+// The LineItemFunc type is an adapter to allow the use of ordinary
+// function as LineItem mutator.
+type LineItemFunc func(context.Context, *ent.LineItemMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LineItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LineItemMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LineItemMutation", m)
+}
+
+// The ReceiptFunc type is an adapter to allow the use of ordinary
+// function as Receipt mutator.
+type ReceiptFunc func(context.Context, *ent.ReceiptMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ReceiptFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ReceiptMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReceiptMutation", m)
+}
+
+// The TransactionFunc type is an adapter to allow the use of ordinary
+// function as Transaction mutator.
+type TransactionFunc func(context.Context, *ent.TransactionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TransactionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TransactionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

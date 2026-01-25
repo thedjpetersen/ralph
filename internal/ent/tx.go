@@ -24,6 +24,12 @@ type Tx struct {
 	GoogleDriveFolder *GoogleDriveFolderClient
 	// GoogleDriveSync is the client for interacting with the GoogleDriveSync builders.
 	GoogleDriveSync *GoogleDriveSyncClient
+	// LineItem is the client for interacting with the LineItem builders.
+	LineItem *LineItemClient
+	// Receipt is the client for interacting with the Receipt builders.
+	Receipt *ReceiptClient
+	// Transaction is the client for interacting with the Transaction builders.
+	Transaction *TransactionClient
 
 	// lazily loaded.
 	client     *Client
@@ -161,6 +167,9 @@ func (tx *Tx) init() {
 	tx.GoogleDriveConnection = NewGoogleDriveConnectionClient(tx.config)
 	tx.GoogleDriveFolder = NewGoogleDriveFolderClient(tx.config)
 	tx.GoogleDriveSync = NewGoogleDriveSyncClient(tx.config)
+	tx.LineItem = NewLineItemClient(tx.config)
+	tx.Receipt = NewReceiptClient(tx.config)
+	tx.Transaction = NewTransactionClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

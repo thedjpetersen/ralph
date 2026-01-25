@@ -149,7 +149,45 @@ func (m *Migrator) Run(ctx context.Context) error {
 		return fmt.Errorf("account migration failed: %w", err)
 	}
 
+	// Step 3: Migrate receipts
+	if err := m.migrateReceiptsPhase(ctx); err != nil {
+		return fmt.Errorf("receipt migration failed: %w", err)
+	}
+
 	log.Println("Migration completed successfully")
+	return nil
+}
+
+// migrateReceiptsPhase migrates receipts, transactions, and line items
+func (m *Migrator) migrateReceiptsPhase(ctx context.Context) error {
+	log.Println("Starting receipt migration phase...")
+
+	receiptMigrator := NewReceiptMigrator(
+		m.legacyDB,
+		m.targetClient,
+		WithBatchSize(m.batchSize),
+		WithDryRun(m.dryRun),
+		WithVerbose(m.verbose),
+		WithUserIDMap(m.userIDMap),
+		WithProgressCallback(func(progress ReceiptMigrationProgress) {
+			if m.verbose {
+				log.Printf("[%s] Processed: receipts=%d, transactions=%d, line_items=%d, current=%s",
+					progress.Phase,
+					progress.ProcessedReceipts,
+					progress.ProcessedTransactions,
+					progress.ProcessedLineItems,
+					progress.CurrentItem)
+			}
+		}),
+	)
+
+	if err := receiptMigrator.Run(ctx); err != nil {
+		return err
+	}
+
+	// Print receipt migration summary
+	receiptMigrator.PrintSummary()
+
 	return nil
 }
 

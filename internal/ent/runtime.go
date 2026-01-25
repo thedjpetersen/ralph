@@ -9,7 +9,10 @@ import (
 	"clockzen-next/internal/ent/googledriveconnection"
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
+	"clockzen-next/internal/ent/lineitem"
+	"clockzen-next/internal/ent/receipt"
 	"clockzen-next/internal/ent/schema"
+	"clockzen-next/internal/ent/transaction"
 	"time"
 )
 
@@ -221,4 +224,108 @@ func init() {
 	googledrivesync.DefaultUpdatedAt = googledrivesyncDescUpdatedAt.Default.(func() time.Time)
 	// googledrivesync.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	googledrivesync.UpdateDefaultUpdatedAt = googledrivesyncDescUpdatedAt.UpdateDefault.(func() time.Time)
+	lineitemFields := schema.LineItem{}.Fields()
+	_ = lineitemFields
+	// lineitemDescReceiptID is the schema descriptor for receipt_id field.
+	lineitemDescReceiptID := lineitemFields[1].Descriptor()
+	// lineitem.ReceiptIDValidator is a validator for the "receipt_id" field. It is called by the builders before save.
+	lineitem.ReceiptIDValidator = lineitemDescReceiptID.Validators[0].(func(string) error)
+	// lineitemDescLineNumber is the schema descriptor for line_number field.
+	lineitemDescLineNumber := lineitemFields[2].Descriptor()
+	// lineitem.DefaultLineNumber holds the default value on creation for the line_number field.
+	lineitem.DefaultLineNumber = lineitemDescLineNumber.Default.(int)
+	// lineitemDescDescription is the schema descriptor for description field.
+	lineitemDescDescription := lineitemFields[3].Descriptor()
+	// lineitem.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	lineitem.DescriptionValidator = lineitemDescDescription.Validators[0].(func(string) error)
+	// lineitemDescQuantity is the schema descriptor for quantity field.
+	lineitemDescQuantity := lineitemFields[6].Descriptor()
+	// lineitem.DefaultQuantity holds the default value on creation for the quantity field.
+	lineitem.DefaultQuantity = lineitemDescQuantity.Default.(float64)
+	// lineitemDescDiscountAmount is the schema descriptor for discount_amount field.
+	lineitemDescDiscountAmount := lineitemFields[10].Descriptor()
+	// lineitem.DefaultDiscountAmount holds the default value on creation for the discount_amount field.
+	lineitem.DefaultDiscountAmount = lineitemDescDiscountAmount.Default.(float64)
+	// lineitemDescTaxAmount is the schema descriptor for tax_amount field.
+	lineitemDescTaxAmount := lineitemFields[12].Descriptor()
+	// lineitem.DefaultTaxAmount holds the default value on creation for the tax_amount field.
+	lineitem.DefaultTaxAmount = lineitemDescTaxAmount.Default.(float64)
+	// lineitemDescIsTaxable is the schema descriptor for is_taxable field.
+	lineitemDescIsTaxable := lineitemFields[14].Descriptor()
+	// lineitem.DefaultIsTaxable holds the default value on creation for the is_taxable field.
+	lineitem.DefaultIsTaxable = lineitemDescIsTaxable.Default.(bool)
+	// lineitemDescCreatedAt is the schema descriptor for created_at field.
+	lineitemDescCreatedAt := lineitemFields[19].Descriptor()
+	// lineitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	lineitem.DefaultCreatedAt = lineitemDescCreatedAt.Default.(func() time.Time)
+	// lineitemDescUpdatedAt is the schema descriptor for updated_at field.
+	lineitemDescUpdatedAt := lineitemFields[20].Descriptor()
+	// lineitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	lineitem.DefaultUpdatedAt = lineitemDescUpdatedAt.Default.(func() time.Time)
+	// lineitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	lineitem.UpdateDefaultUpdatedAt = lineitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	receiptFields := schema.Receipt{}.Fields()
+	_ = receiptFields
+	// receiptDescUserID is the schema descriptor for user_id field.
+	receiptDescUserID := receiptFields[1].Descriptor()
+	// receipt.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	receipt.UserIDValidator = receiptDescUserID.Validators[0].(func(string) error)
+	// receiptDescFileName is the schema descriptor for file_name field.
+	receiptDescFileName := receiptFields[5].Descriptor()
+	// receipt.FileNameValidator is a validator for the "file_name" field. It is called by the builders before save.
+	receipt.FileNameValidator = receiptDescFileName.Validators[0].(func(string) error)
+	// receiptDescMimeType is the schema descriptor for mime_type field.
+	receiptDescMimeType := receiptFields[7].Descriptor()
+	// receipt.MimeTypeValidator is a validator for the "mime_type" field. It is called by the builders before save.
+	receipt.MimeTypeValidator = receiptDescMimeType.Validators[0].(func(string) error)
+	// receiptDescFileSize is the schema descriptor for file_size field.
+	receiptDescFileSize := receiptFields[8].Descriptor()
+	// receipt.DefaultFileSize holds the default value on creation for the file_size field.
+	receipt.DefaultFileSize = receiptDescFileSize.Default.(int64)
+	// receiptDescOcrCompleted is the schema descriptor for ocr_completed field.
+	receiptDescOcrCompleted := receiptFields[13].Descriptor()
+	// receipt.DefaultOcrCompleted holds the default value on creation for the ocr_completed field.
+	receipt.DefaultOcrCompleted = receiptDescOcrCompleted.Default.(bool)
+	// receiptDescCurrency is the schema descriptor for currency field.
+	receiptDescCurrency := receiptFields[22].Descriptor()
+	// receipt.DefaultCurrency holds the default value on creation for the currency field.
+	receipt.DefaultCurrency = receiptDescCurrency.Default.(string)
+	// receiptDescCreatedAt is the schema descriptor for created_at field.
+	receiptDescCreatedAt := receiptFields[30].Descriptor()
+	// receipt.DefaultCreatedAt holds the default value on creation for the created_at field.
+	receipt.DefaultCreatedAt = receiptDescCreatedAt.Default.(func() time.Time)
+	// receiptDescUpdatedAt is the schema descriptor for updated_at field.
+	receiptDescUpdatedAt := receiptFields[31].Descriptor()
+	// receipt.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	receipt.DefaultUpdatedAt = receiptDescUpdatedAt.Default.(func() time.Time)
+	// receipt.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	receipt.UpdateDefaultUpdatedAt = receiptDescUpdatedAt.UpdateDefault.(func() time.Time)
+	transactionFields := schema.Transaction{}.Fields()
+	_ = transactionFields
+	// transactionDescReceiptID is the schema descriptor for receipt_id field.
+	transactionDescReceiptID := transactionFields[1].Descriptor()
+	// transaction.ReceiptIDValidator is a validator for the "receipt_id" field. It is called by the builders before save.
+	transaction.ReceiptIDValidator = transactionDescReceiptID.Validators[0].(func(string) error)
+	// transactionDescUserID is the schema descriptor for user_id field.
+	transactionDescUserID := transactionFields[2].Descriptor()
+	// transaction.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	transaction.UserIDValidator = transactionDescUserID.Validators[0].(func(string) error)
+	// transactionDescCurrency is the schema descriptor for currency field.
+	transactionDescCurrency := transactionFields[5].Descriptor()
+	// transaction.DefaultCurrency holds the default value on creation for the currency field.
+	transaction.DefaultCurrency = transactionDescCurrency.Default.(string)
+	// transactionDescIsRecurring is the schema descriptor for is_recurring field.
+	transactionDescIsRecurring := transactionFields[15].Descriptor()
+	// transaction.DefaultIsRecurring holds the default value on creation for the is_recurring field.
+	transaction.DefaultIsRecurring = transactionDescIsRecurring.Default.(bool)
+	// transactionDescCreatedAt is the schema descriptor for created_at field.
+	transactionDescCreatedAt := transactionFields[21].Descriptor()
+	// transaction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(func() time.Time)
+	// transactionDescUpdatedAt is the schema descriptor for updated_at field.
+	transactionDescUpdatedAt := transactionFields[22].Descriptor()
+	// transaction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	transaction.DefaultUpdatedAt = transactionDescUpdatedAt.Default.(func() time.Time)
+	// transaction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	transaction.UpdateDefaultUpdatedAt = transactionDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

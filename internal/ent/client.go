@@ -17,6 +17,9 @@ import (
 	"clockzen-next/internal/ent/googledriveconnection"
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
+	"clockzen-next/internal/ent/lineitem"
+	"clockzen-next/internal/ent/receipt"
+	"clockzen-next/internal/ent/transaction"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -41,6 +44,12 @@ type Client struct {
 	GoogleDriveFolder *GoogleDriveFolderClient
 	// GoogleDriveSync is the client for interacting with the GoogleDriveSync builders.
 	GoogleDriveSync *GoogleDriveSyncClient
+	// LineItem is the client for interacting with the LineItem builders.
+	LineItem *LineItemClient
+	// Receipt is the client for interacting with the Receipt builders.
+	Receipt *ReceiptClient
+	// Transaction is the client for interacting with the Transaction builders.
+	Transaction *TransactionClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -58,6 +67,9 @@ func (c *Client) init() {
 	c.GoogleDriveConnection = NewGoogleDriveConnectionClient(c.config)
 	c.GoogleDriveFolder = NewGoogleDriveFolderClient(c.config)
 	c.GoogleDriveSync = NewGoogleDriveSyncClient(c.config)
+	c.LineItem = NewLineItemClient(c.config)
+	c.Receipt = NewReceiptClient(c.config)
+	c.Transaction = NewTransactionClient(c.config)
 }
 
 type (
@@ -156,6 +168,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		GoogleDriveConnection: NewGoogleDriveConnectionClient(cfg),
 		GoogleDriveFolder:     NewGoogleDriveFolderClient(cfg),
 		GoogleDriveSync:       NewGoogleDriveSyncClient(cfg),
+		LineItem:              NewLineItemClient(cfg),
+		Receipt:               NewReceiptClient(cfg),
+		Transaction:           NewTransactionClient(cfg),
 	}, nil
 }
 
@@ -181,6 +196,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		GoogleDriveConnection: NewGoogleDriveConnectionClient(cfg),
 		GoogleDriveFolder:     NewGoogleDriveFolderClient(cfg),
 		GoogleDriveSync:       NewGoogleDriveSyncClient(cfg),
+		LineItem:              NewLineItemClient(cfg),
+		Receipt:               NewReceiptClient(cfg),
+		Transaction:           NewTransactionClient(cfg),
 	}, nil
 }
 
@@ -211,7 +229,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.EmailConnection, c.EmailLabel, c.EmailSync, c.GoogleDriveConnection,
-		c.GoogleDriveFolder, c.GoogleDriveSync,
+		c.GoogleDriveFolder, c.GoogleDriveSync, c.LineItem, c.Receipt, c.Transaction,
 	} {
 		n.Use(hooks...)
 	}
@@ -222,7 +240,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.EmailConnection, c.EmailLabel, c.EmailSync, c.GoogleDriveConnection,
-		c.GoogleDriveFolder, c.GoogleDriveSync,
+		c.GoogleDriveFolder, c.GoogleDriveSync, c.LineItem, c.Receipt, c.Transaction,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -243,6 +261,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.GoogleDriveFolder.mutate(ctx, m)
 	case *GoogleDriveSyncMutation:
 		return c.GoogleDriveSync.mutate(ctx, m)
+	case *LineItemMutation:
+		return c.LineItem.mutate(ctx, m)
+	case *ReceiptMutation:
+		return c.Receipt.mutate(ctx, m)
+	case *TransactionMutation:
+		return c.Transaction.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1174,14 +1198,478 @@ func (c *GoogleDriveSyncClient) mutate(ctx context.Context, m *GoogleDriveSyncMu
 	}
 }
 
+// LineItemClient is a client for the LineItem schema.
+type LineItemClient struct {
+	config
+}
+
+// NewLineItemClient returns a client for the LineItem from the given config.
+func NewLineItemClient(c config) *LineItemClient {
+	return &LineItemClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `lineitem.Hooks(f(g(h())))`.
+func (c *LineItemClient) Use(hooks ...Hook) {
+	c.hooks.LineItem = append(c.hooks.LineItem, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `lineitem.Intercept(f(g(h())))`.
+func (c *LineItemClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LineItem = append(c.inters.LineItem, interceptors...)
+}
+
+// Create returns a builder for creating a LineItem entity.
+func (c *LineItemClient) Create() *LineItemCreate {
+	mutation := newLineItemMutation(c.config, OpCreate)
+	return &LineItemCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LineItem entities.
+func (c *LineItemClient) CreateBulk(builders ...*LineItemCreate) *LineItemCreateBulk {
+	return &LineItemCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LineItemClient) MapCreateBulk(slice any, setFunc func(*LineItemCreate, int)) *LineItemCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LineItemCreateBulk{err: fmt.Errorf("calling to LineItemClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LineItemCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LineItemCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LineItem.
+func (c *LineItemClient) Update() *LineItemUpdate {
+	mutation := newLineItemMutation(c.config, OpUpdate)
+	return &LineItemUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LineItemClient) UpdateOne(_m *LineItem) *LineItemUpdateOne {
+	mutation := newLineItemMutation(c.config, OpUpdateOne, withLineItem(_m))
+	return &LineItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LineItemClient) UpdateOneID(id string) *LineItemUpdateOne {
+	mutation := newLineItemMutation(c.config, OpUpdateOne, withLineItemID(id))
+	return &LineItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LineItem.
+func (c *LineItemClient) Delete() *LineItemDelete {
+	mutation := newLineItemMutation(c.config, OpDelete)
+	return &LineItemDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LineItemClient) DeleteOne(_m *LineItem) *LineItemDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LineItemClient) DeleteOneID(id string) *LineItemDeleteOne {
+	builder := c.Delete().Where(lineitem.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LineItemDeleteOne{builder}
+}
+
+// Query returns a query builder for LineItem.
+func (c *LineItemClient) Query() *LineItemQuery {
+	return &LineItemQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLineItem},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LineItem entity by its id.
+func (c *LineItemClient) Get(ctx context.Context, id string) (*LineItem, error) {
+	return c.Query().Where(lineitem.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LineItemClient) GetX(ctx context.Context, id string) *LineItem {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryReceipt queries the receipt edge of a LineItem.
+func (c *LineItemClient) QueryReceipt(_m *LineItem) *ReceiptQuery {
+	query := (&ReceiptClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(lineitem.Table, lineitem.FieldID, id),
+			sqlgraph.To(receipt.Table, receipt.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, lineitem.ReceiptTable, lineitem.ReceiptColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LineItemClient) Hooks() []Hook {
+	return c.hooks.LineItem
+}
+
+// Interceptors returns the client interceptors.
+func (c *LineItemClient) Interceptors() []Interceptor {
+	return c.inters.LineItem
+}
+
+func (c *LineItemClient) mutate(ctx context.Context, m *LineItemMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LineItemCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LineItemUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LineItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LineItemDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LineItem mutation op: %q", m.Op())
+	}
+}
+
+// ReceiptClient is a client for the Receipt schema.
+type ReceiptClient struct {
+	config
+}
+
+// NewReceiptClient returns a client for the Receipt from the given config.
+func NewReceiptClient(c config) *ReceiptClient {
+	return &ReceiptClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `receipt.Hooks(f(g(h())))`.
+func (c *ReceiptClient) Use(hooks ...Hook) {
+	c.hooks.Receipt = append(c.hooks.Receipt, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `receipt.Intercept(f(g(h())))`.
+func (c *ReceiptClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Receipt = append(c.inters.Receipt, interceptors...)
+}
+
+// Create returns a builder for creating a Receipt entity.
+func (c *ReceiptClient) Create() *ReceiptCreate {
+	mutation := newReceiptMutation(c.config, OpCreate)
+	return &ReceiptCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Receipt entities.
+func (c *ReceiptClient) CreateBulk(builders ...*ReceiptCreate) *ReceiptCreateBulk {
+	return &ReceiptCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ReceiptClient) MapCreateBulk(slice any, setFunc func(*ReceiptCreate, int)) *ReceiptCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ReceiptCreateBulk{err: fmt.Errorf("calling to ReceiptClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ReceiptCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ReceiptCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Receipt.
+func (c *ReceiptClient) Update() *ReceiptUpdate {
+	mutation := newReceiptMutation(c.config, OpUpdate)
+	return &ReceiptUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ReceiptClient) UpdateOne(_m *Receipt) *ReceiptUpdateOne {
+	mutation := newReceiptMutation(c.config, OpUpdateOne, withReceipt(_m))
+	return &ReceiptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ReceiptClient) UpdateOneID(id string) *ReceiptUpdateOne {
+	mutation := newReceiptMutation(c.config, OpUpdateOne, withReceiptID(id))
+	return &ReceiptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Receipt.
+func (c *ReceiptClient) Delete() *ReceiptDelete {
+	mutation := newReceiptMutation(c.config, OpDelete)
+	return &ReceiptDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ReceiptClient) DeleteOne(_m *Receipt) *ReceiptDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ReceiptClient) DeleteOneID(id string) *ReceiptDeleteOne {
+	builder := c.Delete().Where(receipt.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ReceiptDeleteOne{builder}
+}
+
+// Query returns a query builder for Receipt.
+func (c *ReceiptClient) Query() *ReceiptQuery {
+	return &ReceiptQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeReceipt},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Receipt entity by its id.
+func (c *ReceiptClient) Get(ctx context.Context, id string) (*Receipt, error) {
+	return c.Query().Where(receipt.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ReceiptClient) GetX(ctx context.Context, id string) *Receipt {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTransactions queries the transactions edge of a Receipt.
+func (c *ReceiptClient) QueryTransactions(_m *Receipt) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(receipt.Table, receipt.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, receipt.TransactionsTable, receipt.TransactionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLineItems queries the line_items edge of a Receipt.
+func (c *ReceiptClient) QueryLineItems(_m *Receipt) *LineItemQuery {
+	query := (&LineItemClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(receipt.Table, receipt.FieldID, id),
+			sqlgraph.To(lineitem.Table, lineitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, receipt.LineItemsTable, receipt.LineItemsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ReceiptClient) Hooks() []Hook {
+	return c.hooks.Receipt
+}
+
+// Interceptors returns the client interceptors.
+func (c *ReceiptClient) Interceptors() []Interceptor {
+	return c.inters.Receipt
+}
+
+func (c *ReceiptClient) mutate(ctx context.Context, m *ReceiptMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ReceiptCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ReceiptUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ReceiptUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ReceiptDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Receipt mutation op: %q", m.Op())
+	}
+}
+
+// TransactionClient is a client for the Transaction schema.
+type TransactionClient struct {
+	config
+}
+
+// NewTransactionClient returns a client for the Transaction from the given config.
+func NewTransactionClient(c config) *TransactionClient {
+	return &TransactionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `transaction.Hooks(f(g(h())))`.
+func (c *TransactionClient) Use(hooks ...Hook) {
+	c.hooks.Transaction = append(c.hooks.Transaction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `transaction.Intercept(f(g(h())))`.
+func (c *TransactionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Transaction = append(c.inters.Transaction, interceptors...)
+}
+
+// Create returns a builder for creating a Transaction entity.
+func (c *TransactionClient) Create() *TransactionCreate {
+	mutation := newTransactionMutation(c.config, OpCreate)
+	return &TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Transaction entities.
+func (c *TransactionClient) CreateBulk(builders ...*TransactionCreate) *TransactionCreateBulk {
+	return &TransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TransactionClient) MapCreateBulk(slice any, setFunc func(*TransactionCreate, int)) *TransactionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TransactionCreateBulk{err: fmt.Errorf("calling to TransactionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TransactionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Transaction.
+func (c *TransactionClient) Update() *TransactionUpdate {
+	mutation := newTransactionMutation(c.config, OpUpdate)
+	return &TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TransactionClient) UpdateOne(_m *Transaction) *TransactionUpdateOne {
+	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransaction(_m))
+	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TransactionClient) UpdateOneID(id string) *TransactionUpdateOne {
+	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransactionID(id))
+	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Transaction.
+func (c *TransactionClient) Delete() *TransactionDelete {
+	mutation := newTransactionMutation(c.config, OpDelete)
+	return &TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TransactionClient) DeleteOne(_m *Transaction) *TransactionDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TransactionClient) DeleteOneID(id string) *TransactionDeleteOne {
+	builder := c.Delete().Where(transaction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TransactionDeleteOne{builder}
+}
+
+// Query returns a query builder for Transaction.
+func (c *TransactionClient) Query() *TransactionQuery {
+	return &TransactionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTransaction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Transaction entity by its id.
+func (c *TransactionClient) Get(ctx context.Context, id string) (*Transaction, error) {
+	return c.Query().Where(transaction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TransactionClient) GetX(ctx context.Context, id string) *Transaction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryReceipt queries the receipt edge of a Transaction.
+func (c *TransactionClient) QueryReceipt(_m *Transaction) *ReceiptQuery {
+	query := (&ReceiptClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(receipt.Table, receipt.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, transaction.ReceiptTable, transaction.ReceiptColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TransactionClient) Hooks() []Hook {
+	return c.hooks.Transaction
+}
+
+// Interceptors returns the client interceptors.
+func (c *TransactionClient) Interceptors() []Interceptor {
+	return c.inters.Transaction
+}
+
+func (c *TransactionClient) mutate(ctx context.Context, m *TransactionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Transaction mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		EmailConnection, EmailLabel, EmailSync, GoogleDriveConnection,
-		GoogleDriveFolder, GoogleDriveSync []ent.Hook
+		GoogleDriveFolder, GoogleDriveSync, LineItem, Receipt, Transaction []ent.Hook
 	}
 	inters struct {
 		EmailConnection, EmailLabel, EmailSync, GoogleDriveConnection,
-		GoogleDriveFolder, GoogleDriveSync []ent.Interceptor
+		GoogleDriveFolder, GoogleDriveSync, LineItem, Receipt,
+		Transaction []ent.Interceptor
 	}
 )

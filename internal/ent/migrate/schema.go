@@ -323,6 +323,252 @@ var (
 			},
 		},
 	}
+	// LineItemsColumns holds the columns for the "line_items" table.
+	LineItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "line_number", Type: field.TypeInt, Default: 0},
+		{Name: "description", Type: field.TypeString},
+		{Name: "sku", Type: field.TypeString, Nullable: true},
+		{Name: "product_code", Type: field.TypeString, Nullable: true},
+		{Name: "quantity", Type: field.TypeFloat64, Default: 1},
+		{Name: "unit", Type: field.TypeString, Nullable: true},
+		{Name: "unit_price", Type: field.TypeFloat64},
+		{Name: "total_price", Type: field.TypeFloat64},
+		{Name: "discount_amount", Type: field.TypeFloat64, Nullable: true, Default: 0},
+		{Name: "discount_description", Type: field.TypeString, Nullable: true},
+		{Name: "tax_amount", Type: field.TypeFloat64, Nullable: true, Default: 0},
+		{Name: "tax_rate", Type: field.TypeFloat64, Nullable: true},
+		{Name: "is_taxable", Type: field.TypeBool, Default: true},
+		{Name: "category", Type: field.TypeString, Nullable: true},
+		{Name: "tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "legacy_id", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "receipt_id", Type: field.TypeString},
+	}
+	// LineItemsTable holds the schema information for the "line_items" table.
+	LineItemsTable = &schema.Table{
+		Name:       "line_items",
+		Columns:    LineItemsColumns,
+		PrimaryKey: []*schema.Column{LineItemsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "line_items_receipts_line_items",
+				Columns:    []*schema.Column{LineItemsColumns[20]},
+				RefColumns: []*schema.Column{ReceiptsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "lineitem_receipt_id",
+				Unique:  false,
+				Columns: []*schema.Column{LineItemsColumns[20]},
+			},
+			{
+				Name:    "lineitem_receipt_id_line_number",
+				Unique:  false,
+				Columns: []*schema.Column{LineItemsColumns[20], LineItemsColumns[1]},
+			},
+			{
+				Name:    "lineitem_sku",
+				Unique:  false,
+				Columns: []*schema.Column{LineItemsColumns[3]},
+			},
+			{
+				Name:    "lineitem_product_code",
+				Unique:  false,
+				Columns: []*schema.Column{LineItemsColumns[4]},
+			},
+			{
+				Name:    "lineitem_category",
+				Unique:  false,
+				Columns: []*schema.Column{LineItemsColumns[14]},
+			},
+			{
+				Name:    "lineitem_legacy_id",
+				Unique:  false,
+				Columns: []*schema.Column{LineItemsColumns[17]},
+			},
+		},
+	}
+	// ReceiptsColumns holds the columns for the "receipts" table.
+	ReceiptsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "source_type", Type: field.TypeEnum, Enums: []string{"email", "drive", "upload", "scan"}},
+		{Name: "source_id", Type: field.TypeString, Nullable: true},
+		{Name: "source_connection_id", Type: field.TypeString, Nullable: true},
+		{Name: "file_name", Type: field.TypeString},
+		{Name: "file_path", Type: field.TypeString, Nullable: true},
+		{Name: "mime_type", Type: field.TypeString},
+		{Name: "file_size", Type: field.TypeInt64, Default: 0},
+		{Name: "storage_bucket", Type: field.TypeString, Nullable: true},
+		{Name: "storage_key", Type: field.TypeString, Nullable: true},
+		{Name: "thumbnail_path", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "processing", "processed", "failed", "archived"}, Default: "pending"},
+		{Name: "ocr_completed", Type: field.TypeBool, Default: false},
+		{Name: "ocr_text", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "ocr_confidence", Type: field.TypeFloat64, Nullable: true},
+		{Name: "merchant_name", Type: field.TypeString, Nullable: true},
+		{Name: "merchant_address", Type: field.TypeString, Nullable: true},
+		{Name: "receipt_date", Type: field.TypeTime, Nullable: true},
+		{Name: "total_amount", Type: field.TypeFloat64, Nullable: true},
+		{Name: "tax_amount", Type: field.TypeFloat64, Nullable: true},
+		{Name: "subtotal_amount", Type: field.TypeFloat64, Nullable: true},
+		{Name: "currency", Type: field.TypeString, Nullable: true, Default: "USD"},
+		{Name: "payment_method", Type: field.TypeString, Nullable: true},
+		{Name: "receipt_number", Type: field.TypeString, Nullable: true},
+		{Name: "category_tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "extracted_data", Type: field.TypeJSON, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "notes", Type: field.TypeString, Nullable: true},
+		{Name: "legacy_id", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "processed_at", Type: field.TypeTime, Nullable: true},
+	}
+	// ReceiptsTable holds the schema information for the "receipts" table.
+	ReceiptsTable = &schema.Table{
+		Name:       "receipts",
+		Columns:    ReceiptsColumns,
+		PrimaryKey: []*schema.Column{ReceiptsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "receipt_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[1]},
+			},
+			{
+				Name:    "receipt_source_type",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[2]},
+			},
+			{
+				Name:    "receipt_source_id",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[3]},
+			},
+			{
+				Name:    "receipt_status",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[12]},
+			},
+			{
+				Name:    "receipt_user_id_status",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[1], ReceiptsColumns[12]},
+			},
+			{
+				Name:    "receipt_merchant_name",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[16]},
+			},
+			{
+				Name:    "receipt_receipt_date",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[18]},
+			},
+			{
+				Name:    "receipt_legacy_id",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[29]},
+			},
+			{
+				Name:    "receipt_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{ReceiptsColumns[30]},
+			},
+		},
+	}
+	// TransactionsColumns holds the columns for the "transactions" table.
+	TransactionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Unique: true},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"purchase", "refund", "payment", "withdrawal", "deposit", "transfer", "other"}, Default: "purchase"},
+		{Name: "amount", Type: field.TypeFloat64},
+		{Name: "currency", Type: field.TypeString, Default: "USD"},
+		{Name: "transaction_date", Type: field.TypeTime},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "merchant_name", Type: field.TypeString, Nullable: true},
+		{Name: "merchant_category", Type: field.TypeString, Nullable: true},
+		{Name: "payment_method", Type: field.TypeString, Nullable: true},
+		{Name: "card_last_four", Type: field.TypeString, Nullable: true},
+		{Name: "reference_number", Type: field.TypeString, Nullable: true},
+		{Name: "authorization_code", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"pending", "completed", "failed", "refunded", "disputed", "cancelled"}, Default: "completed"},
+		{Name: "is_recurring", Type: field.TypeBool, Default: false},
+		{Name: "recurrence_pattern", Type: field.TypeString, Nullable: true},
+		{Name: "category_tags", Type: field.TypeJSON, Nullable: true},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "notes", Type: field.TypeString, Nullable: true},
+		{Name: "legacy_id", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "receipt_id", Type: field.TypeString},
+	}
+	// TransactionsTable holds the schema information for the "transactions" table.
+	TransactionsTable = &schema.Table{
+		Name:       "transactions",
+		Columns:    TransactionsColumns,
+		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "transactions_receipts_transactions",
+				Columns:    []*schema.Column{TransactionsColumns[22]},
+				RefColumns: []*schema.Column{ReceiptsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "transaction_receipt_id",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[22]},
+			},
+			{
+				Name:    "transaction_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[1]},
+			},
+			{
+				Name:    "transaction_type",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[2]},
+			},
+			{
+				Name:    "transaction_status",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[13]},
+			},
+			{
+				Name:    "transaction_transaction_date",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[5]},
+			},
+			{
+				Name:    "transaction_user_id_transaction_date",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[1], TransactionsColumns[5]},
+			},
+			{
+				Name:    "transaction_merchant_name",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[7]},
+			},
+			{
+				Name:    "transaction_legacy_id",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[19]},
+			},
+			{
+				Name:    "transaction_created_at",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[20]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		EmailConnectionsTable,
@@ -331,6 +577,9 @@ var (
 		GoogleDriveConnectionsTable,
 		GoogleDriveFoldersTable,
 		GoogleDriveSyncsTable,
+		LineItemsTable,
+		ReceiptsTable,
+		TransactionsTable,
 	}
 )
 
@@ -339,4 +588,6 @@ func init() {
 	EmailSyncsTable.ForeignKeys[0].RefTable = EmailConnectionsTable
 	GoogleDriveFoldersTable.ForeignKeys[0].RefTable = GoogleDriveConnectionsTable
 	GoogleDriveSyncsTable.ForeignKeys[0].RefTable = GoogleDriveConnectionsTable
+	LineItemsTable.ForeignKeys[0].RefTable = ReceiptsTable
+	TransactionsTable.ForeignKeys[0].RefTable = ReceiptsTable
 }

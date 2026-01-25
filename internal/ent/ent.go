@@ -9,6 +9,9 @@ import (
 	"clockzen-next/internal/ent/googledriveconnection"
 	"clockzen-next/internal/ent/googledrivefolder"
 	"clockzen-next/internal/ent/googledrivesync"
+	"clockzen-next/internal/ent/lineitem"
+	"clockzen-next/internal/ent/receipt"
+	"clockzen-next/internal/ent/transaction"
 	"context"
 	"errors"
 	"fmt"
@@ -84,6 +87,9 @@ func checkColumn(t, c string) error {
 			googledriveconnection.Table: googledriveconnection.ValidColumn,
 			googledrivefolder.Table:     googledrivefolder.ValidColumn,
 			googledrivesync.Table:       googledrivesync.ValidColumn,
+			lineitem.Table:              lineitem.ValidColumn,
+			receipt.Table:               receipt.ValidColumn,
+			transaction.Table:           transaction.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

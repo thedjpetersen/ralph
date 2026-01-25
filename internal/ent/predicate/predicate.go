@@ -23,3 +23,12 @@ type GoogleDriveFolder func(*sql.Selector)
 
 // GoogleDriveSync is the predicate function for googledrivesync builders.
 type GoogleDriveSync func(*sql.Selector)
+
+// LineItem is the predicate function for lineitem builders.
+type LineItem func(*sql.Selector)
+
+// Receipt is the predicate function for receipt builders.
+type Receipt func(*sql.Selector)
+
+// Transaction is the predicate function for transaction builders.
+type Transaction func(*sql.Selector)
