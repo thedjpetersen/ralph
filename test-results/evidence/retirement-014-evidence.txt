@@ -1,0 +1,8 @@
+✓ Build successful
+
+New files created:
+.rw-r--r--@ 8.9k thedjpetersen 24 Jan 23:45 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/retirement/account_handler.go
+.rw-r--r--@  10k thedjpetersen 24 Jan 23:49 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/retirement/expense_handler.go
+.rw-r--r--@  11k thedjpetersen 24 Jan 23:50 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/retirement/income_handler.go
+.rw-r--r--@  12k thedjpetersen 24 Jan 23:45 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/retirement/plan_handler.go
+.rw-r--r--@ 7.2k thedjpetersen 24 Jan 23:49 /Users/thedjpetersen/code/ralph/internal/presentation/http/handlers/retirement/routes.go
