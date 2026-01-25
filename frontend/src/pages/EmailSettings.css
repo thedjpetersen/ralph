@@ -1,0 +1,569 @@
+.email-settings-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.email-settings-header {
+  margin-bottom: 2rem;
+}
+
+.email-settings-header .back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.email-settings-header .back-link:hover {
+  color: #646cff;
+}
+
+.email-settings-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.email-settings-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.email-settings-loading,
+.email-settings-error,
+.email-settings-empty {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.email-settings-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.email-settings-empty h2 {
+  margin: 0 0 0.5rem;
+  color: inherit;
+}
+
+.email-settings-page .retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.email-settings-page .retry-button:hover {
+  background-color: #747bff;
+}
+
+.email-settings-page .select-account-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #646cff;
+  text-decoration: none;
+}
+
+.email-settings-page .select-account-link:hover {
+  text-decoration: underline;
+}
+
+/* Email Sync Status */
+.email-sync-status {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 10px;
+}
+
+.sync-status-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.sync-status-icon {
+  color: #646cff;
+}
+
+.sync-status-icon.pulsing {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.sync-status-label {
+  font-weight: 500;
+}
+
+.sync-progress {
+  height: 4px;
+  background-color: rgba(100, 108, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.sync-progress-fill {
+  height: 100%;
+  background-color: #646cff;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.sync-stats {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Settings Sections */
+.email-settings-page .settings-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+}
+
+.email-settings-page .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.email-settings-page .section-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+/* Connections Grid */
+.email-settings-page .connections-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.email-settings-page .connection-card {
+  padding: 1.25rem;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+
+.email-settings-page .connection-card.needs-attention {
+  border-color: rgba(231, 76, 60, 0.5);
+}
+
+.email-settings-page .connection-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.email-settings-page .connection-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.email-settings-page .connection-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #646cff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+}
+
+.email-settings-page .connection-details {
+  min-width: 0;
+}
+
+.email-settings-page .connection-name {
+  margin: 0 0 0.125rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.email-settings-page .connection-email {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email-settings-page .connection-badges {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.email-settings-page .connection-provider {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+}
+
+.email-settings-page .connection-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.email-settings-page .connection-status.status-active {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.email-settings-page .connection-status.status-pending {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.email-settings-page .connection-status.status-error {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.email-settings-page .connection-status.status-disconnected {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.email-settings-page .connection-status.status-expired {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.email-settings-page .connection-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.email-settings-page .connection-error .error-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.email-settings-page .connection-error .error-message {
+  font-size: 0.8125rem;
+  color: #e74c3c;
+}
+
+.email-settings-page .connection-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.email-settings-page .meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.email-settings-page .meta-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.email-settings-page .meta-value {
+  font-size: 0.875rem;
+}
+
+.email-settings-page .connection-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.email-settings-page .disconnect-button {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid rgba(231, 76, 60, 0.5);
+  border-radius: 6px;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.email-settings-page .disconnect-button:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+  border-color: #e74c3c;
+}
+
+/* No Connections */
+.email-settings-page .no-connections {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background-color: #1a1a1a;
+  border: 2px dashed #333;
+  border-radius: 10px;
+}
+
+.email-settings-page .no-connections-icon {
+  width: 64px;
+  height: 64px;
+  background-color: #2a2a2a;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #646cff;
+  margin: 0 auto 1rem;
+}
+
+.email-settings-page .no-connections h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+.email-settings-page .no-connections p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+/* Sync Now Button */
+.email-settings-page .sync-now-button {
+  padding: 0.5rem 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.email-settings-page .sync-now-button:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.email-settings-page .sync-now-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Disconnect confirmation modal */
+.email-settings-page .disconnect-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.email-settings-page .disconnect-confirm-modal {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 90%;
+}
+
+.email-settings-page .disconnect-confirm-modal h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.email-settings-page .disconnect-confirm-modal p {
+  margin: 0 0 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+.email-settings-page .disconnect-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.email-settings-page .cancel-button {
+  padding: 0.625rem 1.25rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.email-settings-page .cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+.email-settings-page .confirm-disconnect-button {
+  padding: 0.625rem 1.25rem;
+  background-color: #e74c3c;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9375rem;
+}
+
+.email-settings-page .confirm-disconnect-button:hover {
+  background-color: #c0392b;
+}
+
+@media (max-width: 768px) {
+  .email-settings-page .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .email-settings-page .connection-card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .email-settings-page .connection-meta {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .email-settings-header .back-link {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .email-settings-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .email-settings-loading,
+  .email-settings-error,
+  .email-settings-empty {
+    background-color: #f5f5f5;
+  }
+
+  .email-sync-status {
+    background-color: rgba(100, 108, 255, 0.05);
+    border-color: rgba(100, 108, 255, 0.2);
+  }
+
+  .sync-stats {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .email-settings-page .settings-section {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .email-settings-page .connection-card {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .email-settings-page .connection-card.needs-attention {
+    border-color: rgba(231, 76, 60, 0.4);
+  }
+
+  .email-settings-page .connection-email {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .email-settings-page .connection-status.status-disconnected {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .email-settings-page .meta-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .email-settings-page .no-connections {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .email-settings-page .no-connections-icon {
+    background-color: #e0e0e0;
+  }
+
+  .email-settings-page .no-connections p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .email-settings-page .disconnect-confirm-modal {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .email-settings-page .disconnect-confirm-modal h3 {
+    color: #213547;
+  }
+
+  .email-settings-page .disconnect-confirm-modal p {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .email-settings-page .cancel-button {
+    border-color: #ccc;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .email-settings-page .cancel-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+  }
+}

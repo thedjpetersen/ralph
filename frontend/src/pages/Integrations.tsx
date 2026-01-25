@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { useAccountStore } from '../stores/account';
 import {
   googleDriveConnectionsApi,
+  emailConnectionsApi,
   type GoogleDriveConnection,
   type GoogleDriveConnectionStatus,
+  type EmailConnection,
+  type EmailConnectionStatus,
 } from '../api/client';
 import { PageTransition } from '../components/PageTransition';
 import { AccountsListSkeleton } from '../components/skeletons';
@@ -17,7 +20,7 @@ interface Integration {
   icon: string;
   status: 'connected' | 'disconnected' | 'error';
   settingsPath: string;
-  connections?: GoogleDriveConnection[];
+  connections?: GoogleDriveConnection[] | EmailConnection[];
 }
 
 export function Integrations() {
@@ -25,6 +28,7 @@ export function Integrations() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [googleDriveConnections, setGoogleDriveConnections] = useState<GoogleDriveConnection[]>([]);
+  const [emailConnections, setEmailConnections] = useState<EmailConnection[]>([]);
 
   const fetchIntegrations = useCallback(async () => {
     if (!currentAccount?.id) return;
@@ -33,8 +37,12 @@ export function Integrations() {
     setError(null);
 
     try {
-      const response = await googleDriveConnectionsApi.list(currentAccount.id);
-      setGoogleDriveConnections(response.connections);
+      const [driveResponse, emailResponse] = await Promise.all([
+        googleDriveConnectionsApi.list(currentAccount.id),
+        emailConnectionsApi.list(currentAccount.id).catch(() => ({ connections: [] })),
+      ]);
+      setGoogleDriveConnections(driveResponse.connections);
+      setEmailConnections(emailResponse.connections);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch integrations');
     } finally {
@@ -56,7 +64,7 @@ export function Integrations() {
     return hasActive ? 'connected' : 'disconnected';
   };
 
-  const getStatusLabel = (status: GoogleDriveConnectionStatus) => {
+  const getStatusLabel = (status: GoogleDriveConnectionStatus | EmailConnectionStatus) => {
     switch (status) {
       case 'active':
         return 'Active';
@@ -73,6 +81,16 @@ export function Integrations() {
     }
   };
 
+  const getEmailStatus = (): 'connected' | 'disconnected' | 'error' => {
+    if (emailConnections.length === 0) return 'disconnected';
+    const hasError = emailConnections.some(
+      (c) => c.status === 'error' || c.status === 'expired'
+    );
+    if (hasError) return 'error';
+    const hasActive = emailConnections.some((c) => c.status === 'active');
+    return hasActive ? 'connected' : 'disconnected';
+  };
+
   const integrations: Integration[] = [
     {
       id: 'google-drive',
@@ -82,6 +100,15 @@ export function Integrations() {
       status: getGoogleDriveStatus(),
       settingsPath: '/integrations/google-drive',
       connections: googleDriveConnections,
+    },
+    {
+      id: 'email',
+      name: 'Email',
+      description: 'Sync receipts from email labels and folders',
+      icon: '@',
+      status: getEmailStatus(),
+      settingsPath: '/integrations/email',
+      connections: emailConnections,
     },
   ];
 
@@ -190,8 +217,8 @@ export function Integrations() {
         <div className="integrations-info">
           <h3>Coming Soon</h3>
           <p>
-            We're working on additional integrations including Dropbox, OneDrive, and email
-            receipt parsing. Stay tuned for updates!
+            We're working on additional integrations including Dropbox and OneDrive.
+            Stay tuned for updates!
           </p>
         </div>
       </div>

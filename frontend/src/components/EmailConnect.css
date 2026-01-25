@@ -1,0 +1,198 @@
+.email-connect-container {
+  position: relative;
+}
+
+.email-connect-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.email-connect-button:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.email-connect-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.email-icon {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.email-connect-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Provider Select Modal */
+.provider-select-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.provider-select-modal {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 90%;
+}
+
+.provider-select-modal h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.provider-select-description {
+  margin: 0 0 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+.provider-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.provider-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.provider-option:hover:not(:disabled) {
+  border-color: #646cff;
+  background-color: rgba(100, 108, 255, 0.05);
+}
+
+.provider-option:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.provider-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.provider-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.provider-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.provider-cancel-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 0.9375rem;
+  transition: all 0.2s;
+}
+
+.provider-cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+@media (prefers-color-scheme: light) {
+  .provider-select-modal {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .provider-select-modal h3 {
+    color: #213547;
+  }
+
+  .provider-select-description {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .provider-option {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .provider-option:hover:not(:disabled) {
+    background-color: rgba(100, 108, 255, 0.05);
+  }
+
+  .provider-icon {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .provider-name {
+    color: #213547;
+  }
+
+  .provider-cancel-button {
+    border-color: #ccc;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .provider-cancel-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #bbb;
+  }
+}

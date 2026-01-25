@@ -43,6 +43,7 @@ import { WithdrawalStrategy } from './pages/WithdrawalStrategy';
 import { RetirementBacktest } from './pages/RetirementBacktest';
 import { Integrations } from './pages/Integrations';
 import { GoogleDriveSettings } from './pages/GoogleDriveSettings';
+import { EmailSettings } from './pages/EmailSettings';
 import './App.css';
 
 function App() {
@@ -100,6 +101,8 @@ function App() {
         <Route path="/integrations" element={<Integrations />} />
         <Route path="/integrations/google-drive" element={<GoogleDriveSettings />} />
         <Route path="/integrations/google-drive/callback" element={<GoogleDriveSettings />} />
+        <Route path="/integrations/email" element={<EmailSettings />} />
+        <Route path="/integrations/email/callback" element={<EmailSettings />} />
       </Route>
     </Routes>
   );

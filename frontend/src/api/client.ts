@@ -4590,3 +4590,397 @@ export const googleDriveSyncHistoryApi = {
     return response.json();
   },
 };
+
+// ============================================================================
+// Email Integration API
+// ============================================================================
+
+// Email OAuth types
+export interface EmailOAuthInitiateRequest {
+  redirect_uri?: string;
+  scopes?: string[];
+  state?: string;
+  provider?: EmailProvider;
+}
+
+export interface EmailOAuthInitiateResponse {
+  authorization_url: string;
+  state: string;
+}
+
+export interface EmailOAuthCallbackRequest {
+  code: string;
+  state: string;
+  redirect_uri?: string;
+}
+
+export interface EmailOAuthCallbackResponse {
+  connection_id: string;
+  email: string;
+  name?: string;
+}
+
+// Email OAuth API methods
+export const emailOAuthApi = {
+  async initiate(accountId: string, data?: EmailOAuthInitiateRequest): Promise<EmailOAuthInitiateResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/oauth/initiate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data || {}),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to initiate Email OAuth');
+    }
+    return response.json();
+  },
+
+  async callback(accountId: string, data: EmailOAuthCallbackRequest): Promise<EmailOAuthCallbackResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/oauth/callback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to complete Email OAuth callback');
+    }
+    return response.json();
+  },
+};
+
+// Email Connection types
+export type EmailConnectionStatus = 'pending' | 'active' | 'error' | 'disconnected' | 'expired';
+export type EmailProvider = 'gmail' | 'outlook' | 'imap';
+
+export interface EmailConnection {
+  id: string;
+  account_id: string;
+  email: string;
+  name?: string;
+  provider: EmailProvider;
+  status: EmailConnectionStatus;
+  error_code?: string;
+  error_message?: string;
+  last_sync_at?: string;
+  next_sync_at?: string;
+  token_expires_at?: string;
+  message_count?: number;
+  unread_count?: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListEmailConnectionsResponse {
+  connections: EmailConnection[];
+  total: number;
+}
+
+export interface ListEmailConnectionsParams {
+  status?: EmailConnectionStatus;
+  provider?: EmailProvider;
+  limit?: number;
+  offset?: number;
+}
+
+// Email Connections API methods (account-scoped)
+export const emailConnectionsApi = {
+  async list(accountId: string, params?: ListEmailConnectionsParams): Promise<ListEmailConnectionsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.provider) searchParams.set('provider', params.provider);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/email/connections${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch email connections');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, connectionId: string): Promise<EmailConnection> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/connections/${connectionId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch email connection');
+    }
+    return response.json();
+  },
+
+  async disconnect(accountId: string, connectionId: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/connections/${connectionId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to disconnect email connection');
+    }
+  },
+};
+
+// Email Label types
+export type EmailLabelStatus = 'active' | 'inactive' | 'syncing' | 'error';
+
+export interface EmailLabel {
+  id: string;
+  account_id: string;
+  connection_id: string;
+  provider_label_id: string;
+  name: string;
+  type: 'system' | 'user';
+  status: EmailLabelStatus;
+  sync_enabled: boolean;
+  message_count?: number;
+  last_sync_at?: string;
+  error_message?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListEmailLabelsResponse {
+  labels: EmailLabel[];
+  total: number;
+}
+
+export interface ListEmailLabelsParams {
+  connection_id?: string;
+  status?: EmailLabelStatus;
+  sync_enabled?: boolean;
+  type?: 'system' | 'user';
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateEmailLabelRequest {
+  connection_id: string;
+  provider_label_id: string;
+  name: string;
+  type?: 'system' | 'user';
+  sync_enabled?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateEmailLabelRequest {
+  name?: string;
+  sync_enabled?: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+// Email Labels API methods (account-scoped)
+export const emailLabelsApi = {
+  async list(accountId: string, params?: ListEmailLabelsParams): Promise<ListEmailLabelsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.connection_id) searchParams.set('connection_id', params.connection_id);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.sync_enabled !== undefined) searchParams.set('sync_enabled', params.sync_enabled.toString());
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/email/labels${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch email labels');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, labelId: string): Promise<EmailLabel> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/labels/${labelId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch email label');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateEmailLabelRequest): Promise<EmailLabel> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/labels`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create email label');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, labelId: string, data: UpdateEmailLabelRequest): Promise<EmailLabel> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/labels/${labelId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update email label');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, labelId: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/labels/${labelId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete email label');
+    }
+  },
+
+  async fetchFromProvider(accountId: string, connectionId: string): Promise<ListEmailLabelsResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/connections/${connectionId}/labels/fetch`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch labels from provider');
+    }
+    return response.json();
+  },
+};
+
+// Email Sync types
+export type EmailSyncStatus = 'idle' | 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface EmailSyncStatus_Response {
+  status: EmailSyncStatus;
+  current_sync_id?: string;
+  messages_processed?: number;
+  messages_total?: number;
+  started_at?: string;
+  estimated_completion?: string;
+  error_message?: string;
+}
+
+export interface TriggerEmailSyncRequest {
+  label_ids?: string[];
+  force?: boolean;
+}
+
+export interface TriggerEmailSyncResponse {
+  sync_id: string;
+  status: EmailSyncStatus;
+  message: string;
+}
+
+// Email Sync API methods (account-scoped)
+export const emailSyncApi = {
+  async triggerSync(accountId: string, data?: TriggerEmailSyncRequest): Promise<TriggerEmailSyncResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data || {}),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to trigger email sync');
+    }
+    return response.json();
+  },
+
+  async getSyncStatus(accountId: string): Promise<EmailSyncStatus_Response> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/sync/status`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch email sync status');
+    }
+    return response.json();
+  },
+
+  async triggerConnectionSync(accountId: string, connectionId: string, data?: { force?: boolean }): Promise<TriggerEmailSyncResponse> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/connections/${connectionId}/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data || {}),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to trigger connection sync');
+    }
+    return response.json();
+  },
+};
+
+// Email Sync History types
+export interface EmailSyncHistory {
+  id: string;
+  account_id: string;
+  connection_id?: string;
+  label_id?: string;
+  status: SyncHistoryStatus;
+  messages_processed: number;
+  messages_total: number;
+  messages_added: number;
+  messages_updated: number;
+  messages_deleted: number;
+  messages_failed: number;
+  error_message?: string;
+  started_at: string;
+  completed_at?: string;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListEmailSyncHistoryResponse {
+  sync_history: EmailSyncHistory[];
+  total: number;
+}
+
+export interface ListEmailSyncHistoryParams {
+  connection_id?: string;
+  label_id?: string;
+  status?: SyncHistoryStatus;
+  limit?: number;
+  offset?: number;
+}
+
+// Email Sync History API methods (account-scoped)
+export const emailSyncHistoryApi = {
+  async list(accountId: string, params?: ListEmailSyncHistoryParams): Promise<ListEmailSyncHistoryResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.connection_id) searchParams.set('connection_id', params.connection_id);
+    if (params?.label_id) searchParams.set('label_id', params.label_id);
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/email/sync-history${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch email sync history');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, syncId: string): Promise<EmailSyncHistory> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/sync-history/${syncId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch email sync history entry');
+    }
+    return response.json();
+  },
+
+  async cancel(accountId: string, syncId: string): Promise<EmailSyncHistory> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/email/sync-history/${syncId}/cancel`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to cancel email sync');
+    }
+    return response.json();
+  },
+};
