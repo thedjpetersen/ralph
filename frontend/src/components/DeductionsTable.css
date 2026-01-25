@@ -1,0 +1,389 @@
+.deductions-table {
+  width: 100%;
+}
+
+.table-empty {
+  text-align: center;
+  padding: 2rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.table-empty p {
+  margin: 0 0 1rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.75rem;
+  border-bottom: 1px solid #444;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #333;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.table tbody tr:hover {
+  background-color: rgba(100, 108, 255, 0.05);
+}
+
+.table tfoot td {
+  border-bottom: none;
+  font-weight: 500;
+}
+
+.table tfoot tr:last-child td {
+  border-top: 1px solid #444;
+  font-weight: 600;
+}
+
+.subtotal-row td {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.deduction-type {
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.pretax-badge {
+  padding: 0.125rem 0.375rem;
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.posttax-badge {
+  padding: 0.125rem 0.375rem;
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.amount {
+  font-weight: 600;
+  color: #e74c3c;
+  font-variant-numeric: tabular-nums;
+}
+
+.ytd {
+  color: rgba(255, 255, 255, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.total-label {
+  text-align: right;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.total-amount {
+  font-size: 1rem;
+}
+
+.actions {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 0.25rem 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.edit-btn {
+  color: #646cff;
+}
+
+.edit-btn:hover {
+  text-decoration: underline;
+}
+
+.delete-btn {
+  color: #e74c3c;
+}
+
+.delete-btn:hover {
+  text-decoration: underline;
+}
+
+.add-button {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: transparent;
+  border: 1px dashed #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.add-button:hover {
+  background-color: rgba(100, 108, 255, 0.05);
+  border-color: #646cff;
+  color: #646cff;
+}
+
+.edit-row td {
+  padding: 1rem 0.75rem;
+  background-color: rgba(100, 108, 255, 0.05);
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.inline-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.add-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: rgba(100, 108, 255, 0.05);
+  border: 1px solid #444;
+  border-radius: 6px;
+}
+
+.add-form .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.add-form .form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.form-select,
+.form-input {
+  padding: 0.5rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 0.875rem;
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.form-select {
+  min-width: 140px;
+}
+
+.form-input {
+  flex: 1;
+  min-width: 100px;
+}
+
+.input-small {
+  max-width: 80px;
+  flex: 0 0 80px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.87);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.checkbox-input {
+  width: 16px;
+  height: 16px;
+  accent-color: #646cff;
+  cursor: pointer;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.save-btn {
+  background-color: #646cff;
+  color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: transparent;
+  border: 1px solid #444;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cancel-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.75rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem;
+  }
+
+  .inline-form,
+  .add-form .form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-select,
+  .form-input {
+    width: 100%;
+    max-width: none;
+  }
+
+  .input-small {
+    max-width: none;
+    flex: 1;
+  }
+
+  .checkbox-label {
+    justify-content: flex-start;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .table-empty {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .table th {
+    border-bottom-color: #ddd;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .table td {
+    border-bottom-color: #eee;
+    color: #213547;
+  }
+
+  .table tbody tr:hover {
+    background-color: rgba(100, 108, 255, 0.05);
+  }
+
+  .table tfoot tr:last-child td {
+    border-top-color: #ddd;
+  }
+
+  .subtotal-row td {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .ytd {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .total-label {
+    color: #213547;
+  }
+
+  .add-button {
+    border-color: #ccc;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .add-button:hover {
+    border-color: #646cff;
+    color: #646cff;
+  }
+
+  .edit-row td {
+    background-color: rgba(100, 108, 255, 0.05);
+  }
+
+  .add-form {
+    background-color: rgba(100, 108, 255, 0.05);
+    border-color: #ccc;
+  }
+
+  .form-select,
+  .form-input {
+    background-color: #fff;
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .checkbox-label {
+    color: #213547;
+  }
+
+  .cancel-btn {
+    border-color: #ccc;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .cancel-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}

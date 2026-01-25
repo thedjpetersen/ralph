@@ -29,6 +29,10 @@ import { BankTransactions } from './pages/BankTransactions';
 import { BankTransactionDetail } from './pages/BankTransactionDetail';
 import { Personas } from './pages/Personas';
 import { PersonaForm } from './components/PersonaForm';
+import { Paychecks } from './pages/Paychecks';
+import { PaycheckDetail } from './pages/PaycheckDetail';
+import { PaycheckForm } from './components/PaycheckForm';
+import { Employers } from './pages/Employers';
 import './App.css';
 
 function App() {
@@ -69,6 +73,11 @@ function App() {
         <Route path="/personas" element={<Personas />} />
         <Route path="/personas/new" element={<PersonaForm />} />
         <Route path="/personas/:id/edit" element={<PersonaForm />} />
+        <Route path="/paychecks" element={<Paychecks />} />
+        <Route path="/paychecks/new" element={<PaycheckForm />} />
+        <Route path="/paychecks/:id" element={<PaycheckDetail />} />
+        <Route path="/paychecks/:id/edit" element={<PaycheckForm />} />
+        <Route path="/employers" element={<Employers />} />
       </Route>
     </Routes>
   );

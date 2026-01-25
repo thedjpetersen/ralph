@@ -1,0 +1,460 @@
+.employers-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.employers-header {
+  margin-bottom: 2rem;
+}
+
+.employers-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.employers-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+}
+
+.employers-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.view-paychecks-button {
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid #444;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.view-paychecks-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: #555;
+}
+
+.add-employer-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.add-employer-button:hover {
+  background-color: #747bff;
+}
+
+.employers-filters {
+  margin-bottom: 1.5rem;
+}
+
+.filter-select {
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M2.5 4.5L6 8L9.5 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  min-width: 160px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.employer-form {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.employer-form h3 {
+  margin: 0 0 1.5rem;
+  font-size: 1.25rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.form-input {
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 1rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.cancel-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.save-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.save-button:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.employers-empty,
+.employers-error {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.employers-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.employers-empty h2 {
+  margin: 0 0 0.5rem;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.add-employer-link,
+.select-account-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #646cff;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.add-employer-link:hover,
+.select-account-link:hover {
+  text-decoration: underline;
+}
+
+.employers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.employer-card {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.employer-card.editing {
+  flex-direction: column;
+}
+
+.employer-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.employer-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.employer-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.employer-legal-name {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.employer-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-active {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.status-inactive {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+.employer-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.detail-item {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.website-link {
+  color: #646cff;
+  text-decoration: none;
+}
+
+.website-link:hover {
+  text-decoration: underline;
+}
+
+.employer-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.edit-btn,
+.toggle-btn,
+.delete-btn {
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.edit-btn {
+  color: #646cff;
+  border-color: #646cff;
+}
+
+.edit-btn:hover {
+  background-color: rgba(100, 108, 255, 0.1);
+}
+
+.toggle-btn {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.delete-btn {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.delete-btn:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+@media (max-width: 768px) {
+  .employers-header-row {
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions button,
+  .header-actions a {
+    flex: 1;
+    text-align: center;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employer-card {
+    flex-direction: column;
+  }
+
+  .employer-actions {
+    width: 100%;
+  }
+
+  .employer-actions button {
+    flex: 1;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .employers-subtitle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .view-paychecks-button {
+    color: #213547;
+    border-color: #ccc;
+  }
+
+  .view-paychecks-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .filter-select {
+    background-color: #fff;
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .employer-form {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .form-group label {
+    color: #213547;
+  }
+
+  .form-input {
+    background-color: #fff;
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .cancel-button {
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .cancel-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .employers-empty,
+  .employers-error {
+    background-color: #f5f5f5;
+  }
+
+  .employer-card {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .employer-name {
+    color: #213547;
+  }
+
+  .employer-legal-name {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .detail-item {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .edit-btn,
+  .toggle-btn,
+  .delete-btn {
+    border-color: #ccc;
+  }
+
+  .toggle-btn {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .toggle-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}

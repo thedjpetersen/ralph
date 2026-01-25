@@ -1,0 +1,373 @@
+.paycheck-detail-page {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.paycheck-detail-header {
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.back-link:hover {
+  color: #646cff;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header-info h1 {
+  margin: 0 0 0.25rem;
+  font-size: 2rem;
+}
+
+.pay-date {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.mark-reviewed-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.mark-reviewed-button:hover:not(:disabled) {
+  background-color: #27ae60;
+}
+
+.mark-reviewed-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.edit-button:hover {
+  background-color: #747bff;
+}
+
+.delete-button {
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.delete-button:hover:not(:disabled) {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.delete-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.paycheck-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.summary-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.summary-card {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.summary-card.highlight {
+  background-color: rgba(46, 204, 113, 0.1);
+  border-color: rgba(46, 204, 113, 0.3);
+}
+
+.summary-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summary-card .amount {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount-gross {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.amount-deductions,
+.amount-taxes {
+  color: #e74c3c;
+}
+
+.amount-net {
+  color: #2ecc71;
+}
+
+.details-section {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-item label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-item span {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.paycheck-status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+.status-pending {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.status-processed {
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+}
+
+.status-reviewed {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.status-archived {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+.review-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.notes-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #444;
+}
+
+.notes-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.notes-section p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.87);
+  white-space: pre-wrap;
+}
+
+.breakdown-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.breakdown-card {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.breakdown-card h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.paycheck-detail-error {
+  text-align: center;
+  padding: 3rem;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+}
+
+.paycheck-detail-error h2 {
+  margin: 0 0 0.5rem;
+  color: #ff6b6b;
+}
+
+.paycheck-detail-error a {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #646cff;
+  text-decoration: none;
+}
+
+.paycheck-detail-error a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .header-actions button,
+  .header-actions a {
+    flex: 1;
+    text-align: center;
+  }
+
+  .summary-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .breakdown-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .back-link {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .pay-date {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .summary-card {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .summary-card.highlight {
+    background-color: rgba(46, 204, 113, 0.1);
+    border-color: rgba(46, 204, 113, 0.3);
+  }
+
+  .summary-card h3 {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .amount-gross {
+    color: #213547;
+  }
+
+  .details-section {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .info-item label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .info-item span {
+    color: #213547;
+  }
+
+  .notes-section {
+    border-top-color: #ddd;
+  }
+
+  .notes-section h3 {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .notes-section p {
+    color: #213547;
+  }
+
+  .breakdown-card {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+  }
+
+  .paycheck-detail-error {
+    background-color: #f5f5f5;
+  }
+}
