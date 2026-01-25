@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { useAccountStore } from '../stores/account';
 import './Layout.css';
 
 export function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { currentAccount, accounts, isLoading, fetchAccounts, switchAccount } =
     useAccountStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -132,7 +134,9 @@ export function Layout() {
         </div>
       </header>
       <main className="layout-main">
-        <Outlet />
+        <AnimatePresence mode="wait">
+          <Outlet key={location.pathname} />
+        </AnimatePresence>
       </main>
     </div>
   );
