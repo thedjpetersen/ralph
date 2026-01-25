@@ -38,6 +38,9 @@ import { RetirementPlanDetail } from './pages/RetirementPlanDetail';
 import { RetirementPlanForm } from './components/RetirementPlanForm';
 import { FIRECalculator } from './pages/FIRECalculator';
 import { FIREHistory } from './pages/FIREHistory';
+import { RetirementProjections } from './pages/RetirementProjections';
+import { WithdrawalStrategy } from './pages/WithdrawalStrategy';
+import { RetirementBacktest } from './pages/RetirementBacktest';
 import './App.css';
 
 function App() {
@@ -89,6 +92,9 @@ function App() {
         <Route path="/retirement-plans/:id/edit" element={<RetirementPlanForm />} />
         <Route path="/fire-calculator" element={<FIRECalculator />} />
         <Route path="/fire-history" element={<FIREHistory />} />
+        <Route path="/retirement-projections" element={<RetirementProjections />} />
+        <Route path="/withdrawal-strategy" element={<WithdrawalStrategy />} />
+        <Route path="/retirement-backtest" element={<RetirementBacktest />} />
       </Route>
     </Routes>
   );
