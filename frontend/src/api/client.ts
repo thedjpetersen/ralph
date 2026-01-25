@@ -607,3 +607,404 @@ export const categoriesApi = {
     }
   },
 };
+
+// Transaction types
+export type TransactionType = 'purchase' | 'refund' | 'payment' | 'withdrawal' | 'deposit' | 'transfer' | 'other';
+export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded' | 'disputed' | 'cancelled';
+
+export interface Transaction {
+  id: string;
+  receipt_id: string;
+  user_id: string;
+  type: TransactionType;
+  amount: number;
+  currency: string;
+  transaction_date: string;
+  description?: string;
+  merchant_name?: string;
+  merchant_category?: string;
+  payment_method?: string;
+  card_last_four?: string;
+  reference_number?: string;
+  authorization_code?: string;
+  status: TransactionStatus;
+  is_recurring: boolean;
+  recurrence_pattern?: string;
+  category_tags?: string[];
+  metadata?: Record<string, unknown>;
+  notes?: string;
+  legacy_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListTransactionsResponse {
+  transactions: Transaction[];
+  total: number;
+}
+
+export interface ListTransactionsParams {
+  status?: TransactionStatus;
+  type?: TransactionType;
+  receipt_id?: string;
+  start_date?: string;
+  end_date?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CreateTransactionRequest {
+  receipt_id: string;
+  type?: TransactionType;
+  amount: number;
+  currency?: string;
+  transaction_date: string;
+  description?: string;
+  merchant_name?: string;
+  merchant_category?: string;
+  payment_method?: string;
+  card_last_four?: string;
+  reference_number?: string;
+  authorization_code?: string;
+  status?: TransactionStatus;
+  is_recurring?: boolean;
+  recurrence_pattern?: string;
+  category_tags?: string[];
+  metadata?: Record<string, unknown>;
+  notes?: string;
+}
+
+export interface UpdateTransactionRequest {
+  type?: TransactionType;
+  amount?: number;
+  currency?: string;
+  transaction_date?: string;
+  description?: string;
+  merchant_name?: string;
+  merchant_category?: string;
+  payment_method?: string;
+  card_last_four?: string;
+  reference_number?: string;
+  authorization_code?: string;
+  status?: TransactionStatus;
+  is_recurring?: boolean;
+  recurrence_pattern?: string;
+  category_tags?: string[];
+  metadata?: Record<string, unknown>;
+  notes?: string;
+}
+
+export interface TransactionSummary {
+  total_count: number;
+  total_amount: number;
+  currency: string;
+  by_type: Record<TransactionType, { count: number; amount: number }>;
+  by_status: Record<TransactionStatus, { count: number; amount: number }>;
+  by_category: Record<string, { count: number; amount: number }>;
+  date_range: {
+    start: string;
+    end: string;
+  };
+}
+
+// Transaction API methods (account-scoped)
+export const transactionsApi = {
+  async list(accountId: string, params?: ListTransactionsParams): Promise<ListTransactionsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set('status', params.status);
+    if (params?.type) searchParams.set('type', params.type);
+    if (params?.receipt_id) searchParams.set('receipt_id', params.receipt_id);
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/transactions${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch transactions');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, id: string): Promise<Transaction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch transaction');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateTransactionRequest): Promise<Transaction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create transaction');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, id: string, data: UpdateTransactionRequest): Promise<Transaction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update transaction');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete transaction');
+    }
+  },
+
+  async getSummary(accountId: string, params?: { start_date?: string; end_date?: string }): Promise<TransactionSummary> {
+    const searchParams = new URLSearchParams();
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/transactions/summary${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch transaction summary');
+    }
+    return response.json();
+  },
+
+  async linkReceipt(accountId: string, transactionId: string, receiptId: string): Promise<Transaction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/receipt`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ receipt_id: receiptId }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to link receipt to transaction');
+    }
+    return response.json();
+  },
+
+  async unlinkReceipt(accountId: string, transactionId: string): Promise<Transaction> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/receipt`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to unlink receipt from transaction');
+    }
+    return response.json();
+  },
+};
+
+// Line Item types
+export interface LineItem {
+  id: string;
+  receipt_id: string;
+  line_number: number;
+  description: string;
+  sku?: string;
+  product_code?: string;
+  quantity: number;
+  unit?: string;
+  unit_price: number;
+  total_price: number;
+  discount_amount: number;
+  discount_description?: string;
+  tax_amount: number;
+  tax_rate?: number;
+  is_taxable: boolean;
+  category?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+  legacy_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListLineItemsResponse {
+  line_items: LineItem[];
+  total: number;
+}
+
+export interface CreateLineItemRequest {
+  receipt_id: string;
+  line_number?: number;
+  description: string;
+  sku?: string;
+  product_code?: string;
+  quantity?: number;
+  unit?: string;
+  unit_price: number;
+  total_price?: number;
+  discount_amount?: number;
+  discount_description?: string;
+  tax_amount?: number;
+  tax_rate?: number;
+  is_taxable?: boolean;
+  category?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateLineItemRequest {
+  line_number?: number;
+  description?: string;
+  sku?: string;
+  product_code?: string;
+  quantity?: number;
+  unit?: string;
+  unit_price?: number;
+  total_price?: number;
+  discount_amount?: number;
+  discount_description?: string;
+  tax_amount?: number;
+  tax_rate?: number;
+  is_taxable?: boolean;
+  category?: string;
+  tags?: string[];
+  metadata?: Record<string, unknown>;
+}
+
+// Line Items API methods (account-scoped, nested under transactions)
+export const lineItemsApi = {
+  async list(accountId: string, transactionId: string): Promise<ListLineItemsResponse> {
+    const url = `${API_BASE}/accounts/${accountId}/transactions/${transactionId}/line-items`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch line items');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, transactionId: string, id: string): Promise<LineItem> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/line-items/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch line item');
+    }
+    return response.json();
+  },
+
+  async add(accountId: string, transactionId: string, data: Omit<CreateLineItemRequest, 'receipt_id'>): Promise<LineItem> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/line-items`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add line item');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, transactionId: string, id: string, data: UpdateLineItemRequest): Promise<LineItem> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/line-items/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update line item');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, transactionId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/line-items/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete line item');
+    }
+  },
+};
+
+// Discount types
+export type DiscountType = 'percentage' | 'fixed' | 'coupon' | 'loyalty' | 'promotion' | 'other';
+
+export interface Discount {
+  id: string;
+  transaction_id: string;
+  line_item_id?: string;
+  type: DiscountType;
+  description: string;
+  code?: string;
+  amount: number;
+  percentage?: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListDiscountsResponse {
+  discounts: Discount[];
+  total: number;
+}
+
+export interface AddDiscountRequest {
+  line_item_id?: string;
+  type: DiscountType;
+  description: string;
+  code?: string;
+  amount: number;
+  percentage?: number;
+  metadata?: Record<string, unknown>;
+}
+
+// Discounts API methods (account-scoped, nested under transactions)
+export const discountsApi = {
+  async list(accountId: string, transactionId: string): Promise<ListDiscountsResponse> {
+    const url = `${API_BASE}/accounts/${accountId}/transactions/${transactionId}/discounts`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch discounts');
+    }
+    return response.json();
+  },
+
+  async add(accountId: string, transactionId: string, data: AddDiscountRequest): Promise<Discount> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/discounts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add discount');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, transactionId: string, id: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/discounts/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete discount');
+    }
+  },
+};
