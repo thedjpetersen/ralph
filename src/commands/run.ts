@@ -249,6 +249,20 @@ export async function runCommand(options: RunOptions): Promise<void> {
       logger.info(`Provider override (${source}): ${getProviderDisplayName(effectiveProvider.provider)}`);
     }
 
+    // Log if using task-level validation override
+    if (item.validation) {
+      if (item.validation.skip) {
+        logger.info('Validation override (task): skipping all validation');
+      } else if (item.validation.gates) {
+        const disabled = Object.entries(item.validation.gates)
+          .filter(([_, enabled]) => enabled === false)
+          .map(([gate]) => gate);
+        if (disabled.length > 0) {
+          logger.info(`Validation override (task): disabled gates: ${disabled.join(', ')}`);
+        }
+      }
+    }
+
     // Build prompt and run provider
     const taskPrompt = formatTaskForPrompt(item, prdFile);
     const fullPrompt = buildTaskPrompt(taskPrompt, config, {
@@ -286,18 +300,28 @@ export async function runCommand(options: RunOptions): Promise<void> {
       continue;
     }
 
-    // Run validation gates (unless skipped)
+    // Run validation gates (unless skipped globally or per-task)
     let validationResult: ValidationResult | undefined;
     let validationPassed = true;
 
-    if (!config.skipValidation) {
+    const skipValidation = config.skipValidation || item.validation?.skip;
+
+    if (!skipValidation) {
       logger.info('Running validation gates...');
+
+      // Merge task-level validation config with global config
+      const taskValidation = item.validation || {};
+      const mergedGates = {
+        ...config.validationGates,
+        ...taskValidation.gates,
+      };
 
       validationResult = await runValidation(config.projectRoot, {
         config: {
-          gates: config.validationGates,
-          timeout: config.validationTimeout,
-          failFast: config.validationFailFast,
+          gates: mergedGates,
+          timeout: taskValidation.timeout ?? config.validationTimeout,
+          failFast: taskValidation.failFast ?? config.validationFailFast,
+          packages: taskValidation.packages,
         },
         category: prdFile.category,
         taskNotes: item.notes,

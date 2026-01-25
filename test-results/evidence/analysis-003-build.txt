@@ -1,1 +1,0 @@
-.rw-r--r--@ 19k thedjpetersen 25 Jan 02:56 /Users/thedjpetersen/code/ralph/internal/application/dto/analysis.go

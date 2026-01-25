@@ -12,6 +12,23 @@ export type TaskPriority = 'high' | 'medium' | 'low';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked';
 
 /**
+ * Per-task validation configuration override
+ */
+export interface TaskValidationConfig {
+  gates?: {
+    oxlint?: boolean;
+    build?: boolean;
+    test?: boolean;
+    lint?: boolean;
+    custom?: boolean;
+  };
+  timeout?: number;
+  failFast?: boolean;
+  packages?: Package[];
+  skip?: boolean;  // Skip all validation for this task
+}
+
+/**
  * Task with DAG dependencies - the core unit of work
  */
 export interface Task {
@@ -32,6 +49,9 @@ export interface Task {
 
   // Provider override for this task
   provider?: TaskProviderConfig;
+
+  // Validation override for this task
+  validation?: TaskValidationConfig;
 
   // Judge configurations
   judges?: JudgeConfig[];

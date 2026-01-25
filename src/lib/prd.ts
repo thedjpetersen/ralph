@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'fs';
 import { join, basename } from 'path';
 import { logger } from './logger.js';
-import type { ValidationResult } from './validation/validation.types.js';
+import type { ValidationResult, Package } from './validation/validation.types.js';
 import type { AIProvider } from './config.js';
 
 /**
@@ -17,7 +17,8 @@ export interface PrdProviderConfig {
 export interface JudgeConfig {
   persona: string;          // e.g., "QA Engineer", "UX Designer", "Security Auditor"
   criteria?: string[];      // Specific criteria for the judge to evaluate
-  model?: 'opus' | 'sonnet'; // Model to use for judgment (default: sonnet for cost)
+  provider?: AIProvider;    // Provider to use (claude, gemini, cursor) - defaults to task provider
+  model?: string;           // Provider-specific model (opus, sonnet, pro, flash, etc.)
   requireEvidence?: boolean; // Whether evidence is required for judgment
   required?: boolean;        // If true, this judge must pass for task to complete (default: true)
   weight?: number;           // Weight for aggregated scoring (default: 1.0)
@@ -43,6 +44,23 @@ export interface AggregatedJudgeResult {
   timestamp: string;
 }
 
+/**
+ * Per-task validation configuration override
+ */
+export interface PrdValidationConfig {
+  gates?: {
+    oxlint?: boolean;
+    build?: boolean;
+    test?: boolean;
+    lint?: boolean;
+    custom?: boolean;
+  };
+  timeout?: number;
+  failFast?: boolean;
+  packages?: Package[];
+  skip?: boolean;  // Skip all validation for this task
+}
+
 export interface PrdItem {
   id: string;
   name?: string;
@@ -64,6 +82,8 @@ export interface PrdItem {
   judge_results?: AggregatedJudgeResult;
   // Provider override for this specific task
   provider?: PrdProviderConfig;
+  // Validation override for this specific task
+  validation?: PrdValidationConfig;
 }
 
 export interface PrdFile {

@@ -100,6 +100,7 @@ Each item in the `items` array represents a task:
 | `estimated_hours` | number | Time estimate |
 | `evidence_path` | string | Path to evidence screenshot |
 | `validation_results` | object | Results from validation gates |
+| `validation` | object | Task-level validation overrides |
 | `judges` | object[] | LLM judge configuration |
 | `judge_results` | object | Results from LLM judges |
 | `provider` | object | Task-level provider override |
@@ -201,10 +202,14 @@ Configure AI-powered code review:
 |-------|------|---------|-------------|
 | `persona` | string | required | Judge persona name |
 | `criteria` | string[] | - | Specific evaluation criteria |
-| `model` | string | `sonnet` | Model for evaluation |
+| `provider` | string | task provider | AI provider (`claude`, `gemini`, `cursor`) |
+| `model` | string | `sonnet` | Provider-specific model |
+| `threshold` | number | `70` | Pass threshold (0-100) |
 | `requireEvidence` | boolean | `false` | Whether screenshot evidence is required |
 | `required` | boolean | `true` | Must pass for task completion |
 | `weight` | number | `1.0` | Weight for aggregated scoring |
+
+**Tip**: Use cheaper/faster models for judges since they only review code, not produce it. Example: producer uses `opus`, judges use `sonnet` or `gemini flash`.
 
 ### Available Personas
 
@@ -230,6 +235,53 @@ Override the AI provider at task level:
 ```
 
 Priority: Task > File metadata > CLI
+
+## Validation Override
+
+Override validation settings at task level:
+
+```json
+{
+  "id": "docs-only-task",
+  "description": "Update documentation",
+  "validation": {
+    "skip": true
+  }
+}
+```
+
+Or selectively disable specific gates:
+
+```json
+{
+  "id": "refactor-task",
+  "description": "Refactor without breaking tests",
+  "validation": {
+    "gates": {
+      "test": false,
+      "lint": true
+    },
+    "timeout": 180000,
+    "failFast": true
+  }
+}
+```
+
+### Validation Configuration
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `skip` | boolean | `false` | Skip all validation for this task |
+| `gates.oxlint` | boolean | `true` | Run oxlint (fast Rust linter) |
+| `gates.build` | boolean | `true` | Run TypeScript build |
+| `gates.test` | boolean | `true` | Run unit tests |
+| `gates.lint` | boolean | `true` | Run ESLint |
+| `gates.custom` | boolean | `true` | Run custom validations from notes |
+| `timeout` | number | `120000` | Timeout per gate in milliseconds |
+| `failFast` | boolean | `false` | Stop on first gate failure |
+| `packages` | string[] | auto | Explicit packages to validate |
+
+Priority: Task > Global CLI config
 
 ## Validation Results
 
@@ -290,9 +342,18 @@ Ralph stores validation results after each attempt:
         "POST /api/auth/refresh extends session",
         "Middleware validates JWT on protected routes"
       ],
+      "validation": {
+        "gates": {
+          "test": true,
+          "lint": true
+        },
+        "failFast": true
+      },
       "judges": [
         {
           "persona": "Security Auditor",
+          "provider": "claude",
+          "model": "sonnet",
           "criteria": [
             "Passwords hashed with bcrypt",
             "JWT secret from environment",
@@ -302,6 +363,8 @@ Ralph stores validation results after each attempt:
         },
         {
           "persona": "QA Engineer",
+          "provider": "gemini",
+          "model": "pro",
           "criteria": ["Unit tests for all endpoints"],
           "required": true
         }
@@ -310,6 +373,11 @@ Ralph stores validation results after each attempt:
   ]
 }
 ```
+
+This example shows:
+- **Producer**: Claude Opus (via metadata provider)
+- **Security Judge**: Claude Sonnet (cheaper, still good for review)
+- **QA Judge**: Gemini Pro (alternative model for diversity)
 
 ### Multi-Task PRD with Dependencies
 

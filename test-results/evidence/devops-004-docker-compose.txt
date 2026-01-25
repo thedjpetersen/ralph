@@ -1,8 +1,0 @@
-NAME                IMAGE                COMMAND                  SERVICE    CREATED              STATUS                        PORTS
-clockzen-api        ralph-api            "/app/api"               api        About a minute ago   Up About a minute (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
-clockzen-postgres   postgres:16-alpine   "docker-entrypoint.s…"   postgres   About a minute ago   Up About a minute (healthy)   0.0.0.0:5435->5432/tcp, [::]:5435->5432/tcp
-clockzen-worker     ralph-worker         "/app/worker"            worker     About a minute ago   Up About a minute (healthy)   0.0.0.0:8081->8081/tcp, [::]:8081->8081/tcp
----
-{"service":"clockzen-api","status":"healthy"}
-
-{"service":"clockzen-worker","status":"healthy","workers":{"drive":{"ocr_queued":0,"queued_tasks":0,"running":true},"email":{"ocr_queued":0,"queued_tasks":0,"running":true}}}
