@@ -19,6 +19,9 @@ import { TransactionDetail } from './pages/TransactionDetail';
 import { TransactionForm } from './components/TransactionForm';
 import { Receipts } from './pages/Receipts';
 import { ReceiptDetail } from './pages/ReceiptDetail';
+import { Budgets } from './pages/Budgets';
+import { BudgetDetail } from './pages/BudgetDetail';
+import { BudgetForm } from './components/BudgetForm';
 import './App.css';
 
 function App() {
@@ -47,6 +50,10 @@ function App() {
         <Route path="/transactions/:id/edit" element={<TransactionForm />} />
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/receipts/:id" element={<ReceiptDetail />} />
+        <Route path="/budgets" element={<Budgets />} />
+        <Route path="/budgets/new" element={<BudgetForm />} />
+        <Route path="/budgets/:id" element={<BudgetDetail />} />
+        <Route path="/budgets/:id/edit" element={<BudgetForm />} />
       </Route>
     </Routes>
   );

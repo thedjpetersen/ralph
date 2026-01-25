@@ -1,0 +1,149 @@
+.budget-progress {
+  width: 100%;
+}
+
+.progress-bar-container {
+  position: relative;
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease-out, background-color 0.3s;
+}
+
+.progress-bar-overflow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  background-color: rgba(231, 76, 60, 0.5);
+  border-radius: 0 6px 6px 0;
+}
+
+/* Progress states */
+.progress-good {
+  background-color: #2ecc71;
+}
+
+.progress-moderate {
+  background-color: #3498db;
+}
+
+.progress-warning {
+  background-color: #f1c40f;
+}
+
+.progress-over {
+  background-color: #e74c3c;
+}
+
+/* Labels */
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 0.75rem;
+  gap: 1rem;
+}
+
+.progress-spent,
+.progress-remaining {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.progress-spent {
+  align-items: flex-start;
+}
+
+.progress-remaining {
+  align-items: flex-end;
+}
+
+.progress-percentage {
+  flex: 1;
+  text-align: center;
+}
+
+.progress-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.progress-value {
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.progress-value.over-budget {
+  color: #e74c3c;
+}
+
+.percentage-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.percentage-value.progress-good {
+  color: #2ecc71;
+}
+
+.percentage-value.progress-moderate {
+  color: #3498db;
+}
+
+.percentage-value.progress-warning {
+  color: #f1c40f;
+}
+
+.percentage-value.progress-over {
+  color: #e74c3c;
+}
+
+@media (max-width: 480px) {
+  .progress-labels {
+    flex-wrap: wrap;
+  }
+
+  .progress-percentage {
+    order: -1;
+    flex-basis: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-spent,
+  .progress-remaining {
+    flex: 1;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .progress-bar-container {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .progress-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .progress-value {
+    color: #213547;
+  }
+
+  .progress-value.over-budget {
+    color: #e74c3c;
+  }
+}
