@@ -380,8 +380,10 @@ export function Bills() {
       const newBill = await createBill(currentAccount.id, createData);
       setIsCreateModalOpen(false);
       resetForm();
-      toast.success(`Bill "${newBill.payee_name}" created successfully`);
-      announce(`Bill ${newBill.payee_name} created`);
+      if (newBill) {
+        toast.success(`Bill "${newBill.payee_name}" created successfully`);
+        announce(`Bill ${newBill.payee_name} created`);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create bill');
     } finally {
@@ -416,8 +418,10 @@ export function Bills() {
       setIsEditModalOpen(false);
       setEditingBill(null);
       resetForm();
-      toast.success(`Bill "${updatedBill.payee_name}" updated successfully`);
-      announce(`Bill ${updatedBill.payee_name} updated`);
+      if (updatedBill) {
+        toast.success(`Bill "${updatedBill.payee_name}" updated successfully`);
+        announce(`Bill ${updatedBill.payee_name} updated`);
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to update bill');
     } finally {

@@ -11,6 +11,17 @@ import {
   type CreateLineItemRequest,
   type UpdateLineItemRequest,
 } from '../api/client';
+import { executeOptimisticMutation, generateMutationId } from './optimistic';
+
+// Helper to generate optimistic transaction ID
+function generateOptimisticTransactionId(): string {
+  return `optimistic-transaction-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// Helper to generate optimistic line item ID
+function generateOptimisticLineItemId(): string {
+  return `optimistic-lineitem-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
 
 interface TransactionsState {
   // State
@@ -27,19 +38,19 @@ interface TransactionsState {
   setCurrentTransaction: (transaction: Transaction | null) => void;
   fetchTransactions: (accountId: string, params?: ListTransactionsParams) => Promise<void>;
   fetchTransaction: (accountId: string, id: string) => Promise<Transaction>;
-  createTransaction: (accountId: string, data: CreateTransactionRequest) => Promise<Transaction>;
-  updateTransaction: (accountId: string, id: string, data: UpdateTransactionRequest) => Promise<Transaction>;
-  deleteTransaction: (accountId: string, id: string) => Promise<void>;
+  createTransaction: (accountId: string, data: CreateTransactionRequest) => Promise<Transaction | null>;
+  updateTransaction: (accountId: string, id: string, data: UpdateTransactionRequest) => Promise<Transaction | null>;
+  deleteTransaction: (accountId: string, id: string) => Promise<boolean>;
   fetchSummary: (accountId: string, params?: { start_date?: string; end_date?: string }) => Promise<void>;
 
   // Line items actions
   fetchLineItems: (accountId: string, transactionId: string) => Promise<void>;
-  addLineItem: (accountId: string, transactionId: string, data: Omit<CreateLineItemRequest, 'receipt_id'>) => Promise<LineItem>;
-  updateLineItem: (accountId: string, transactionId: string, id: string, data: UpdateLineItemRequest) => Promise<LineItem>;
-  deleteLineItem: (accountId: string, transactionId: string, id: string) => Promise<void>;
+  addLineItem: (accountId: string, transactionId: string, data: Omit<CreateLineItemRequest, 'receipt_id'>) => Promise<LineItem | null>;
+  updateLineItem: (accountId: string, transactionId: string, id: string, data: UpdateLineItemRequest) => Promise<LineItem | null>;
+  deleteLineItem: (accountId: string, transactionId: string, id: string) => Promise<boolean>;
 }
 
-export const useTransactionsStore = create<TransactionsState>()((set) => ({
+export const useTransactionsStore = create<TransactionsState>()((set, get) => ({
   // Initial state
   transactions: [],
   currentTransaction: null,
@@ -89,65 +100,155 @@ export const useTransactionsStore = create<TransactionsState>()((set) => ({
     }
   },
 
-  // Create a new transaction
+  // Create a new transaction with optimistic update
   createTransaction: async (accountId, data) => {
-    set({ isLoading: true, error: null });
-    try {
-      const newTransaction = await transactionsApi.create(accountId, data);
-      set((state) => ({
-        transactions: [...state.transactions, newTransaction],
-        total: state.total + 1,
-        isLoading: false,
-      }));
-      return newTransaction;
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
-    }
+    const { transactions } = get();
+
+    // Create optimistic transaction
+    const optimisticId = generateOptimisticTransactionId();
+    const optimisticTransaction: Transaction = {
+      id: optimisticId,
+      receipt_id: data.receipt_id,
+      user_id: '',
+      type: data.type ?? 'purchase',
+      amount: data.amount,
+      currency: data.currency || 'USD',
+      transaction_date: data.transaction_date,
+      description: data.description,
+      merchant_name: data.merchant_name,
+      merchant_category: data.merchant_category,
+      payment_method: data.payment_method,
+      card_last_four: data.card_last_four,
+      reference_number: data.reference_number,
+      authorization_code: data.authorization_code,
+      status: data.status || 'pending',
+      is_recurring: data.is_recurring ?? false,
+      recurrence_pattern: data.recurrence_pattern,
+      category_tags: data.category_tags,
+      metadata: data.metadata,
+      notes: data.notes,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Apply optimistic update immediately
+    set({
+      transactions: [...transactions, optimisticTransaction],
+      total: transactions.length + 1,
+      error: null,
+    });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('transaction-create'),
+      type: 'transaction:create',
+      optimisticData: optimisticTransaction,
+      previousData: transactions,
+      mutationFn: () => transactionsApi.create(accountId, data),
+      onSuccess: (newTransaction) => {
+        // Replace optimistic transaction with real one from server
+        set((state) => ({
+          transactions: state.transactions.filter((t) => t.id !== optimisticId).concat(newTransaction),
+        }));
+      },
+      onRollback: () => {
+        // Restore previous state
+        set({ transactions, total: transactions.length });
+      },
+      errorMessage: 'Failed to create transaction',
+    });
+
+    return result;
   },
 
-  // Update a transaction
+  // Update a transaction with optimistic update
   updateTransaction: async (accountId, id, data) => {
-    set({ isLoading: true, error: null });
-    try {
-      const updatedTransaction = await transactionsApi.update(accountId, id, data);
-      set((state) => ({
-        transactions: state.transactions.map((t) => (t.id === id ? updatedTransaction : t)),
-        currentTransaction:
-          state.currentTransaction?.id === id ? updatedTransaction : state.currentTransaction,
-        isLoading: false,
-      }));
-      return updatedTransaction;
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
+    const { transactions, currentTransaction } = get();
+    const existingTransaction = transactions.find((t) => t.id === id);
+
+    if (!existingTransaction) {
+      return null;
     }
+
+    // Create optimistic updated transaction
+    const optimisticTransaction: Transaction = {
+      ...existingTransaction,
+      ...data,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Apply optimistic update immediately
+    set({
+      transactions: transactions.map((t) => (t.id === id ? optimisticTransaction : t)),
+      currentTransaction: currentTransaction?.id === id ? optimisticTransaction : currentTransaction,
+      error: null,
+    });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('transaction-update'),
+      type: 'transaction:update',
+      optimisticData: optimisticTransaction,
+      previousData: existingTransaction,
+      mutationFn: () => transactionsApi.update(accountId, id, data),
+      onSuccess: (updatedTransaction) => {
+        // Apply server response
+        set((state) => ({
+          transactions: state.transactions.map((t) => (t.id === id ? updatedTransaction : t)),
+          currentTransaction:
+            state.currentTransaction?.id === id ? updatedTransaction : state.currentTransaction,
+        }));
+      },
+      onRollback: () => {
+        // Restore previous state
+        set((state) => ({
+          transactions: state.transactions.map((t) => (t.id === id ? existingTransaction : t)),
+          currentTransaction:
+            state.currentTransaction?.id === id ? existingTransaction : state.currentTransaction,
+        }));
+      },
+      errorMessage: 'Failed to update transaction',
+    });
+
+    return result;
   },
 
-  // Delete a transaction
+  // Delete a transaction with optimistic update
   deleteTransaction: async (accountId, id) => {
-    set({ isLoading: true, error: null });
-    try {
-      await transactionsApi.delete(accountId, id);
-      set((state) => ({
-        transactions: state.transactions.filter((t) => t.id !== id),
-        currentTransaction: state.currentTransaction?.id === id ? null : state.currentTransaction,
-        total: state.total - 1,
-        isLoading: false,
-      }));
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
+    const { transactions, currentTransaction } = get();
+    const existingTransaction = transactions.find((t) => t.id === id);
+
+    if (!existingTransaction) {
+      return false;
     }
+
+    // Apply optimistic delete immediately
+    set({
+      transactions: transactions.filter((t) => t.id !== id),
+      currentTransaction: currentTransaction?.id === id ? null : currentTransaction,
+      total: transactions.length - 1,
+      error: null,
+    });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('transaction-delete'),
+      type: 'transaction:delete',
+      optimisticData: null,
+      previousData: { transactions, currentTransaction },
+      mutationFn: () => transactionsApi.delete(accountId, id),
+      onRollback: () => {
+        // Restore previous state
+        set({
+          transactions,
+          currentTransaction,
+          total: transactions.length,
+        });
+      },
+      errorMessage: 'Failed to delete transaction',
+    });
+
+    return result !== null;
   },
 
   // Fetch transaction summary
@@ -178,60 +279,141 @@ export const useTransactionsStore = create<TransactionsState>()((set) => ({
     }
   },
 
-  // Add a line item to a transaction
+  // Add a line item to a transaction with optimistic update
   addLineItem: async (accountId, transactionId, data) => {
-    set({ isLoading: true, error: null });
-    try {
-      const newLineItem = await lineItemsApi.add(accountId, transactionId, data);
-      set((state) => ({
-        lineItems: [...state.lineItems, newLineItem],
-        isLoading: false,
-      }));
-      return newLineItem;
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
-    }
+    const { lineItems } = get();
+
+    // Create optimistic line item
+    const optimisticId = generateOptimisticLineItemId();
+    const optimisticLineItem: LineItem = {
+      id: optimisticId,
+      receipt_id: transactionId,
+      line_number: data.line_number ?? lineItems.length + 1,
+      description: data.description,
+      sku: data.sku,
+      product_code: data.product_code,
+      quantity: data.quantity ?? 1,
+      unit: data.unit,
+      unit_price: data.unit_price,
+      total_price: data.total_price ?? data.unit_price * (data.quantity ?? 1),
+      discount_amount: data.discount_amount ?? 0,
+      discount_description: data.discount_description,
+      tax_amount: data.tax_amount ?? 0,
+      tax_rate: data.tax_rate,
+      is_taxable: data.is_taxable ?? false,
+      category: data.category,
+      tags: data.tags,
+      metadata: data.metadata,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Apply optimistic update immediately
+    set({
+      lineItems: [...lineItems, optimisticLineItem],
+      error: null,
+    });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('lineitem-add'),
+      type: 'lineitem:add',
+      optimisticData: optimisticLineItem,
+      previousData: lineItems,
+      mutationFn: () => lineItemsApi.add(accountId, transactionId, data),
+      onSuccess: (newLineItem) => {
+        // Replace optimistic line item with real one from server
+        set((state) => ({
+          lineItems: state.lineItems.filter((item) => item.id !== optimisticId).concat(newLineItem),
+        }));
+      },
+      onRollback: () => {
+        // Restore previous state
+        set({ lineItems });
+      },
+      errorMessage: 'Failed to add line item',
+    });
+
+    return result;
   },
 
-  // Update a line item
+  // Update a line item with optimistic update
   updateLineItem: async (accountId, transactionId, id, data) => {
-    set({ isLoading: true, error: null });
-    try {
-      const updatedLineItem = await lineItemsApi.update(accountId, transactionId, id, data);
-      set((state) => ({
-        lineItems: state.lineItems.map((item) => (item.id === id ? updatedLineItem : item)),
-        isLoading: false,
-      }));
-      return updatedLineItem;
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
+    const { lineItems } = get();
+    const existingLineItem = lineItems.find((item) => item.id === id);
+
+    if (!existingLineItem) {
+      return null;
     }
+
+    // Create optimistic updated line item
+    const optimisticLineItem: LineItem = {
+      ...existingLineItem,
+      ...data,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Apply optimistic update immediately
+    set({
+      lineItems: lineItems.map((item) => (item.id === id ? optimisticLineItem : item)),
+      error: null,
+    });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('lineitem-update'),
+      type: 'lineitem:update',
+      optimisticData: optimisticLineItem,
+      previousData: existingLineItem,
+      mutationFn: () => lineItemsApi.update(accountId, transactionId, id, data),
+      onSuccess: (updatedLineItem) => {
+        // Apply server response
+        set((state) => ({
+          lineItems: state.lineItems.map((item) => (item.id === id ? updatedLineItem : item)),
+        }));
+      },
+      onRollback: () => {
+        // Restore previous state
+        set((state) => ({
+          lineItems: state.lineItems.map((item) => (item.id === id ? existingLineItem : item)),
+        }));
+      },
+      errorMessage: 'Failed to update line item',
+    });
+
+    return result;
   },
 
-  // Delete a line item
+  // Delete a line item with optimistic update
   deleteLineItem: async (accountId, transactionId, id) => {
-    set({ isLoading: true, error: null });
-    try {
-      await lineItemsApi.delete(accountId, transactionId, id);
-      set((state) => ({
-        lineItems: state.lineItems.filter((item) => item.id !== id),
-        isLoading: false,
-      }));
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
+    const { lineItems } = get();
+    const existingLineItem = lineItems.find((item) => item.id === id);
+
+    if (!existingLineItem) {
+      return false;
     }
+
+    // Apply optimistic delete immediately
+    set({
+      lineItems: lineItems.filter((item) => item.id !== id),
+      error: null,
+    });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('lineitem-delete'),
+      type: 'lineitem:delete',
+      optimisticData: null,
+      previousData: lineItems,
+      mutationFn: () => lineItemsApi.delete(accountId, transactionId, id),
+      onRollback: () => {
+        // Restore previous state
+        set({ lineItems });
+      },
+      errorMessage: 'Failed to delete line item',
+    });
+
+    return result !== null;
   },
 }));
 

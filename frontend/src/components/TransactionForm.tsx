@@ -210,7 +210,11 @@ export function TransactionForm() {
         navigate(`/transactions/${id}`);
       } else {
         const newTransaction = await createTransaction(currentAccount.id, transactionData);
-        navigate(`/transactions/${newTransaction.id}`);
+        if (newTransaction) {
+          navigate(`/transactions/${newTransaction.id}`);
+        } else {
+          navigate('/transactions');
+        }
       }
     } catch {
       setSaveError(isEditing ? 'Failed to update transaction' : 'Failed to create transaction');

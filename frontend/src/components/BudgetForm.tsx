@@ -165,7 +165,11 @@ export function BudgetForm() {
       } else {
         const newBudget = await createBudget(currentAccount.id, budgetData);
         toast.success('Budget created successfully');
-        navigate(`/budgets/${newBudget.id}`);
+        if (newBudget) {
+          navigate(`/budgets/${newBudget.id}`);
+        } else {
+          navigate('/budgets');
+        }
       }
     } catch {
       const errorMsg = isEditing ? 'Failed to update budget' : 'Failed to create budget';
