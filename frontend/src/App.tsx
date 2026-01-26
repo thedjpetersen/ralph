@@ -6,6 +6,7 @@ import { AccountSettings } from './pages/AccountSettings';
 import { AccountMembers } from './pages/AccountMembers';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
+import { OrganizedSettings } from './pages/OrganizedSettings';
 import { APIKeys } from './pages/APIKeys';
 import { SkeletonDemo } from './pages/SkeletonDemo';
 import { SidebarDemo } from './pages/SidebarDemo';
@@ -19,6 +20,7 @@ import { Categories } from './pages/Categories';
 import { Transactions } from './pages/Transactions';
 import { TransactionDetail } from './pages/TransactionDetail';
 import { TransactionForm } from './components/TransactionForm';
+import { LineItems } from './pages/LineItems';
 import { Receipts } from './pages/Receipts';
 import { ReceiptDetail } from './pages/ReceiptDetail';
 import { ReceiptUpload } from './pages/ReceiptUpload';
@@ -58,7 +60,8 @@ function App() {
         <Route path="/accounts/:id/settings" element={<AccountSettings />} />
         <Route path="/accounts/:id/members" element={<AccountMembers />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/settings" element={<OrganizedSettings />} />
+        <Route path="/settings/legacy" element={<Settings />} />
         <Route path="/api-keys" element={<APIKeys />} />
         <Route path="/skeleton-demo" element={<SkeletonDemo />} />
         <Route path="/sidebar-demo" element={<SidebarDemo />} />
@@ -74,6 +77,7 @@ function App() {
         <Route path="/transactions/new" element={<TransactionForm />} />
         <Route path="/transactions/:id" element={<TransactionDetail />} />
         <Route path="/transactions/:id/edit" element={<TransactionForm />} />
+        <Route path="/line-items" element={<LineItems />} />
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/receipts/upload" element={<ReceiptUpload />} />
         <Route path="/receipts/:id" element={<ReceiptDetail />} />
