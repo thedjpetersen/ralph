@@ -320,6 +320,18 @@ export function TransactionDetail() {
             </div>
           )}
 
+          {transaction.receipt_id && (
+            <div className="detail-section">
+              <h2>Source Receipt</h2>
+              <div className="receipt-link-container">
+                <Link to={`/receipts/${transaction.receipt_id}`} className="receipt-link">
+                  <span className="receipt-link-icon">📄</span>
+                  <span className="receipt-link-text">View Source Receipt</span>
+                </Link>
+              </div>
+            </div>
+          )}
+
           <div className="detail-section">
             <h2>Line Items</h2>
             <LineItemList

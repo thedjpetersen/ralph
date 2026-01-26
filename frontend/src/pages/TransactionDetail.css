@@ -311,6 +311,38 @@
   font-size: 0.875rem;
 }
 
+.receipt-link-container {
+  display: flex;
+  align-items: center;
+}
+
+.receipt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 8px;
+  color: #646cff;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+.receipt-link:hover {
+  background-color: rgba(100, 108, 255, 0.2);
+  border-color: rgba(100, 108, 255, 0.5);
+}
+
+.receipt-link-icon {
+  font-size: 1.25rem;
+}
+
+.receipt-link-text {
+  font-weight: 500;
+}
+
 .detail-timestamps {
   display: flex;
   gap: 2rem;
