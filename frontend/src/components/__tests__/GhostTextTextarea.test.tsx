@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { GhostTextTextarea } from '../GhostTextTextarea';
 import { useAISuggestionStore } from '../../stores/aiSuggestions';
+import { useImageUploadStore } from '../../stores/imageUpload';
+import { useToastStore } from '../../stores/toast';
 
 describe('GhostTextTextarea', () => {
   beforeEach(() => {
@@ -9,6 +11,14 @@ describe('GhostTextTextarea', () => {
     useAISuggestionStore.setState({
       suggestions: new Map(),
       abortControllers: new Map(),
+    });
+    useImageUploadStore.setState({
+      uploads: new Map(),
+      isDragging: false,
+    });
+    useToastStore.setState({
+      toasts: [],
+      queue: [],
     });
     vi.useFakeTimers();
   });
@@ -626,6 +636,285 @@ describe('GhostTextTextarea', () => {
       const suggestion = useAISuggestionStore.getState().suggestions.get('test-notes');
       expect(suggestion?.text).toBeTruthy();
       // The suggestion should be contextual (though mock, it should still be a valid continuation)
+    });
+  });
+
+  describe('Image drag-and-drop', () => {
+    const createImageFile = (name = 'test.png', type = 'image/png') => {
+      const blob = new Blob(['fake image content'], { type });
+      return new File([blob], name, { type });
+    };
+
+    const createLargeImageFile = (name = 'large.png', type = 'image/png') => {
+      // Create a file with a mocked size property larger than 10MB
+      const blob = new Blob(['fake'], { type });
+      const file = new File([blob], name, { type });
+      Object.defineProperty(file, 'size', { value: 11 * 1024 * 1024, writable: false });
+      return file;
+    };
+
+    const createDataTransfer = (files: File[]) => {
+      const dataTransfer = {
+        files,
+        items: files.map((file) => ({
+          kind: 'file',
+          type: file.type,
+          getAsFile: () => file,
+        })),
+        dropEffect: 'none',
+        effectAllowed: 'all',
+      };
+      return dataTransfer;
+    };
+
+    it('shows drag overlay when dragging an image over', () => {
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="" onChange={onChange} />);
+
+      const container = document.querySelector('.ghost-text-container')!;
+      const imageFile = createImageFile();
+      const dataTransfer = createDataTransfer([imageFile]);
+
+      fireEvent.dragEnter(container, { dataTransfer });
+
+      expect(container).toHaveClass('ghost-text-drag-over');
+      expect(screen.getByText('Drop image here')).toBeInTheDocument();
+    });
+
+    it('hides drag overlay when dragging out', () => {
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="" onChange={onChange} />);
+
+      const container = document.querySelector('.ghost-text-container')!;
+      const imageFile = createImageFile();
+      const dataTransfer = createDataTransfer([imageFile]);
+
+      fireEvent.dragEnter(container, { dataTransfer });
+      expect(container).toHaveClass('ghost-text-drag-over');
+
+      fireEvent.dragLeave(container, { dataTransfer });
+      expect(container).not.toHaveClass('ghost-text-drag-over');
+    });
+
+    it('processes dropped image files and shows uploading overlay', async () => {
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="" onChange={onChange} />);
+
+      const container = document.querySelector('.ghost-text-container')!;
+      const imageFile = createImageFile('photo.jpg', 'image/jpeg');
+      const dataTransfer = createDataTransfer([imageFile]);
+
+      fireEvent.drop(container, { dataTransfer });
+
+      // After dropping, container should no longer be in drag-over state
+      expect(container).not.toHaveClass('ghost-text-drag-over');
+
+      // Should add upload to store
+      const uploads = useImageUploadStore.getState().uploads;
+      expect(uploads.size).toBeGreaterThan(0);
+    });
+
+    it('does not show drag overlay when image upload is disabled', () => {
+      const onChange = vi.fn();
+      render(
+        <GhostTextTextarea
+          fieldId="test-notes"
+          value=""
+          onChange={onChange}
+          enableImageUpload={false}
+        />
+      );
+
+      const container = document.querySelector('.ghost-text-container')!;
+      const imageFile = createImageFile();
+      const dataTransfer = createDataTransfer([imageFile]);
+
+      fireEvent.dragEnter(container, { dataTransfer });
+
+      expect(container).not.toHaveClass('ghost-text-drag-over');
+      expect(screen.queryByText('Drop image here')).not.toBeInTheDocument();
+    });
+
+    it('shows warning toast for non-image files', async () => {
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="" onChange={onChange} />);
+
+      const container = document.querySelector('.ghost-text-container')!;
+      const textFile = new File(['text content'], 'document.txt', { type: 'text/plain' });
+      const dataTransfer = createDataTransfer([textFile]);
+
+      fireEvent.drop(container, { dataTransfer });
+
+      await act(async () => {
+        vi.advanceTimersByTime(100);
+      });
+
+      // Should show warning toast for no valid images
+      const toasts = useToastStore.getState().toasts;
+      expect(toasts.some((t) => t.type === 'warning')).toBe(true);
+    });
+
+    it('shows error toast for oversized image files', async () => {
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="" onChange={onChange} />);
+
+      const container = document.querySelector('.ghost-text-container')!;
+      // Create file larger than 10MB limit
+      const largeFile = createLargeImageFile('large.png', 'image/png');
+      const dataTransfer = createDataTransfer([largeFile]);
+
+      fireEvent.drop(container, { dataTransfer });
+
+      await act(async () => {
+        vi.advanceTimersByTime(100);
+      });
+
+      // Should show error toast for oversized file
+      const toasts = useToastStore.getState().toasts;
+      expect(toasts.some((t) => t.type === 'error' && t.message.includes('too large'))).toBe(true);
+    });
+
+    it('calls onImageUpload callback after upload completes', async () => {
+      vi.useRealTimers(); // Use real timers for this test
+
+      const onChange = vi.fn();
+      const onImageUpload = vi.fn();
+      render(
+        <GhostTextTextarea
+          fieldId="test-notes"
+          value=""
+          onChange={onChange}
+          onImageUpload={onImageUpload}
+        />
+      );
+
+      const container = document.querySelector('.ghost-text-container')!;
+      const imageFile = createImageFile('callback.png', 'image/png');
+      const dataTransfer = createDataTransfer([imageFile]);
+
+      fireEvent.drop(container, { dataTransfer });
+
+      // Wait for upload to complete (simulated ~1-2 seconds)
+      await waitFor(
+        () => {
+          expect(onImageUpload).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
+
+      expect(onImageUpload).toHaveBeenCalledWith(expect.stringContaining('blob:'), 'callback');
+
+      vi.useFakeTimers(); // Restore fake timers
+    });
+
+    it('inserts image markdown at cursor position when no callback provided', async () => {
+      vi.useRealTimers(); // Use real timers for this test
+
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="Hello world" onChange={onChange} />);
+
+      const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+      // Set cursor position (simulate user having cursor at position 5)
+      textarea.setSelectionRange(5, 5);
+
+      const container = document.querySelector('.ghost-text-container')!;
+      const imageFile = createImageFile('inline.png', 'image/png');
+      const dataTransfer = createDataTransfer([imageFile]);
+
+      fireEvent.drop(container, { dataTransfer });
+
+      // Wait for upload to complete
+      await waitFor(
+        () => {
+          expect(onChange).toHaveBeenCalled();
+        },
+        { timeout: 3000 }
+      );
+
+      // Should call onChange with markdown inserted
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1];
+      expect(lastCall[0]).toContain('![inline]');
+
+      vi.useFakeTimers(); // Restore fake timers
+    });
+  });
+
+  describe('Image paste from clipboard', () => {
+    const createImageFile = (name = 'test.png', type = 'image/png') => {
+      const blob = new Blob(['fake image content'], { type });
+      return new File([blob], name, { type });
+    };
+
+    const createClipboardData = (items: Array<{ kind: string; type: string; file?: File }>) => {
+      return {
+        items: items.map((item) => ({
+          kind: item.kind,
+          type: item.type,
+          getAsFile: () => item.file || null,
+        })),
+      };
+    };
+
+    it('processes pasted image from clipboard', async () => {
+      vi.useRealTimers(); // Use real timers for this test
+
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="Text " onChange={onChange} />);
+
+      const textarea = screen.getByRole('textbox');
+      const imageFile = createImageFile('pasted.png', 'image/png');
+      const clipboardData = createClipboardData([
+        { kind: 'file', type: 'image/png', file: imageFile },
+      ]);
+
+      fireEvent.paste(textarea, { clipboardData });
+
+      // Wait for upload to start
+      await waitFor(
+        () => {
+          const uploads = useImageUploadStore.getState().uploads;
+          expect(uploads.size).toBeGreaterThan(0);
+        },
+        { timeout: 3000 }
+      );
+
+      vi.useFakeTimers(); // Restore fake timers
+    });
+
+    it('does not handle paste when image upload is disabled', () => {
+      const onChange = vi.fn();
+      render(
+        <GhostTextTextarea
+          fieldId="test-notes"
+          value=""
+          onChange={onChange}
+          enableImageUpload={false}
+        />
+      );
+
+      const textarea = screen.getByRole('textbox');
+      const imageFile = createImageFile('pasted.png', 'image/png');
+      const clipboardData = createClipboardData([
+        { kind: 'file', type: 'image/png', file: imageFile },
+      ]);
+
+      fireEvent.paste(textarea, { clipboardData });
+
+      // Should not show uploading state
+      expect(document.querySelector('.ghost-text-upload-overlay')).not.toBeInTheDocument();
+    });
+
+    it('allows normal text paste when no images in clipboard', () => {
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="" onChange={onChange} />);
+
+      const textarea = screen.getByRole('textbox');
+      const clipboardData = createClipboardData([{ kind: 'string', type: 'text/plain' }]);
+
+      // Paste should not be prevented for text
+      const pasteEvent = fireEvent.paste(textarea, { clipboardData });
+      // Text paste should proceed normally (event not prevented)
+      expect(pasteEvent).toBe(true);
     });
   });
 });

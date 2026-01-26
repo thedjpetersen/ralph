@@ -2,14 +2,19 @@ import {
   useRef,
   useEffect,
   useCallback,
+  useState,
   type TextareaHTMLAttributes,
   type ChangeEvent,
   type KeyboardEvent,
+  type DragEvent,
+  type ClipboardEvent,
 } from 'react';
 import { useAISuggestionStore, useAISuggestion } from '../stores/aiSuggestions';
 import { useSmartTypographyStore } from '../stores/smartTypography';
 import { useParagraphFocusStore } from '../stores/paragraphFocus';
 import { useTypewriterScrollStore } from '../stores/typewriterScroll';
+import { useImageUploadStore, validateImageFile, isImageFile } from '../stores/imageUpload';
+import { toast } from '../stores/toast';
 import './GhostTextTextarea.css';
 
 export interface GhostTextTextareaProps
@@ -28,6 +33,10 @@ export interface GhostTextTextareaProps
   enableSuggestions?: boolean;
   /** Whether smart typography is enabled (default: true) */
   enableSmartTypography?: boolean;
+  /** Whether image drag-and-drop is enabled (default: true) */
+  enableImageUpload?: boolean;
+  /** Callback when an image is uploaded - receives the image URL and alt text */
+  onImageUpload?: (imageUrl: string, altText: string) => void;
 }
 
 export function GhostTextTextarea({
@@ -38,14 +47,23 @@ export function GhostTextTextarea({
   debounceMs = 500,
   enableSuggestions = true,
   enableSmartTypography = true,
+  enableImageUpload = true,
+  onImageUpload,
   className = '',
   onKeyDown,
   ...props
 }: GhostTextTextareaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousValueRef = useRef(value);
   const skipTypographyRef = useRef(false);
+  const dragCounterRef = useRef(0);
+
+  // Local state for drag-over indicator
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const suggestion = useAISuggestion(fieldId);
   const { fetchSuggestion, fetchContinueWriting, dismissSuggestion, acceptSuggestion, acceptPartialSuggestion } =
@@ -53,6 +71,7 @@ export function GhostTextTextarea({
   const smartTypography = useSmartTypographyStore();
   const { setTargetElement: setParagraphFocusTarget } = useParagraphFocusStore();
   const { setTargetElement: setTypewriterScrollTarget } = useTypewriterScrollStore();
+  const { addUpload, updateUploadProgress, setUploadComplete, setUploadError } = useImageUploadStore();
 
   // Register textarea with paragraph focus and typewriter scroll stores when mounted/focused
   useEffect(() => {
@@ -248,6 +267,200 @@ export function GhostTextTextarea({
     ]
   );
 
+  // Image upload handler
+  const handleImageUpload = useCallback(
+    async (file: File) => {
+      if (!enableImageUpload) return;
+
+      // Validate the file
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        toast.error(validationError);
+        return;
+      }
+
+      // Add to upload store and start upload
+      const uploadId = addUpload(file);
+      setIsUploading(true);
+      setUploadProgress(0);
+
+      // Show uploading toast
+      const toastId = toast.info(`Uploading ${file.name}...`, { duration: 0 });
+
+      try {
+        // Simulate upload progress
+        const progressInterval = setInterval(() => {
+          setUploadProgress((prev) => {
+            const next = Math.min(prev + Math.random() * 20 + 5, 90);
+            updateUploadProgress(uploadId, next);
+            return next;
+          });
+        }, 200);
+
+        // Simulate upload delay (1-2 seconds)
+        await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 1000));
+
+        clearInterval(progressInterval);
+        setUploadProgress(100);
+        updateUploadProgress(uploadId, 100);
+
+        // Create a blob URL for the uploaded image
+        const imageUrl = URL.createObjectURL(file);
+        const altText = file.name.replace(/\.[^/.]+$/, '');
+
+        // Mark upload as complete
+        setUploadComplete(uploadId, imageUrl);
+
+        // Dismiss uploading toast and show success
+        toast.dismiss(toastId);
+        toast.success('Image uploaded successfully');
+
+        // Insert image markdown at cursor position or call callback
+        if (onImageUpload) {
+          onImageUpload(imageUrl, altText);
+        } else {
+          // Default behavior: insert markdown at cursor
+          const textarea = textareaRef.current;
+          if (textarea) {
+            const cursorPos = textarea.selectionStart;
+            const textBefore = value.substring(0, cursorPos);
+            const textAfter = value.substring(cursorPos);
+            const imageMarkdown = `![${altText}](${imageUrl})`;
+            const newValue = textBefore + imageMarkdown + textAfter;
+            onChange(newValue);
+
+            // Position cursor after the inserted image
+            requestAnimationFrame(() => {
+              const newPos = cursorPos + imageMarkdown.length;
+              textarea.setSelectionRange(newPos, newPos);
+              textarea.focus();
+            });
+          }
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+        setUploadError(uploadId, errorMessage);
+        toast.dismiss(toastId);
+        toast.error(`Failed to upload image: ${errorMessage}`);
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
+    },
+    [
+      enableImageUpload,
+      addUpload,
+      updateUploadProgress,
+      setUploadComplete,
+      setUploadError,
+      onImageUpload,
+      onChange,
+      value,
+    ]
+  );
+
+  // Process files for image uploads
+  const processFiles = useCallback(
+    (files: FileList | File[]) => {
+      const fileArray = Array.from(files);
+      const imageFiles = fileArray.filter(isImageFile);
+
+      if (imageFiles.length === 0) {
+        toast.warning('No valid image files found');
+        return;
+      }
+
+      // Upload each image
+      imageFiles.forEach((file) => handleImageUpload(file));
+    },
+    [handleImageUpload]
+  );
+
+  // Drag event handlers
+  const handleDragEnter = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      if (!enableImageUpload) return;
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounterRef.current++;
+
+      if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+        // Check if any item is an image
+        const hasImage = Array.from(e.dataTransfer.items).some(
+          (item) => item.kind === 'file' && item.type.startsWith('image/')
+        );
+        if (hasImage) {
+          setIsDragOver(true);
+        }
+      }
+    },
+    [enableImageUpload]
+  );
+
+  const handleDragLeave = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      if (!enableImageUpload) return;
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounterRef.current--;
+
+      if (dragCounterRef.current === 0) {
+        setIsDragOver(false);
+      }
+    },
+    [enableImageUpload]
+  );
+
+  const handleDragOver = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      if (!enableImageUpload) return;
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'copy';
+    },
+    [enableImageUpload]
+  );
+
+  const handleDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
+      if (!enableImageUpload) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+      dragCounterRef.current = 0;
+
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        processFiles(files);
+      }
+    },
+    [enableImageUpload, processFiles]
+  );
+
+  // Paste handler for clipboard images
+  const handlePaste = useCallback(
+    (e: ClipboardEvent<HTMLTextAreaElement>) => {
+      if (!enableImageUpload) return;
+
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      // Check for images in clipboard
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.kind === 'file' && item.type.startsWith('image/')) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            handleImageUpload(file);
+          }
+          return;
+        }
+      }
+    },
+    [enableImageUpload, handleImageUpload]
+  );
+
   // Clean up on unmount
   useEffect(() => {
     return () => {
@@ -277,7 +490,14 @@ export function GhostTextTextarea({
   const showGhostText = suggestion?.text && !suggestion.isLoading;
 
   return (
-    <div className="ghost-text-container">
+    <div
+      ref={containerRef}
+      className={`ghost-text-container ${isDragOver ? 'ghost-text-drag-over' : ''} ${isUploading ? 'ghost-text-uploading' : ''}`}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       {/* Hidden div to mirror content for ghost text positioning */}
       <div className="ghost-text-mirror" aria-hidden="true">
         <span className="ghost-text-value">{value}</span>
@@ -294,6 +514,7 @@ export function GhostTextTextarea({
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
         className={`ghost-text-textarea ${className}`}
         aria-describedby={showGhostText ? `${fieldId}-suggestion-hint` : undefined}
         {...props}
@@ -313,6 +534,46 @@ export function GhostTextTextarea({
           <span className="ghost-text-dot"></span>
           <span className="ghost-text-dot"></span>
           <span className="ghost-text-dot"></span>
+        </div>
+      )}
+
+      {/* Drag-over indicator overlay */}
+      {isDragOver && enableImageUpload && (
+        <div className="ghost-text-drag-overlay" aria-hidden="true">
+          <div className="ghost-text-drag-content">
+            <svg
+              className="ghost-text-drag-icon"
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+            <span className="ghost-text-drag-text">Drop image here</span>
+          </div>
+        </div>
+      )}
+
+      {/* Upload progress overlay */}
+      {isUploading && (
+        <div className="ghost-text-upload-overlay" aria-live="polite">
+          <div className="ghost-text-upload-content">
+            <div className="ghost-text-upload-spinner" />
+            <span className="ghost-text-upload-text">Uploading image...</span>
+            <div className="ghost-text-upload-progress-bar">
+              <div
+                className="ghost-text-upload-progress-fill"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
