@@ -1,13 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../../stores/user';
 import { ThemeToggleButton } from '../ui/ThemeToggle';
+import { Breadcrumbs } from '../Breadcrumbs';
+import type { BreadcrumbItem } from '../Breadcrumbs';
 import './TopNav.css';
 
-export interface BreadcrumbItem {
-  label: string;
-  path?: string;
-}
+export type { BreadcrumbItem };
 
 export interface TopNavProps {
   breadcrumbs?: BreadcrumbItem[];
@@ -28,6 +27,8 @@ const CloseIcon = () => (
   </svg>
 );
 
+// Re-export BreadcrumbItem for backwards compatibility
+
 const SearchIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
     <path d="M9 17A8 8 0 109 1a8 8 0 000 16zm8-2l-4.35-4.35" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -37,12 +38,6 @@ const SearchIcon = () => (
 const BellIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
     <path d="M15 6.5a5 5 0 00-10 0c0 5.5-2 7-2 7h14s-2-1.5-2-7zM8.5 17a1.5 1.5 0 003 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -65,9 +60,8 @@ const LogoutIcon = () => (
   </svg>
 );
 
-export function TopNav({ breadcrumbs = [], onMobileMenuToggle, isMobileMenuOpen = false }: TopNavProps) {
+export function TopNav({ breadcrumbs, onMobileMenuToggle, isMobileMenuOpen = false }: TopNavProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const { user, logout } = useUserStore();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -76,9 +70,6 @@ export function TopNav({ breadcrumbs = [], onMobileMenuToggle, isMobileMenuOpen 
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const userTriggerRef = useRef<HTMLButtonElement>(null);
-
-  // Generate breadcrumbs from location if not provided
-  const displayBreadcrumbs = breadcrumbs.length > 0 ? breadcrumbs : generateBreadcrumbsFromPath(location.pathname);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -173,29 +164,9 @@ export function TopNav({ breadcrumbs = [], onMobileMenuToggle, isMobileMenuOpen 
         </button>
 
         {/* Breadcrumbs */}
-        <nav className="topnav-breadcrumbs" aria-label="Breadcrumb">
-          <ol className="breadcrumb-list">
-            {displayBreadcrumbs.map((crumb, index) => {
-              const isLast = index === displayBreadcrumbs.length - 1;
-              return (
-                <li key={crumb.path || index} className="breadcrumb-item">
-                  {!isLast && crumb.path ? (
-                    <>
-                      <Link to={crumb.path} className="breadcrumb-link">
-                        {crumb.label}
-                      </Link>
-                      <ChevronRightIcon />
-                    </>
-                  ) : (
-                    <span className="breadcrumb-current" aria-current="page">
-                      {crumb.label}
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
+        <div className="topnav-breadcrumbs">
+          <Breadcrumbs items={breadcrumbs} />
+        </div>
 
         {/* Right actions */}
         <div className="topnav-actions">
@@ -310,53 +281,4 @@ export function TopNav({ breadcrumbs = [], onMobileMenuToggle, isMobileMenuOpen 
       </div>
     </header>
   );
-}
-
-// Helper function to generate breadcrumbs from path
-function generateBreadcrumbsFromPath(pathname: string): BreadcrumbItem[] {
-  const pathSegments = pathname.split('/').filter(Boolean);
-
-  if (pathSegments.length === 0) {
-    return [{ label: 'Dashboard', path: '/dashboard' }];
-  }
-
-  const breadcrumbs: BreadcrumbItem[] = [];
-  let currentPath = '';
-
-  // Route label mapping
-  const labelMap: Record<string, string> = {
-    dashboard: 'Dashboard',
-    receipts: 'Receipts',
-    transactions: 'Transactions',
-    stores: 'Stores',
-    budgets: 'Budgets',
-    accounts: 'Accounts',
-    'financial-accounts': 'Financial Accounts',
-    connections: 'Connections',
-    settings: 'Settings',
-    integrations: 'Integrations',
-    profile: 'Profile',
-    'api-keys': 'API Keys',
-    'retirement-planning': 'Retirement Planning',
-    'fire-calculator': 'FIRE Calculator',
-    'google-drive': 'Google Drive',
-    email: 'Email',
-    new: 'New',
-    edit: 'Edit',
-  };
-
-  for (const segment of pathSegments) {
-    currentPath += `/${segment}`;
-
-    // Try to get a friendly label, fall back to capitalized segment
-    const label = labelMap[segment.toLowerCase()] ||
-      segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-
-    breadcrumbs.push({
-      label,
-      path: currentPath,
-    });
-  }
-
-  return breadcrumbs;
 }
