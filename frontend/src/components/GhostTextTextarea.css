@@ -1,0 +1,247 @@
+/* Ghost Text Textarea - Inline AI Suggestions */
+
+.ghost-text-container {
+  position: relative;
+  width: 100%;
+  /* Background for the ghost text to be visible against */
+  background-color: white;
+  border-radius: 6px;
+}
+
+/* Mirror div that overlays the textarea to show ghost text */
+.ghost-text-mirror {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.5rem 0.875rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow: hidden;
+  pointer-events: none;
+  /* Match textarea styling */
+  border: 1px solid transparent;
+  border-radius: 6px;
+  /* Ensure ghost text renders above textarea */
+  z-index: 1;
+}
+
+/* The actual value text - invisible but takes up space */
+.ghost-text-value {
+  visibility: hidden;
+  white-space: pre-wrap;
+}
+
+/* The suggestion text - visible at 50% opacity */
+.ghost-text-suggestion {
+  color: var(--color-gray-500, #6b7280);
+  opacity: 0.5;
+  font-style: italic;
+  white-space: pre-wrap;
+  /* Subtle animation when suggestion appears */
+  animation: ghost-text-fade-in 0.2s ease-out;
+}
+
+@keyframes ghost-text-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+
+/* The actual textarea - transparent background to show mirror underneath */
+.ghost-text-textarea {
+  position: relative;
+  width: 100%;
+  min-height: 80px;
+  padding: 0.5rem 0.875rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-text, #374151);
+  background-color: transparent;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  resize: vertical;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  /* Ensure caret is visible */
+  caret-color: var(--color-text, #374151);
+  /* Position on top of mirror but with transparent background */
+  z-index: 2;
+}
+
+.ghost-text-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ghost-text-textarea:disabled {
+  background-color: var(--color-bg-disabled, #f3f4f6);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.ghost-text-textarea::placeholder {
+  color: var(--color-placeholder, #9ca3af);
+}
+
+/* Screen reader hint - visually hidden but accessible */
+.ghost-text-sr-hint {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Loading indicator (3 dots) */
+.ghost-text-loading {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0.25rem 0.5rem;
+  background: var(--color-bg, white);
+  border-radius: 4px;
+  opacity: 0.7;
+}
+
+.ghost-text-dot {
+  width: 4px;
+  height: 4px;
+  background-color: var(--color-primary, #3b82f6);
+  border-radius: 50%;
+  animation: ghost-text-loading-bounce 1.4s ease-in-out infinite;
+}
+
+.ghost-text-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.ghost-text-dot:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.ghost-text-dot:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes ghost-text-loading-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+/* Keyboard hint tooltip (optional visual hint) */
+.ghost-text-container[data-show-hint="true"]::after {
+  content: 'Tab to accept';
+  position: absolute;
+  bottom: calc(100% + 4px);
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-gray-500, #6b7280);
+  background: var(--color-bg, white);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+
+.ghost-text-container:focus-within[data-show-hint="true"]::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ghost-text-suggestion {
+    animation: none;
+  }
+
+  .ghost-text-dot {
+    animation: none;
+    opacity: 0.7;
+  }
+
+  .ghost-text-container[data-show-hint="true"]::after {
+    transition: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ghost-text-suggestion {
+    color: var(--color-gray-400, #9ca3af);
+  }
+
+  .ghost-text-textarea {
+    color: var(--color-gray-100, #f3f4f6);
+    caret-color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .ghost-text-loading {
+    background: var(--color-gray-800, #1f2937);
+  }
+
+  .ghost-text-container[data-show-hint="true"]::after {
+    color: var(--color-gray-400, #9ca3af);
+    background: var(--color-gray-800, #1f2937);
+    border-color: var(--color-gray-700, #374151);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .ghost-text-textarea {
+    /* Prevent auto-zoom on iOS when focusing inputs */
+    font-size: 16px;
+  }
+
+  .ghost-text-mirror {
+    font-size: 16px;
+  }
+}
+
+/* Touch-friendly improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .ghost-text-textarea {
+    /* Minimum touch target height */
+    min-height: 100px;
+    /* Prevent zoom on iOS Safari */
+    font-size: 16px;
+    /* Remove tap highlight */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ghost-text-textarea:focus {
+    /* Enhanced focus ring for touch devices */
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  }
+
+  /* Hide keyboard hints on touch devices */
+  .ghost-text-container[data-show-hint="true"]::after {
+    display: none;
+  }
+}

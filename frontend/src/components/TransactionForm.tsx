@@ -10,6 +10,7 @@ import {
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from './PageTransition';
 import { SettingsFormSkeleton } from './skeletons';
+import { GhostTextTextarea } from './GhostTextTextarea';
 import './TransactionForm.css';
 
 const TRANSACTION_TYPES: { value: TransactionType; label: string }[] = [
@@ -564,16 +565,27 @@ export function TransactionForm() {
               <label htmlFor="notes" className="form-label">
                 Notes
               </label>
-              <textarea
+              <GhostTextTextarea
+                fieldId="transaction-notes"
                 id="notes"
                 name="notes"
                 value={formData.notes}
-                onChange={handleInputChange}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, notes: value }))
+                }
                 className="form-textarea"
                 rows={3}
                 maxLength={1000}
                 placeholder="Additional notes about this transaction..."
+                context={{
+                  amount: formData.amount,
+                  merchant: formData.merchant_name,
+                  type: formData.type,
+                }}
               />
+              <p className="form-help">
+                AI suggestions enabled. Press Tab to accept, Cmd+Right for word-by-word, Escape to dismiss.
+              </p>
             </div>
           </div>
 

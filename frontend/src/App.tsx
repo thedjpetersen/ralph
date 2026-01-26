@@ -8,6 +8,7 @@ import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
 import { APIKeys } from './pages/APIKeys';
 import { SkeletonDemo } from './pages/SkeletonDemo';
+import { SidebarDemo } from './pages/SidebarDemo';
 import { Stores } from './pages/Stores';
 import { StoreDetail } from './pages/StoreDetail';
 import { StoreForm } from './components/StoreForm';
@@ -60,6 +61,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/api-keys" element={<APIKeys />} />
         <Route path="/skeleton-demo" element={<SkeletonDemo />} />
+        <Route path="/sidebar-demo" element={<SidebarDemo />} />
         <Route path="/stores" element={<Stores />} />
         <Route path="/stores/new" element={<StoreForm />} />
         <Route path="/stores/:id" element={<StoreDetail />} />
