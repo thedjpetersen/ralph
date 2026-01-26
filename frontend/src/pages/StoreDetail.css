@@ -295,6 +295,147 @@
   gap: 0.25rem;
 }
 
+/* Spending Summary */
+.spending-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.spending-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.spending-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #646cff;
+  margin-bottom: 0.25rem;
+}
+
+.spending-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Transactions List */
+.transactions-loading {
+  padding: 1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.transactions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.transaction-item:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.transaction-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.transaction-item-date {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.transaction-item-description {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.transaction-item-amount {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.view-all-link {
+  display: block;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  text-align: center;
+  color: #646cff;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.no-data-message {
+  padding: 1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+/* Frequently Purchased Items */
+.frequent-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.frequent-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+.frequent-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.frequent-item-name {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.87);
+  text-transform: capitalize;
+}
+
+.frequent-item-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.frequent-item-total {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #646cff;
+}
+
 /* Delete Modal */
 .delete-modal-overlay {
   position: fixed;
@@ -452,5 +593,53 @@
   .cancel-button:hover:not(:disabled) {
     background-color: rgba(0, 0, 0, 0.05);
     border-color: #bbb;
+  }
+
+  .spending-card {
+    background-color: #f5f5f5;
+  }
+
+  .spending-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .transactions-loading {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .transaction-item {
+    background-color: #f5f5f5;
+  }
+
+  .transaction-item:hover {
+    background-color: #eee;
+  }
+
+  .transaction-item-date {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .transaction-item-description {
+    color: #213547;
+  }
+
+  .transaction-item-amount {
+    color: #213547;
+  }
+
+  .no-data-message {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .frequent-item {
+    background-color: #f5f5f5;
+  }
+
+  .frequent-item-name {
+    color: #213547;
+  }
+
+  .frequent-item-count {
+    color: rgba(0, 0, 0, 0.5);
   }
 }
