@@ -19,6 +19,7 @@ const APIKeys = lazy(() => import('./pages/APIKeys').then(m => ({ default: m.API
 const SkeletonDemo = lazy(() => import('./pages/SkeletonDemo').then(m => ({ default: m.SkeletonDemo })));
 const SidebarDemo = lazy(() => import('./pages/SidebarDemo').then(m => ({ default: m.SidebarDemo })));
 const ToastDemo = lazy(() => import('./pages/ToastDemo').then(m => ({ default: m.ToastDemo })));
+const AuthorComparisonDemo = lazy(() => import('./pages/AuthorComparisonDemo').then(m => ({ default: m.AuthorComparisonDemo })));
 
 // Store pages
 const Stores = lazy(() => import('./pages/Stores').then(m => ({ default: m.Stores })));
@@ -110,6 +111,7 @@ function App() {
         <Route path="/skeleton-demo" element={<Suspense fallback={<PageLoadingSpinner />}><SkeletonDemo /></Suspense>} />
         <Route path="/sidebar-demo" element={<Suspense fallback={<PageLoadingSpinner />}><SidebarDemo /></Suspense>} />
         <Route path="/toast-demo" element={<Suspense fallback={<PageLoadingSpinner />}><ToastDemo /></Suspense>} />
+        <Route path="/author-comparison-demo" element={<Suspense fallback={<PageLoadingSpinner />}><AuthorComparisonDemo /></Suspense>} />
         <Route path="/stores" element={<Suspense fallback={<PageLoadingSpinner />}><Stores /></Suspense>} />
         <Route path="/stores/new" element={<Suspense fallback={<PageLoadingSpinner />}><StoreForm /></Suspense>} />
         <Route path="/stores/:id" element={<Suspense fallback={<PageLoadingSpinner />}><StoreDetail /></Suspense>} />

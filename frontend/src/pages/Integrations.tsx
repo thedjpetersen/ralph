@@ -4,10 +4,13 @@ import { useAccountStore } from '../stores/account';
 import {
   googleDriveConnectionsApi,
   emailConnectionsApi,
+  financialConnectionsApi,
   type GoogleDriveConnection,
   type GoogleDriveConnectionStatus,
   type EmailConnection,
   type EmailConnectionStatus,
+  type FinancialConnection,
+  type FinancialConnectionStatus,
 } from '../api/client';
 import { PageTransition } from '../components/PageTransition';
 import { AccountsListSkeleton } from '../components/skeletons';
@@ -20,7 +23,7 @@ interface Integration {
   icon: string;
   status: 'connected' | 'disconnected' | 'error';
   settingsPath: string;
-  connections?: GoogleDriveConnection[] | EmailConnection[];
+  connections?: GoogleDriveConnection[] | EmailConnection[] | FinancialConnection[];
 }
 
 export function Integrations() {
@@ -29,6 +32,7 @@ export function Integrations() {
   const [error, setError] = useState<string | null>(null);
   const [googleDriveConnections, setGoogleDriveConnections] = useState<GoogleDriveConnection[]>([]);
   const [emailConnections, setEmailConnections] = useState<EmailConnection[]>([]);
+  const [bankConnections, setBankConnections] = useState<FinancialConnection[]>([]);
 
   const fetchIntegrations = useCallback(async () => {
     if (!currentAccount?.id) return;
@@ -37,12 +41,14 @@ export function Integrations() {
     setError(null);
 
     try {
-      const [driveResponse, emailResponse] = await Promise.all([
+      const [driveResponse, emailResponse, bankResponse] = await Promise.all([
         googleDriveConnectionsApi.list(currentAccount.id),
         emailConnectionsApi.list(currentAccount.id).catch(() => ({ connections: [] })),
+        financialConnectionsApi.list(currentAccount.id).catch(() => ({ connections: [] })),
       ]);
       setGoogleDriveConnections(driveResponse.connections);
       setEmailConnections(emailResponse.connections);
+      setBankConnections(bankResponse.connections);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch integrations');
     } finally {
@@ -64,7 +70,7 @@ export function Integrations() {
     return hasActive ? 'connected' : 'disconnected';
   };
 
-  const getStatusLabel = (status: GoogleDriveConnectionStatus | EmailConnectionStatus) => {
+  const getStatusLabel = (status: GoogleDriveConnectionStatus | EmailConnectionStatus | FinancialConnectionStatus) => {
     switch (status) {
       case 'active':
         return 'Active';
@@ -91,6 +97,27 @@ export function Integrations() {
     return hasActive ? 'connected' : 'disconnected';
   };
 
+  const getBankStatus = (): 'connected' | 'disconnected' | 'error' => {
+    if (bankConnections.length === 0) return 'disconnected';
+    const hasError = bankConnections.some(
+      (c) => c.status === 'error' || c.status === 'expired'
+    );
+    if (hasError) return 'error';
+    const hasActive = bankConnections.some((c) => c.status === 'active');
+    return hasActive ? 'connected' : 'disconnected';
+  };
+
+  const getConnectionDisplayName = (
+    connection: GoogleDriveConnection | EmailConnection | FinancialConnection,
+    integrationId: string
+  ): string => {
+    if (integrationId === 'bank') {
+      const bankConn = connection as FinancialConnection;
+      return bankConn.institution_name || 'Bank Account';
+    }
+    return (connection as GoogleDriveConnection | EmailConnection).email;
+  };
+
   const integrations: Integration[] = [
     {
       id: 'google-drive',
@@ -109,6 +136,15 @@ export function Integrations() {
       status: getEmailStatus(),
       settingsPath: '/integrations/email',
       connections: emailConnections,
+    },
+    {
+      id: 'bank',
+      name: 'Bank',
+      description: 'Connect bank accounts for automatic transaction sync',
+      icon: '$',
+      status: getBankStatus(),
+      settingsPath: '/connections',
+      connections: bankConnections,
     },
   ];
 
@@ -190,7 +226,9 @@ export function Integrations() {
                   <ul className="connections-list">
                     {integration.connections.slice(0, 3).map((connection) => (
                       <li key={connection.id} className="connection-item">
-                        <span className="connection-email">{connection.email}</span>
+                        <span className="connection-email">
+                          {getConnectionDisplayName(connection, integration.id)}
+                        </span>
                         <span className={`connection-status status-${connection.status}`}>
                           {getStatusLabel(connection.status)}
                         </span>
