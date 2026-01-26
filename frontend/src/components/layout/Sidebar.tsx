@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
+import { DocumentFolders } from './DocumentFolders';
 import './Sidebar.css';
 
 interface NavSection {
@@ -395,6 +396,9 @@ export function Sidebar({ isCollapsed = false, onToggleCollapse }: SidebarProps)
             </div>
           </div>
         ))}
+
+        {/* Document Folders Section */}
+        <DocumentFolders isCollapsed={isCollapsed} />
       </nav>
 
       {/* User Menu */}

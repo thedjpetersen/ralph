@@ -4984,3 +4984,115 @@ export const emailSyncHistoryApi = {
     return response.json();
   },
 };
+
+// Document Folder types
+export interface DocumentFolder {
+  id: string;
+  account_id: string;
+  name: string;
+  parent_id: string | null;
+  level: number; // 0, 1, or 2 (max 3 levels of nesting)
+  position: number; // For ordering within parent
+  document_count: number;
+  is_expanded: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListDocumentFoldersResponse {
+  folders: DocumentFolder[];
+  total: number;
+}
+
+export interface CreateDocumentFolderRequest {
+  name: string;
+  parent_id?: string | null;
+}
+
+export interface UpdateDocumentFolderRequest {
+  name?: string;
+  parent_id?: string | null;
+  position?: number;
+  is_expanded?: boolean;
+}
+
+export interface ListDocumentFoldersParams {
+  parent_id?: string | null;
+}
+
+// Document Folder API methods (account-scoped)
+export const documentFoldersApi = {
+  async list(accountId: string, params?: ListDocumentFoldersParams): Promise<ListDocumentFoldersResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.parent_id !== undefined) {
+      searchParams.set('parent_id', params.parent_id ?? 'null');
+    }
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/document-folders${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch document folders');
+    }
+    return response.json();
+  },
+
+  async get(accountId: string, folderId: string): Promise<DocumentFolder> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/document-folders/${folderId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch document folder');
+    }
+    return response.json();
+  },
+
+  async create(accountId: string, data: CreateDocumentFolderRequest): Promise<DocumentFolder> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/document-folders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create document folder');
+    }
+    return response.json();
+  },
+
+  async update(accountId: string, folderId: string, data: UpdateDocumentFolderRequest): Promise<DocumentFolder> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/document-folders/${folderId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update document folder');
+    }
+    return response.json();
+  },
+
+  async delete(accountId: string, folderId: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/document-folders/${folderId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete document folder');
+    }
+  },
+
+  async moveDocument(accountId: string, documentId: string, folderId: string | null): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/documents/${documentId}/move`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ folder_id: folderId }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to move document');
+    }
+  },
+};

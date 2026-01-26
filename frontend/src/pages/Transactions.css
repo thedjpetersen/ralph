@@ -203,7 +203,7 @@
 
 .transactions-table-header {
   display: flex;
-  padding: 1rem 1.5rem;
+  padding: 0;
   background-color: rgba(0, 0, 0, 0.2);
   border-bottom: 1px solid #444;
   font-size: 0.75rem;
@@ -213,9 +213,47 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+.sortable-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1rem;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.sortable-header:hover {
+  background-color: rgba(100, 108, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sortable-header:focus {
+  outline: none;
+  background-color: rgba(100, 108, 255, 0.15);
+}
+
+.sortable-header[aria-sort] {
+  color: #646cff;
+}
+
+.sort-indicator {
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+.sortable-header[aria-sort] .sort-indicator {
+  opacity: 1;
+}
+
 .transaction-row {
   display: flex;
-  padding: 1rem 1.5rem;
+  padding: 1rem;
   border-bottom: 1px solid #333;
   text-decoration: none;
   color: inherit;
@@ -236,13 +274,13 @@
 }
 
 .col-date {
-  width: 120px;
+  width: 110px;
   flex-shrink: 0;
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.875rem;
 }
 
-.col-merchant {
+.col-store {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -250,7 +288,7 @@
   gap: 0.25rem;
 }
 
-.merchant-name {
+.store-name {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.87);
   white-space: nowrap;
@@ -266,23 +304,40 @@
   text-overflow: ellipsis;
 }
 
-.col-type {
-  width: 100px;
-  flex-shrink: 0;
-}
-
 .col-amount {
-  width: 120px;
+  width: 110px;
   flex-shrink: 0;
   justify-content: flex-end;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
+.col-category {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.category-badge {
+  padding: 0.25rem 0.5rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
 .col-status {
   width: 100px;
   flex-shrink: 0;
   justify-content: flex-end;
+}
+
+.col-type {
+  width: 100px;
+  flex-shrink: 0;
 }
 
 .transaction-type {
@@ -374,6 +429,13 @@
   color: rgba(255, 255, 255, 0.87);
 }
 
+/* Pagination */
+.transactions-pagination {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
 @media (max-width: 768px) {
   .transactions-table-header {
     display: none;
@@ -389,21 +451,21 @@
     order: 1;
   }
 
-  .col-merchant {
+  .col-store {
     width: 100%;
     order: 3;
   }
 
-  .col-type {
-    width: auto;
-    order: 2;
-  }
-
   .col-amount {
     width: auto;
-    order: 4;
+    order: 2;
     flex: 1;
-    justify-content: flex-start;
+    justify-content: flex-end;
+  }
+
+  .col-category {
+    width: auto;
+    order: 4;
   }
 
   .col-status {
@@ -461,6 +523,11 @@
     color: rgba(0, 0, 0, 0.5);
   }
 
+  .sortable-header:hover {
+    background-color: rgba(100, 108, 255, 0.08);
+    color: rgba(0, 0, 0, 0.8);
+  }
+
   .transaction-row {
     border-bottom-color: #eee;
   }
@@ -473,12 +540,16 @@
     color: rgba(0, 0, 0, 0.6);
   }
 
-  .merchant-name {
+  .store-name {
     color: #213547;
   }
 
   .transaction-description {
     color: rgba(0, 0, 0, 0.5);
+  }
+
+  .category-badge {
+    color: rgba(0, 0, 0, 0.7);
   }
 
   .amount-negative {
