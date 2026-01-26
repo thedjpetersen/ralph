@@ -4,6 +4,7 @@ import { PageTransition } from '../components/PageTransition';
 import { Switch } from '../components/ui/Switch';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/Button';
+import { KeyboardShortcutsViewer } from '../components/ui/KeyboardShortcutsViewer';
 import {
   useAppSettingsStore,
   type SettingsSection,
@@ -16,6 +17,7 @@ import { useUserStore } from '../stores/user';
 import { useSmartTypographyStore } from '../stores/smartTypography';
 import { useParagraphFocusStore } from '../stores/paragraphFocus';
 import { useTypewriterScrollStore } from '../stores/typewriterScroll';
+import { useKeyboardShortcutsStore } from '../stores/keyboardShortcuts';
 import { SettingsFormSkeleton } from '../components/skeletons';
 import './OrganizedSettings.css';
 
@@ -81,6 +83,7 @@ function GeneralSection() {
   const updateGeneralSettings = useAppSettingsStore((state) => state.updateGeneralSettings);
   const resetToDefaults = useAppSettingsStore((state) => state.resetToDefaults);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const openShortcutsModal = useKeyboardShortcutsStore((state) => state.openModal);
 
   const handleReset = useCallback(() => {
     resetToDefaults('general');
@@ -92,6 +95,21 @@ function GeneralSection() {
       <div className="section-header">
         <h2>General Settings</h2>
         <p>Configure general application behavior</p>
+      </div>
+
+      <div className="settings-group">
+        <h3>Keyboard Shortcuts</h3>
+        <div className="setting-item shortcuts-link">
+          <div className="setting-info">
+            <span className="setting-label">View all keyboard shortcuts</span>
+            <span className="setting-description">
+              See a complete list of available keyboard shortcuts organized by category
+            </span>
+          </div>
+          <Button variant="secondary" onClick={openShortcutsModal}>
+            View Shortcuts
+          </Button>
+        </div>
       </div>
 
       <div className="settings-group">
@@ -1098,6 +1116,8 @@ export function OrganizedSettings() {
   const setActiveSection = useAppSettingsStore((state) => state.setActiveSection);
   const isSaving = useAppSettingsStore((state) => state.isSaving);
   const lastSaved = useAppSettingsStore((state) => state.lastSaved);
+  const shortcutsIsOpen = useKeyboardShortcutsStore((state) => state.isOpen);
+  const closeShortcutsModal = useKeyboardShortcutsStore((state) => state.closeModal);
 
   const renderSection = () => {
     switch (activeSection) {
@@ -1159,6 +1179,9 @@ export function OrganizedSettings() {
           <main className="settings-main">{renderSection()}</main>
         </div>
       </div>
+
+      {/* Keyboard Shortcuts Viewer Modal */}
+      <KeyboardShortcutsViewer isOpen={shortcutsIsOpen} onClose={closeShortcutsModal} />
     </PageTransition>
   );
 }

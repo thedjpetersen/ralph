@@ -5,11 +5,13 @@ import { TopNav } from './TopNav';
 import { MobileTabBar } from './MobileTabBar';
 import { ToastContainer } from '../Toast';
 import { KeyboardShortcutsHelp } from '../ui/KeyboardShortcutsHelp';
+import { KeyboardShortcutsViewer } from '../ui/KeyboardShortcutsViewer';
 import { ScreenReaderAnnouncer } from '../ScreenReaderAnnouncer';
 import { CommandPalette } from '../CommandPalette';
 import { QuickSwitcher } from '../QuickSwitcher';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useFindReplaceStore } from '../../stores/findReplace';
+import { useKeyboardShortcutsStore } from '../../stores/keyboardShortcuts';
 import { useParagraphFocusStore, useParagraphFocus } from '../../stores/paragraphFocus';
 import { useTypewriterScrollStore } from '../../stores/typewriterScroll';
 import { useAccountStore } from '../../stores/account';
@@ -76,6 +78,11 @@ export function AppShell({ children }: AppShellProps) {
   const { toggleStar } = useStarredDocumentsStore();
   const { togglePanel: toggleTableOfContents, closePanel: closeTableOfContents } = useTableOfContentsStore();
   const { shouldShowWelcome, openModal: openWelcomeModal } = useWelcomeModal();
+  const {
+    isOpen: isShortcutsViewerOpen,
+    openModal: openShortcutsViewer,
+    closeModal: closeShortcutsViewer,
+  } = useKeyboardShortcutsStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -192,6 +199,32 @@ export function AppShell({ children }: AppShellProps) {
       description: 'Show keyboard shortcuts',
     },
     {
+      key: '/',
+      metaKey: true,
+      action: () => {
+        if (isShortcutsViewerOpen) {
+          closeShortcutsViewer();
+        } else {
+          openShortcutsViewer();
+        }
+      },
+      description: 'Show keyboard shortcuts viewer',
+      allowInInput: true,
+    },
+    {
+      key: '/',
+      ctrlKey: true,
+      action: () => {
+        if (isShortcutsViewerOpen) {
+          closeShortcutsViewer();
+        } else {
+          openShortcutsViewer();
+        }
+      },
+      description: 'Show keyboard shortcuts viewer',
+      allowInInput: true,
+    },
+    {
       key: 'Escape',
       action: () => {
         setIsMobileMenuOpen(false);
@@ -203,6 +236,7 @@ export function AppShell({ children }: AppShellProps) {
         closeVocabularyEnhancer();
         closeReadability();
         closeTableOfContents();
+        closeShortcutsViewer();
       },
       description: 'Close menus',
       allowInInput: true,
@@ -389,6 +423,10 @@ export function AppShell({ children }: AppShellProps) {
       <KeyboardShortcutsHelp
         isOpen={isShortcutsHelpOpen}
         onClose={() => setIsShortcutsHelpOpen(false)}
+      />
+      <KeyboardShortcutsViewer
+        isOpen={isShortcutsViewerOpen}
+        onClose={closeShortcutsViewer}
       />
       <ScreenReaderAnnouncer />
 

@@ -519,6 +519,27 @@
   gap: 1rem;
 }
 
+/* Shortcuts Link */
+.shortcuts-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.shortcuts-link .setting-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.shortcuts-link .setting-label {
+  margin-bottom: 0;
+}
+
+.shortcuts-link .setting-description {
+  margin-top: 0.25rem;
+}
+
 /* Settings Error */
 .settings-error {
   text-align: center;
