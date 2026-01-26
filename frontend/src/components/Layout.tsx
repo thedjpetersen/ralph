@@ -1,10 +1,12 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useAccountStore } from '../stores/account';
 import { useUserStore } from '../stores/user';
 import { AccountSwitcherSkeleton } from './skeletons';
 import { ToastContainer } from './Toast';
+import { KeyboardShortcutsHelp } from './ui/KeyboardShortcutsHelp';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import './Layout.css';
 
 export function Layout() {
@@ -15,8 +17,14 @@ export function Layout() {
   const { user, fetchUser, logout } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [accountMenuIndex, setAccountMenuIndex] = useState(-1);
+  const [userMenuIndex, setUserMenuIndex] = useState(-1);
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const accountTriggerRef = useRef<HTMLButtonElement>(null);
+  const userTriggerRef = useRef<HTMLButtonElement>(null);
+  const mainContentRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     fetchAccounts();
@@ -31,12 +39,14 @@ export function Layout() {
         !userMenuRef.current.contains(event.target as Node)
       ) {
         setIsUserMenuOpen(false);
+        setUserMenuIndex(-1);
       }
       if (
         accountMenuRef.current &&
         !accountMenuRef.current.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
+        setAccountMenuIndex(-1);
       }
     };
 
@@ -44,15 +54,123 @@ export function Layout() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Keyboard navigation for account dropdown
+  const handleAccountKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      const menuItems = accounts.length + 2; // accounts + settings + members
+
+      switch (event.key) {
+        case 'Escape':
+          setIsDropdownOpen(false);
+          setAccountMenuIndex(-1);
+          accountTriggerRef.current?.focus();
+          event.preventDefault();
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          if (!isDropdownOpen) {
+            setIsDropdownOpen(true);
+            setAccountMenuIndex(0);
+          } else {
+            setAccountMenuIndex((prev) => (prev + 1) % menuItems);
+          }
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          if (!isDropdownOpen) {
+            setIsDropdownOpen(true);
+            setAccountMenuIndex(menuItems - 1);
+          } else {
+            setAccountMenuIndex((prev) => (prev - 1 + menuItems) % menuItems);
+          }
+          break;
+        case 'Enter':
+        case ' ':
+          if (!isDropdownOpen) {
+            event.preventDefault();
+            setIsDropdownOpen(true);
+            setAccountMenuIndex(0);
+          }
+          break;
+        case 'Tab':
+          if (isDropdownOpen) {
+            setIsDropdownOpen(false);
+            setAccountMenuIndex(-1);
+          }
+          break;
+      }
+    },
+    [accounts.length, isDropdownOpen]
+  );
+
+  // Keyboard navigation for user menu
+  const userMenuItems = ['profile', 'settings', 'api-keys', 'logout'];
+  const handleUserMenuKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      const menuItemsCount = userMenuItems.length;
+
+      switch (event.key) {
+        case 'Escape':
+          setIsUserMenuOpen(false);
+          setUserMenuIndex(-1);
+          userTriggerRef.current?.focus();
+          event.preventDefault();
+          break;
+        case 'ArrowDown':
+          event.preventDefault();
+          if (!isUserMenuOpen) {
+            setIsUserMenuOpen(true);
+            setUserMenuIndex(0);
+          } else {
+            setUserMenuIndex((prev) => (prev + 1) % menuItemsCount);
+          }
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          if (!isUserMenuOpen) {
+            setIsUserMenuOpen(true);
+            setUserMenuIndex(menuItemsCount - 1);
+          } else {
+            setUserMenuIndex((prev) => (prev - 1 + menuItemsCount) % menuItemsCount);
+          }
+          break;
+        case 'Enter':
+        case ' ':
+          if (!isUserMenuOpen) {
+            event.preventDefault();
+            setIsUserMenuOpen(true);
+            setUserMenuIndex(0);
+          }
+          break;
+        case 'Tab':
+          if (isUserMenuOpen) {
+            setIsUserMenuOpen(false);
+            setUserMenuIndex(-1);
+          }
+          break;
+      }
+    },
+    [isUserMenuOpen, userMenuItems.length]
+  );
+
+  // Skip to main content handler
+  const handleSkipToContent = (event: React.MouseEvent | React.KeyboardEvent) => {
+    event.preventDefault();
+    mainContentRef.current?.focus();
+  };
+
   const handleAccountSwitch = (accountId: string) => {
     switchAccount(accountId);
     setIsDropdownOpen(false);
+    setAccountMenuIndex(-1);
+    accountTriggerRef.current?.focus();
   };
 
   const handleAccountSettings = () => {
     if (currentAccount) {
       navigate(`/accounts/${currentAccount.id}/settings`);
       setIsDropdownOpen(false);
+      setAccountMenuIndex(-1);
     }
   };
 
@@ -60,23 +178,66 @@ export function Layout() {
     if (currentAccount) {
       navigate(`/accounts/${currentAccount.id}/members`);
       setIsDropdownOpen(false);
+      setAccountMenuIndex(-1);
     }
   };
 
   const handleLogout = () => {
     logout();
     setIsUserMenuOpen(false);
+    setUserMenuIndex(-1);
     navigate('/');
   };
 
+  const handleUserMenuItemClick = (path: string) => {
+    navigate(path);
+    setIsUserMenuOpen(false);
+    setUserMenuIndex(-1);
+  };
+
+  // Global keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: '?',
+      action: () => setIsShortcutsHelpOpen(true),
+      description: 'Show keyboard shortcuts',
+    },
+    {
+      key: 'h',
+      action: () => navigate('/'),
+      description: 'Go to home',
+    },
+    {
+      key: 'Escape',
+      action: () => {
+        setIsDropdownOpen(false);
+        setIsUserMenuOpen(false);
+        setAccountMenuIndex(-1);
+        setUserMenuIndex(-1);
+      },
+      description: 'Close menus',
+      allowInInput: true,
+    },
+  ]);
+
   return (
     <div className="layout">
-      <header className="layout-header">
+      {/* Skip to main content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="skip-to-content"
+        onClick={handleSkipToContent}
+        onKeyDown={(e) => e.key === 'Enter' && handleSkipToContent(e)}
+      >
+        Skip to main content
+      </a>
+
+      <header className="layout-header" role="banner">
         <div className="layout-header-content">
-          <Link to="/" className="layout-logo">
+          <Link to="/" className="layout-logo" aria-label="ClockZen home">
             ClockZen
           </Link>
-          <nav className="layout-nav">
+          <nav className="layout-nav" role="navigation" aria-label="Main navigation">
             <Link to="/accounts" className="nav-link">
               Accounts
             </Link>
@@ -86,12 +247,15 @@ export function Layout() {
               {isLoading ? (
                 <AccountSwitcherSkeleton />
               ) : currentAccount ? (
-                <div className="dropdown">
+                <div className="dropdown" onKeyDown={handleAccountKeyDown}>
                   <button
+                    ref={accountTriggerRef}
                     className="dropdown-trigger"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     aria-expanded={isDropdownOpen}
-                    aria-haspopup="true"
+                    aria-haspopup="menu"
+                    aria-controls="account-menu"
+                    aria-label={`Current account: ${currentAccount.name}. Press Enter to switch accounts.`}
                   >
                     <span className="account-name">{currentAccount.name}</span>
                     <svg
@@ -100,6 +264,7 @@ export function Layout() {
                       height="12"
                       viewBox="0 0 12 12"
                       fill="none"
+                      aria-hidden="true"
                     >
                       <path
                         d="M2.5 4.5L6 8L9.5 4.5"
@@ -111,16 +276,26 @@ export function Layout() {
                     </svg>
                   </button>
                   {isDropdownOpen && (
-                    <div className="dropdown-menu">
-                      <div className="dropdown-section">
-                        <div className="dropdown-section-title">Switch Account</div>
-                        {accounts.map((account) => (
+                    <div
+                      id="account-menu"
+                      className="dropdown-menu"
+                      role="menu"
+                      aria-label="Account menu"
+                    >
+                      <div className="dropdown-section" role="group" aria-label="Switch Account">
+                        <div className="dropdown-section-title" id="switch-account-label">
+                          Switch Account
+                        </div>
+                        {accounts.map((account, index) => (
                           <button
                             key={account.id}
                             className={`dropdown-item ${
                               account.id === currentAccount.id ? 'active' : ''
-                            }`}
+                            } ${accountMenuIndex === index ? 'focused' : ''}`}
                             onClick={() => handleAccountSwitch(account.id)}
+                            role="menuitemradio"
+                            aria-checked={account.id === currentAccount.id}
+                            tabIndex={accountMenuIndex === index ? 0 : -1}
                           >
                             <span className="account-item-name">{account.name}</span>
                             {account.id === currentAccount.id && (
@@ -130,6 +305,7 @@ export function Layout() {
                                 height="16"
                                 viewBox="0 0 16 16"
                                 fill="none"
+                                aria-hidden="true"
                               >
                                 <path
                                   d="M3.5 8L6.5 11L12.5 5"
@@ -143,17 +319,21 @@ export function Layout() {
                           </button>
                         ))}
                       </div>
-                      <div className="dropdown-divider" />
-                      <div className="dropdown-section">
+                      <div className="dropdown-divider" role="separator" aria-hidden="true" />
+                      <div className="dropdown-section" role="group" aria-label="Account actions">
                         <button
-                          className="dropdown-item"
+                          className={`dropdown-item ${accountMenuIndex === accounts.length ? 'focused' : ''}`}
                           onClick={handleAccountSettings}
+                          role="menuitem"
+                          tabIndex={accountMenuIndex === accounts.length ? 0 : -1}
                         >
                           Account Settings
                         </button>
                         <button
-                          className="dropdown-item"
+                          className={`dropdown-item ${accountMenuIndex === accounts.length + 1 ? 'focused' : ''}`}
                           onClick={handleAccountMembers}
+                          role="menuitem"
+                          tabIndex={accountMenuIndex === accounts.length + 1 ? 0 : -1}
                         >
                           Manage Members
                         </button>
@@ -168,56 +348,72 @@ export function Layout() {
               )}
             </div>
 
-            <div className="user-menu" ref={userMenuRef}>
+            <div className="user-menu" ref={userMenuRef} onKeyDown={handleUserMenuKeyDown}>
               <button
+                ref={userTriggerRef}
                 className="user-menu-trigger"
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 aria-expanded={isUserMenuOpen}
-                aria-haspopup="true"
+                aria-haspopup="menu"
+                aria-controls="user-menu-dropdown"
+                aria-label={`User menu for ${user?.name || 'User'}. Press Enter to open menu.`}
               >
                 {user?.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="user-avatar" />
+                  <img src={user.avatar} alt="" className="user-avatar" aria-hidden="true" />
                 ) : (
-                  <div className="user-avatar-placeholder">
+                  <div className="user-avatar-placeholder" aria-hidden="true">
                     {user?.name?.charAt(0)?.toUpperCase() || '?'}
                   </div>
                 )}
               </button>
               {isUserMenuOpen && (
-                <div className="dropdown-menu user-dropdown">
+                <div
+                  id="user-menu-dropdown"
+                  className="dropdown-menu user-dropdown"
+                  role="menu"
+                  aria-label="User menu"
+                >
                   <div className="dropdown-section">
-                    <div className="user-info">
+                    <div className="user-info" role="presentation">
                       <span className="user-name">{user?.name || 'User'}</span>
                       <span className="user-email">{user?.email || ''}</span>
                     </div>
                   </div>
-                  <div className="dropdown-divider" />
-                  <div className="dropdown-section">
-                    <Link
-                      to="/profile"
-                      className="dropdown-item"
-                      onClick={() => setIsUserMenuOpen(false)}
+                  <div className="dropdown-divider" role="separator" aria-hidden="true" />
+                  <div className="dropdown-section" role="group">
+                    <button
+                      className={`dropdown-item ${userMenuIndex === 0 ? 'focused' : ''}`}
+                      onClick={() => handleUserMenuItemClick('/profile')}
+                      role="menuitem"
+                      tabIndex={userMenuIndex === 0 ? 0 : -1}
                     >
                       Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="dropdown-item"
-                      onClick={() => setIsUserMenuOpen(false)}
+                    </button>
+                    <button
+                      className={`dropdown-item ${userMenuIndex === 1 ? 'focused' : ''}`}
+                      onClick={() => handleUserMenuItemClick('/settings')}
+                      role="menuitem"
+                      tabIndex={userMenuIndex === 1 ? 0 : -1}
                     >
                       Settings
-                    </Link>
-                    <Link
-                      to="/api-keys"
-                      className="dropdown-item"
-                      onClick={() => setIsUserMenuOpen(false)}
+                    </button>
+                    <button
+                      className={`dropdown-item ${userMenuIndex === 2 ? 'focused' : ''}`}
+                      onClick={() => handleUserMenuItemClick('/api-keys')}
+                      role="menuitem"
+                      tabIndex={userMenuIndex === 2 ? 0 : -1}
                     >
                       API Keys
-                    </Link>
+                    </button>
                   </div>
-                  <div className="dropdown-divider" />
-                  <div className="dropdown-section">
-                    <button className="dropdown-item logout-item" onClick={handleLogout}>
+                  <div className="dropdown-divider" role="separator" aria-hidden="true" />
+                  <div className="dropdown-section" role="group">
+                    <button
+                      className={`dropdown-item logout-item ${userMenuIndex === 3 ? 'focused' : ''}`}
+                      onClick={handleLogout}
+                      role="menuitem"
+                      tabIndex={userMenuIndex === 3 ? 0 : -1}
+                    >
                       Log Out
                     </button>
                   </div>
@@ -227,12 +423,23 @@ export function Layout() {
           </div>
         </div>
       </header>
-      <main className="layout-main">
+      <main
+        id="main-content"
+        className="layout-main"
+        ref={mainContentRef}
+        tabIndex={-1}
+        role="main"
+        aria-label="Main content"
+      >
         <AnimatePresence mode="wait">
           <Outlet key={location.pathname} />
         </AnimatePresence>
       </main>
       <ToastContainer />
+      <KeyboardShortcutsHelp
+        isOpen={isShortcutsHelpOpen}
+        onClose={() => setIsShortcutsHelpOpen(false)}
+      />
     </div>
   );
 }

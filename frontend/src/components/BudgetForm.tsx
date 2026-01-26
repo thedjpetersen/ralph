@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   useBudgetsStore,
@@ -68,6 +68,7 @@ export function BudgetForm() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (id && currentAccount?.id) {
@@ -124,16 +125,19 @@ export function BudgetForm() {
     e.preventDefault();
     if (!currentAccount?.id) {
       setSaveError('No account selected');
+      errorRef.current?.focus();
       return;
     }
 
     if (!formData.name.trim()) {
       setSaveError('Budget name is required');
+      errorRef.current?.focus();
       return;
     }
 
     if (!formData.total_amount || parseFloat(formData.total_amount) <= 0) {
       setSaveError('Budget amount must be greater than 0');
+      errorRef.current?.focus();
       return;
     }
 
@@ -229,13 +233,25 @@ export function BudgetForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="budget-form">
-          <div className="form-section">
-            <h2>Basic Information</h2>
+        <form onSubmit={handleSubmit} className="budget-form" aria-label={isEditing ? 'Edit budget form' : 'Create budget form'}>
+          {saveError && (
+            <div
+              ref={errorRef}
+              className="form-error"
+              role="alert"
+              aria-live="assertive"
+              tabIndex={-1}
+            >
+              {saveError}
+            </div>
+          )}
+
+          <fieldset className="form-section">
+            <legend><h2>Basic Information</h2></legend>
 
             <div className="form-group">
               <label htmlFor="name" className="form-label">
-                Budget Name *
+                Budget Name <span aria-hidden="true">*</span>
               </label>
               <input
                 type="text"
@@ -245,6 +261,7 @@ export function BudgetForm() {
                 onChange={handleInputChange}
                 className="form-input"
                 required
+                aria-required="true"
                 maxLength={100}
                 placeholder="e.g., Monthly Expenses, Groceries, Entertainment"
               />
@@ -265,15 +282,15 @@ export function BudgetForm() {
                 placeholder="Brief description of this budget..."
               />
             </div>
-          </div>
+          </fieldset>
 
-          <div className="form-section">
-            <h2>Budget Amount</h2>
+          <fieldset className="form-section">
+            <legend><h2>Budget Amount</h2></legend>
 
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="total_amount" className="form-label">
-                  Amount *
+                  Amount <span aria-hidden="true">*</span>
                 </label>
                 <input
                   type="number"
@@ -283,6 +300,7 @@ export function BudgetForm() {
                   onChange={handleInputChange}
                   className="form-input"
                   required
+                  aria-required="true"
                   min="0"
                   step="0.01"
                   placeholder="0.00"
@@ -308,14 +326,14 @@ export function BudgetForm() {
                 </select>
               </div>
             </div>
-          </div>
+          </fieldset>
 
-          <div className="form-section">
-            <h2>Budget Period</h2>
+          <fieldset className="form-section">
+            <legend><h2>Budget Period</h2></legend>
 
             <div className="form-group">
               <label htmlFor="period_type" className="form-label">
-                Period Type *
+                Period Type <span aria-hidden="true">*</span>
               </label>
               <select
                 id="period_type"
@@ -324,6 +342,8 @@ export function BudgetForm() {
                 onChange={handleInputChange}
                 className="form-select"
                 required
+                aria-required="true"
+                aria-describedby="period_type_help"
               >
                 {PERIOD_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -331,7 +351,7 @@ export function BudgetForm() {
                   </option>
                 ))}
               </select>
-              <p className="form-help">
+              <p id="period_type_help" className="form-help">
                 How often the budget resets and spending is calculated.
               </p>
             </div>
@@ -362,16 +382,17 @@ export function BudgetForm() {
                   value={formData.end_date}
                   onChange={handleInputChange}
                   className="form-input"
+                  aria-describedby="end_date_help"
                 />
-                <p className="form-help">
+                <p id="end_date_help" className="form-help">
                   Optional. Leave empty for an ongoing budget.
                 </p>
               </div>
             </div>
-          </div>
+          </fieldset>
 
-          <div className="form-section">
-            <h2>Options</h2>
+          <fieldset className="form-section">
+            <legend><h2>Options</h2></legend>
 
             <div className="form-group form-checkbox">
               <input
@@ -381,12 +402,13 @@ export function BudgetForm() {
                 checked={formData.rollover_enabled}
                 onChange={handleInputChange}
                 className="checkbox-input"
+                aria-describedby="rollover_enabled_help"
               />
               <label htmlFor="rollover_enabled" className="checkbox-label">
                 Enable rollover
               </label>
             </div>
-            <p className="form-help checkbox-help">
+            <p id="rollover_enabled_help" className="form-help checkbox-help">
               When enabled, unused budget from one period carries over to the next.
             </p>
 
@@ -404,8 +426,9 @@ export function BudgetForm() {
                 min="0"
                 max="100"
                 placeholder="80"
+                aria-describedby="alert_threshold_help"
               />
-              <p className="form-help">
+              <p id="alert_threshold_help" className="form-help">
                 Get notified when spending reaches this percentage of the budget.
               </p>
             </div>
@@ -418,17 +441,16 @@ export function BudgetForm() {
                 checked={formData.is_default}
                 onChange={handleInputChange}
                 className="checkbox-input"
+                aria-describedby="is_default_help"
               />
               <label htmlFor="is_default" className="checkbox-label">
                 Set as default budget
               </label>
             </div>
-            <p className="form-help checkbox-help">
+            <p id="is_default_help" className="form-help checkbox-help">
               The default budget is used for automatic categorization.
             </p>
-          </div>
-
-          {saveError && <div className="form-error">{saveError}</div>}
+          </fieldset>
 
           <div className="form-actions">
             <button
@@ -438,7 +460,12 @@ export function BudgetForm() {
             >
               Cancel
             </button>
-            <button type="submit" className="save-button" disabled={isSaving}>
+            <button
+              type="submit"
+              className="save-button"
+              disabled={isSaving}
+              aria-busy={isSaving}
+            >
               {isSaving
                 ? isEditing
                   ? 'Saving...'

@@ -1,0 +1,90 @@
+import { Modal } from './Modal';
+import './KeyboardShortcutsHelp.css';
+
+export interface ShortcutGroup {
+  title: string;
+  shortcuts: {
+    keys: string[];
+    description: string;
+  }[];
+}
+
+export interface KeyboardShortcutsHelpProps {
+  isOpen: boolean;
+  onClose: () => void;
+  groups?: ShortcutGroup[];
+}
+
+const DEFAULT_SHORTCUTS: ShortcutGroup[] = [
+  {
+    title: 'Navigation',
+    shortcuts: [
+      { keys: ['Tab'], description: 'Move to next interactive element' },
+      { keys: ['Shift', 'Tab'], description: 'Move to previous interactive element' },
+      { keys: ['Enter'], description: 'Activate button or link' },
+      { keys: ['Space'], description: 'Toggle checkbox or activate button' },
+    ],
+  },
+  {
+    title: 'Menus & Dropdowns',
+    shortcuts: [
+      { keys: ['↓'], description: 'Open menu / move to next item' },
+      { keys: ['↑'], description: 'Move to previous item' },
+      { keys: ['Enter'], description: 'Select item' },
+      { keys: ['Escape'], description: 'Close menu' },
+    ],
+  },
+  {
+    title: 'Modals',
+    shortcuts: [
+      { keys: ['Escape'], description: 'Close modal' },
+      { keys: ['Tab'], description: 'Navigate within modal (focus trapped)' },
+    ],
+  },
+  {
+    title: 'Accessibility',
+    shortcuts: [
+      { keys: ['?'], description: 'Show this help dialog' },
+    ],
+  },
+];
+
+export function KeyboardShortcutsHelp({
+  isOpen,
+  onClose,
+  groups = DEFAULT_SHORTCUTS,
+}: KeyboardShortcutsHelpProps) {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Keyboard Shortcuts"
+      size="md"
+    >
+      <div className="shortcuts-help">
+        {groups.map((group) => (
+          <div key={group.title} className="shortcuts-group">
+            <h3 className="shortcuts-group-title">{group.title}</h3>
+            <dl className="shortcuts-list">
+              {group.shortcuts.map((shortcut, index) => (
+                <div key={index} className="shortcut-item">
+                  <dt className="shortcut-keys">
+                    {shortcut.keys.map((key, keyIndex) => (
+                      <span key={keyIndex}>
+                        <kbd className="shortcut-key">{key}</kbd>
+                        {keyIndex < shortcut.keys.length - 1 && (
+                          <span className="shortcut-separator">+</span>
+                        )}
+                      </span>
+                    ))}
+                  </dt>
+                  <dd className="shortcut-description">{shortcut.description}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </div>
+    </Modal>
+  );
+}

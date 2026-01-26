@@ -108,7 +108,8 @@ describe('Layout', () => {
       renderWithRouter()
       const trigger = screen.getByRole('button', { name: /Test Account/i })
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
-      expect(trigger).toHaveAttribute('aria-haspopup', 'true')
+      expect(trigger).toHaveAttribute('aria-haspopup', 'menu')
+      expect(trigger).toHaveAttribute('aria-controls', 'account-menu')
     })
 
     it('opens dropdown on click', () => {
@@ -212,17 +213,17 @@ describe('Layout', () => {
       } as unknown as ReturnType<typeof useUserStore>)
 
       renderWithRouter()
-      expect(screen.getByAltText('Test User')).toHaveAttribute(
-        'src',
-        'https://example.com/avatar.png'
-      )
+      // Avatar image is decorative (aria-hidden), alt text is on the button instead
+      const avatarImg = document.querySelector('.user-avatar') as HTMLImageElement
+      expect(avatarImg).toHaveAttribute('src', 'https://example.com/avatar.png')
     })
 
     it('has correct ARIA attributes on user menu trigger', () => {
       renderWithRouter()
       const trigger = document.querySelector('.user-menu-trigger')!
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
-      expect(trigger).toHaveAttribute('aria-haspopup', 'true')
+      expect(trigger).toHaveAttribute('aria-haspopup', 'menu')
+      expect(trigger).toHaveAttribute('aria-controls', 'user-menu-dropdown')
     })
 
     it('opens user menu on click', () => {
@@ -236,15 +237,16 @@ describe('Layout', () => {
       expect(screen.getByText('test@example.com')).toBeInTheDocument()
     })
 
-    it('shows navigation links in user menu', () => {
+    it('shows navigation items in user menu', () => {
       renderWithRouter()
       const userMenuTrigger = document.querySelector('.user-menu-trigger')!
 
       fireEvent.click(userMenuTrigger)
 
-      expect(screen.getByRole('link', { name: 'Profile' })).toBeInTheDocument()
-      expect(screen.getByRole('link', { name: 'Settings' })).toBeInTheDocument()
-      expect(screen.getByRole('link', { name: 'API Keys' })).toBeInTheDocument()
+      // Menu items are buttons with role="menuitem" for better accessibility
+      expect(screen.getByRole('menuitem', { name: 'Profile' })).toBeInTheDocument()
+      expect(screen.getByRole('menuitem', { name: 'Settings' })).toBeInTheDocument()
+      expect(screen.getByRole('menuitem', { name: 'API Keys' })).toBeInTheDocument()
     })
 
     it('shows logout button in user menu', () => {
@@ -278,12 +280,12 @@ describe('Layout', () => {
       expect(screen.queryByText('Log Out')).not.toBeInTheDocument()
     })
 
-    it('closes menu when nav link is clicked', async () => {
+    it('closes menu when menu item is clicked', async () => {
       renderWithRouter()
       const userMenuTrigger = document.querySelector('.user-menu-trigger')!
 
       fireEvent.click(userMenuTrigger)
-      fireEvent.click(screen.getByRole('link', { name: 'Profile' }))
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Profile' }))
 
       await waitFor(() => {
         expect(screen.queryByText('Log Out')).not.toBeInTheDocument()
@@ -354,15 +356,15 @@ describe('Layout', () => {
       })
     })
 
-    it('navigation links are focusable', () => {
+    it('menu items are focusable', () => {
       renderWithRouter()
       const userMenuTrigger = document.querySelector('.user-menu-trigger')!
 
       fireEvent.click(userMenuTrigger)
 
-      const profileLink = screen.getByRole('link', { name: 'Profile' })
-      profileLink.focus()
-      expect(document.activeElement).toBe(profileLink)
+      const profileItem = screen.getByRole('menuitem', { name: 'Profile' })
+      profileItem.focus()
+      expect(document.activeElement).toBe(profileItem)
     })
   })
 
@@ -392,6 +394,55 @@ describe('Layout', () => {
       fireEvent.click(trigger)
 
       expect(arrow).toHaveClass('open')
+    })
+
+    it('has skip-to-content link', () => {
+      renderWithRouter()
+      const skipLink = document.querySelector('.skip-to-content')
+      expect(skipLink).toBeInTheDocument()
+      expect(skipLink).toHaveTextContent('Skip to main content')
+    })
+
+    it('has ARIA landmarks', () => {
+      renderWithRouter()
+      expect(screen.getByRole('banner')).toBeInTheDocument() // header
+      expect(screen.getByRole('navigation', { name: 'Main navigation' })).toBeInTheDocument()
+      expect(screen.getByRole('main', { name: 'Main content' })).toBeInTheDocument()
+    })
+
+    it('main content has id for skip link target', () => {
+      renderWithRouter()
+      const main = screen.getByRole('main')
+      expect(main).toHaveAttribute('id', 'main-content')
+      expect(main).toHaveAttribute('tabindex', '-1')
+    })
+
+    it('account menu has proper ARIA menu roles', () => {
+      renderWithRouter()
+      const trigger = screen.getByRole('button', { name: /Test Account/i })
+      fireEvent.click(trigger)
+
+      const menu = document.getElementById('account-menu')
+      expect(menu).toHaveAttribute('role', 'menu')
+      expect(menu).toHaveAttribute('aria-label', 'Account menu')
+
+      // Check menu items have proper roles
+      const menuItems = screen.getAllByRole('menuitemradio')
+      expect(menuItems.length).toBeGreaterThan(0)
+    })
+
+    it('user menu has proper ARIA menu roles', () => {
+      renderWithRouter()
+      const userMenuTrigger = document.querySelector('.user-menu-trigger')!
+      fireEvent.click(userMenuTrigger)
+
+      const menu = document.getElementById('user-menu-dropdown')
+      expect(menu).toHaveAttribute('role', 'menu')
+      expect(menu).toHaveAttribute('aria-label', 'User menu')
+
+      // Check menu items have proper roles
+      const menuItems = screen.getAllByRole('menuitem')
+      expect(menuItems.length).toBe(4) // Profile, Settings, API Keys, Log Out
     })
   })
 
