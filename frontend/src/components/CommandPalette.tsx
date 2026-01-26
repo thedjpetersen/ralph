@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCommandPaletteStore, type Command, type CommandCategory } from '../stores/commandPalette';
 import { useFindReplaceStore } from '../stores/findReplace';
 import { useAISummaryStore } from '../stores/aiSummary';
+import { useAIOutlineStore } from '../stores/aiOutline';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
 import './CommandPalette.css';
@@ -55,6 +56,7 @@ function useCommands(): Command[] {
   const navigate = useNavigate();
   const { openDialog: openFindReplace } = useFindReplaceStore();
   const { openSummaryDialog } = useAISummaryStore();
+  const { openOutlineDialog } = useAIOutlineStore();
   const { closePalette } = useCommandPaletteStore();
 
   return useMemo(() => {
@@ -259,6 +261,33 @@ Additionally, the document discusses methods for tracking monthly spending patte
         keywords: ['summarize', 'demo', 'test', 'example'],
         action: () => { navigate('/ai-summary-demo'); closePalette(); },
       },
+      {
+        id: 'ai-generate-outline',
+        label: 'Generate Outline',
+        category: 'ai',
+        description: 'Generate a structured outline from notes or topics',
+        keywords: ['outline', 'structure', 'organize', 'sections', 'headings', 'h1', 'h2', 'h3'],
+        action: () => {
+          // Use sample content for demo - in production this would use actual document content
+          const sampleContent = `This document will cover the essentials of project management for software development teams.
+
+We need to discuss planning, execution, and monitoring phases. The team structure should include frontend, backend, and QA roles.
+
+Key topics: agile methodology, sprint planning, code reviews, testing strategies, deployment pipelines, and documentation best practices.
+
+Also want to cover communication protocols, stakeholder management, and risk assessment. Should include sections on tooling recommendations and metrics tracking.`;
+          openOutlineDialog(sampleContent, 'Project Management Guide');
+          closePalette();
+        },
+      },
+      {
+        id: 'ai-outline-demo',
+        label: 'AI Outline Demo',
+        category: 'ai',
+        description: 'Try the AI outline generation feature',
+        keywords: ['outline', 'demo', 'test', 'structure', 'example'],
+        action: () => { navigate('/ai-outline-demo'); closePalette(); },
+      },
 
       // Settings
       {
@@ -304,7 +333,7 @@ Additionally, the document discusses methods for tracking monthly spending patte
     ];
 
     return commands;
-  }, [navigate, openFindReplace, openSummaryDialog, closePalette]);
+  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, closePalette]);
 }
 
 // Highlight text component
