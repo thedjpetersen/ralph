@@ -11,6 +11,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ContextMenu, type ContextMenuItem } from '../ui/ContextMenu';
 import { DocumentGrid, ViewToggle } from '../DocumentGrid';
 import { DocumentList } from '../DocumentList';
+import { CoverImageUploader } from '../CoverImageUploader';
 import { toast } from '../../stores/toast';
 import './DocumentFolders.css';
 
@@ -220,10 +221,14 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
   const { currentAccount } = useAccountStore();
   const {
     folderTree,
+    folders,
     isLoading,
     error,
     fetchFolders,
     deleteFolder,
+    uploadCoverImage,
+    updateCoverImagePosition,
+    removeCoverImage,
   } = useDocumentFoldersStore();
   const { openImportDialog } = useDocumentImportStore();
   const { starredDocuments, toggleStar, isStarred, renameStarred } = useStarredDocumentsStore();
@@ -251,6 +256,10 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
 
   // Archive view state
   const [showingArchived, setShowingArchived] = useState(false);
+
+  // Cover image modal state
+  const [coverImageModalOpen, setCoverImageModalOpen] = useState(false);
+  const [coverImageFolderId, setCoverImageFolderId] = useState<string | null>(null);
 
   // Fetch folders when account changes
   useEffect(() => {
@@ -332,6 +341,37 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
   const handleQuickDelete = useCallback((folderId: string, folderName: string, documentCount: number) => {
     handleDeleteRequest(folderId, folderName, documentCount);
   }, [handleDeleteRequest]);
+
+  // Cover image handlers
+  const handleCoverImageClick = useCallback((folderId: string) => {
+    setCoverImageFolderId(folderId);
+    setCoverImageModalOpen(true);
+  }, []);
+
+  const handleCoverImageClose = useCallback(() => {
+    setCoverImageModalOpen(false);
+    setCoverImageFolderId(null);
+  }, []);
+
+  const handleCoverImageUpload = useCallback(async (file: File) => {
+    if (!currentAccount || !coverImageFolderId) return null;
+    return uploadCoverImage(currentAccount.id, coverImageFolderId, file);
+  }, [currentAccount, coverImageFolderId, uploadCoverImage]);
+
+  const handleCoverImagePositionUpdate = useCallback(async (position: { x: number; y: number; scale: number }) => {
+    if (!currentAccount || !coverImageFolderId) return false;
+    return updateCoverImagePosition(currentAccount.id, coverImageFolderId, position);
+  }, [currentAccount, coverImageFolderId, updateCoverImagePosition]);
+
+  const handleCoverImageRemove = useCallback(async () => {
+    if (!currentAccount || !coverImageFolderId) return false;
+    return removeCoverImage(currentAccount.id, coverImageFolderId);
+  }, [currentAccount, coverImageFolderId, removeCoverImage]);
+
+  // Get the current folder's cover image info
+  const currentCoverFolder = coverImageFolderId
+    ? folders.find(f => f.id === coverImageFolderId)
+    : null;
 
   // Context menu state
   const {
@@ -551,6 +591,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
               onDelete={handleQuickDelete}
               onContextMenu={(id, name, docCount) => handleDeleteRequest(id, name, docCount)}
               onCreateFolder={handleCreateFolder}
+              onCoverImageClick={handleCoverImageClick}
             />
           </motion.div>
         )}
@@ -575,6 +616,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
               onDelete={handleQuickDelete}
               onContextMenu={(id, name, docCount) => handleDeleteRequest(id, name, docCount)}
               onCreateFolder={handleCreateFolder}
+              onCoverImageClick={handleCoverImageClick}
             />
           </motion.div>
         )}
@@ -742,6 +784,17 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
         items={documentContextMenuItems}
         onClose={closeMenu}
         header={documentData?.folderName}
+      />
+
+      {/* Cover Image Uploader Modal */}
+      <CoverImageUploader
+        isOpen={coverImageModalOpen}
+        onClose={handleCoverImageClose}
+        currentImageUrl={currentCoverFolder?.cover_image_url}
+        currentPosition={currentCoverFolder?.cover_image_position}
+        onUpload={handleCoverImageUpload}
+        onUpdatePosition={handleCoverImagePositionUpdate}
+        onRemove={handleCoverImageRemove}
       />
     </div>
   );

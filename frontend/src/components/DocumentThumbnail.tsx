@@ -3,15 +3,17 @@
  *
  * Displays a visual thumbnail preview of document content in grid view.
  * Features:
- * - Shows first paragraph preview
+ * - Shows first paragraph preview or cover image
  * - Hover expands to show full preview
  * - Updates on save
  * - Fallback for empty documents
+ * - Cover image with position/scale controls
  */
 
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDocumentPreviewsStore } from '../stores/documentPreviews';
+import type { CoverImagePosition } from '../api/client';
 import './DocumentThumbnail.css';
 
 // Icons
@@ -116,17 +118,28 @@ const DeleteIcon = () => (
   </svg>
 );
 
+const CoverImageIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <rect x="1.5" y="1.5" width="11" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.25" />
+    <circle cx="4.5" cy="4.5" r="1" fill="currentColor" />
+    <path d="M12.5 9l-3-3-8 8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export interface DocumentThumbnailProps {
   id: string;
   name: string;
   documentCount?: number;
   isStarred?: boolean;
+  coverImageUrl?: string | null;
+  coverImagePosition?: CoverImagePosition | null;
   onOpen?: (id: string) => void;
   onStar?: (id: string, name: string) => void;
   onEdit?: (id: string, name: string) => void;
   onDuplicate?: (id: string, name: string) => void;
   onDelete?: (id: string, name: string, documentCount: number) => void;
   onContextMenu?: (id: string, name: string, e: React.MouseEvent) => void;
+  onCoverImageClick?: (id: string) => void;
 }
 
 function DocumentThumbnailComponent({
@@ -134,12 +147,15 @@ function DocumentThumbnailComponent({
   name,
   documentCount = 0,
   isStarred = false,
+  coverImageUrl,
+  coverImagePosition,
   onOpen,
   onStar,
   onEdit,
   onDuplicate,
   onDelete,
   onContextMenu,
+  onCoverImageClick,
 }: DocumentThumbnailProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showExpandedPreview, setShowExpandedPreview] = useState(false);
@@ -233,6 +249,14 @@ function DocumentThumbnailComponent({
     [id, name, documentCount, onDelete]
   );
 
+  const handleCoverImageClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onCoverImageClick?.(id);
+    },
+    [id, onCoverImageClick]
+  );
+
   // Touch long-press handlers
   const handleTouchStart = useCallback(() => {
     longPressTimeoutRef.current = window.setTimeout(() => {
@@ -312,15 +336,63 @@ function DocumentThumbnailComponent({
         onBlur={() => setIsHovered(false)}
       >
         {/* Thumbnail Preview Area */}
-        <div className="document-thumbnail-preview">
-          {hasPreview ? (
+        <div className={`document-thumbnail-preview ${coverImageUrl ? 'document-thumbnail-preview-has-cover' : ''}`}>
+          {coverImageUrl ? (
+            <div className="document-thumbnail-cover">
+              <img
+                src={coverImageUrl}
+                alt=""
+                className="document-thumbnail-cover-image"
+                style={{
+                  objectPosition: coverImagePosition
+                    ? `${coverImagePosition.x}% ${coverImagePosition.y}%`
+                    : '50% 50%',
+                  transform: coverImagePosition?.scale
+                    ? `scale(${coverImagePosition.scale})`
+                    : undefined,
+                }}
+              />
+              {showActions && onCoverImageClick && (
+                <button
+                  className="document-thumbnail-cover-edit"
+                  onClick={handleCoverImageClick}
+                  aria-label="Change cover image"
+                  title="Change cover"
+                >
+                  <CoverImageIcon />
+                </button>
+              )}
+            </div>
+          ) : hasPreview ? (
             <div className="document-thumbnail-content">
               <p className="document-thumbnail-text">{preview.preview}</p>
+              {showActions && onCoverImageClick && (
+                <button
+                  className="document-thumbnail-add-cover"
+                  onClick={handleCoverImageClick}
+                  aria-label="Add cover image"
+                  title="Add cover"
+                >
+                  <CoverImageIcon />
+                  <span>Add cover</span>
+                </button>
+              )}
             </div>
           ) : (
             <div className="document-thumbnail-empty">
               <EmptyDocumentIcon />
               <span className="document-thumbnail-empty-text">Empty document</span>
+              {showActions && onCoverImageClick && (
+                <button
+                  className="document-thumbnail-add-cover"
+                  onClick={handleCoverImageClick}
+                  aria-label="Add cover image"
+                  title="Add cover"
+                >
+                  <CoverImageIcon />
+                  <span>Add cover</span>
+                </button>
+              )}
             </div>
           )}
         </div>

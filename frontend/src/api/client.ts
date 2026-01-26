@@ -5116,6 +5116,12 @@ export const emailSyncHistoryApi = {
 };
 
 // Document Folder types
+export interface CoverImagePosition {
+  x: number; // 0-100 percentage
+  y: number; // 0-100 percentage
+  scale: number; // 1.0 = 100%
+}
+
 export interface DocumentFolder {
   id: string;
   account_id: string;
@@ -5125,6 +5131,8 @@ export interface DocumentFolder {
   position: number; // For ordering within parent
   document_count: number;
   is_expanded: boolean;
+  cover_image_url: string | null;
+  cover_image_position: CoverImagePosition | null;
   created_at: string;
   updated_at: string;
 }
@@ -5144,6 +5152,8 @@ export interface UpdateDocumentFolderRequest {
   parent_id?: string | null;
   position?: number;
   is_expanded?: boolean;
+  cover_image_url?: string | null;
+  cover_image_position?: CoverImagePosition | null;
 }
 
 export interface ListDocumentFoldersParams {
@@ -5223,6 +5233,29 @@ export const documentFoldersApi = {
     });
     if (!response.ok) {
       throw new Error('Failed to move document');
+    }
+  },
+
+  async uploadCoverImage(accountId: string, folderId: string, file: File): Promise<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/document-folders/${folderId}/cover-image`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error('Failed to upload cover image');
+    }
+    return response.json();
+  },
+
+  async removeCoverImage(accountId: string, folderId: string): Promise<void> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/document-folders/${folderId}/cover-image`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to remove cover image');
     }
   },
 };

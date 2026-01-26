@@ -49,6 +49,8 @@ export interface DocumentGridProps {
   onContextMenu?: (id: string, name: string, documentCount: number) => void;
   /** Callback to create a new folder */
   onCreateFolder?: () => void;
+  /** Callback when cover image button is clicked */
+  onCoverImageClick?: (id: string) => void;
   /** Additional CSS class */
   className?: string;
 }
@@ -88,6 +90,7 @@ function DocumentGridComponent({
   onDelete,
   onContextMenu,
   onCreateFolder,
+  onCoverImageClick,
   className = '',
 }: DocumentGridProps) {
   // Flatten folder tree to get all documents
@@ -169,12 +172,15 @@ function DocumentGridComponent({
               name={item.name}
               documentCount={item.document_count}
               isStarred={checkIsStarred?.(item.id) ?? false}
+              coverImageUrl={item.cover_image_url}
+              coverImagePosition={item.cover_image_position}
               onOpen={onOpen}
               onStar={onToggleStar}
               onEdit={onEdit}
               onDuplicate={onDuplicate}
               onDelete={onDelete}
               onContextMenu={handleContextMenu}
+              onCoverImageClick={onCoverImageClick}
             />
           </motion.div>
         ))}

@@ -103,6 +103,8 @@ export interface DocumentListProps {
   onContextMenu?: (id: string, name: string, documentCount: number) => void;
   /** Callback to create a new folder */
   onCreateFolder?: () => void;
+  /** Callback when cover image button is clicked */
+  onCoverImageClick?: (id: string) => void;
   /** Additional CSS class */
   className?: string;
 }
@@ -178,6 +180,7 @@ interface DocumentListItemProps {
   onDuplicate?: (id: string, name: string) => void;
   onDelete?: (id: string, name: string, documentCount: number) => void;
   onContextMenu?: (id: string, name: string, documentCount: number) => void;
+  onCoverImageClick?: (id: string) => void;
 }
 
 const DocumentListItem = memo(function DocumentListItem({
@@ -190,6 +193,7 @@ const DocumentListItem = memo(function DocumentListItem({
   onDuplicate,
   onDelete,
   onContextMenu,
+  onCoverImageClick,
 }: DocumentListItemProps) {
   const handleClick = useCallback(() => {
     onOpen?.(item.id);
@@ -253,9 +257,17 @@ const DocumentListItem = memo(function DocumentListItem({
     [handleClick]
   );
 
+  const handleCoverImageClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onCoverImageClick?.(item.id);
+    },
+    [item.id, onCoverImageClick]
+  );
+
   return (
     <motion.div
-      className={`document-list-item ${isStarred ? 'document-list-item-starred' : ''}`}
+      className={`document-list-item ${isStarred ? 'document-list-item-starred' : ''} ${item.cover_image_url ? 'document-list-item-has-cover' : ''}`}
       variants={itemVariants}
       onClick={handleClick}
       onContextMenu={handleRightClick}
@@ -265,7 +277,27 @@ const DocumentListItem = memo(function DocumentListItem({
       layout
     >
       <div className="document-list-item-icon">
-        <DocumentIcon />
+        {item.cover_image_url ? (
+          <div
+            className="document-list-item-cover-thumb"
+            onClick={onCoverImageClick ? handleCoverImageClick : undefined}
+            role={onCoverImageClick ? 'button' : undefined}
+            tabIndex={onCoverImageClick ? 0 : undefined}
+            title={onCoverImageClick ? 'Change cover' : undefined}
+          >
+            <img
+              src={item.cover_image_url}
+              alt=""
+              style={{
+                objectPosition: item.cover_image_position
+                  ? `${item.cover_image_position.x}% ${item.cover_image_position.y}%`
+                  : '50% 50%',
+              }}
+            />
+          </div>
+        ) : (
+          <DocumentIcon />
+        )}
       </div>
       <div className="document-list-item-title" title={item.name}>
         {item.name}
@@ -343,6 +375,7 @@ function DocumentListComponent({
   onDelete,
   onContextMenu,
   onCreateFolder,
+  onCoverImageClick,
   className = '',
 }: DocumentListProps) {
   const previews = useDocumentPreviewsStore((state) => state.previews);
@@ -437,6 +470,7 @@ function DocumentListComponent({
               onDuplicate={onDuplicate}
               onDelete={onDelete}
               onContextMenu={onContextMenu}
+              onCoverImageClick={onCoverImageClick}
             />
           ))}
         </AnimatePresence>

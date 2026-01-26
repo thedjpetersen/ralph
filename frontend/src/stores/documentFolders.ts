@@ -4,6 +4,7 @@ import {
   type DocumentFolder,
   type CreateDocumentFolderRequest,
   type UpdateDocumentFolderRequest,
+  type CoverImagePosition,
 } from '../api/client';
 import { executeOptimisticMutation, generateMutationId } from './optimistic';
 import { toast } from './toast';
@@ -44,6 +45,11 @@ interface DocumentFoldersState {
   deleteFolder: (accountId: string, folderId: string) => Promise<boolean>;
   moveDocumentToFolder: (accountId: string, documentId: string, folderId: string | null) => Promise<boolean>;
   moveFolderToParent: (accountId: string, folderId: string, parentId: string | null) => Promise<DocumentFolder | null>;
+
+  // Cover image actions
+  uploadCoverImage: (accountId: string, folderId: string, file: File) => Promise<string | null>;
+  updateCoverImagePosition: (accountId: string, folderId: string, position: CoverImagePosition) => Promise<boolean>;
+  removeCoverImage: (accountId: string, folderId: string) => Promise<boolean>;
 }
 
 // Helper to build tree structure from flat list
@@ -251,6 +257,8 @@ export const useDocumentFoldersStore = create<DocumentFoldersState>()((set, get)
       position: siblingFolders.length,
       document_count: 0,
       is_expanded: false,
+      cover_image_url: null,
+      cover_image_position: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -492,7 +500,143 @@ export const useDocumentFoldersStore = create<DocumentFoldersState>()((set, get)
 
     return result;
   },
+
+  // Upload cover image
+  uploadCoverImage: async (accountId, folderId, file) => {
+    const { folders } = get();
+    const existingFolder = folders.find(f => f.id === folderId);
+
+    if (!existingFolder) {
+      toast.error('Folder not found');
+      return null;
+    }
+
+    // Create temporary preview URL for optimistic update
+    const previewUrl = URL.createObjectURL(file);
+
+    // Apply optimistic update
+    const optimisticFolder: DocumentFolder = {
+      ...existingFolder,
+      cover_image_url: previewUrl,
+      updated_at: new Date().toISOString(),
+    };
+
+    const optimisticFolders = folders.map(f => f.id === folderId ? optimisticFolder : f);
+    const optimisticTree = buildFolderTree(optimisticFolders);
+    set({ folders: optimisticFolders, folderTree: optimisticTree, error: null });
+
+    try {
+      const result = await documentFoldersApi.uploadCoverImage(accountId, folderId, file);
+
+      // Revoke preview URL
+      URL.revokeObjectURL(previewUrl);
+
+      // Update with real URL
+      set((state) => {
+        const updatedFolders = state.folders.map(f => {
+          if (f.id === folderId) {
+            return { ...f, cover_image_url: result.url, updated_at: new Date().toISOString() };
+          }
+          return f;
+        });
+        const folderTree = buildFolderTree(updatedFolders);
+        return { folders: updatedFolders, folderTree };
+      });
+
+      toast.success('Cover image uploaded');
+      return result.url;
+    } catch {
+      // Rollback
+      URL.revokeObjectURL(previewUrl);
+      const folderTree = buildFolderTree(folders);
+      set({ folders, folderTree });
+      toast.error('Failed to upload cover image');
+      return null;
+    }
+  },
+
+  // Update cover image position
+  updateCoverImagePosition: async (accountId, folderId, position) => {
+    const { folders } = get();
+    const existingFolder = folders.find(f => f.id === folderId);
+
+    if (!existingFolder) {
+      toast.error('Folder not found');
+      return false;
+    }
+
+    // Apply optimistic update
+    const optimisticFolder: DocumentFolder = {
+      ...existingFolder,
+      cover_image_position: position,
+      updated_at: new Date().toISOString(),
+    };
+
+    const optimisticFolders = folders.map(f => f.id === folderId ? optimisticFolder : f);
+    const optimisticTree = buildFolderTree(optimisticFolders);
+    set({ folders: optimisticFolders, folderTree: optimisticTree, error: null });
+
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('cover-position-update'),
+      type: 'folder:update',
+      optimisticData: optimisticFolder,
+      previousData: existingFolder,
+      mutationFn: () => documentFoldersApi.update(accountId, folderId, { cover_image_position: position }),
+      onSuccess: (updatedFolder) => {
+        set((state) => {
+          const updatedFolders = state.folders.map(f => f.id === folderId ? updatedFolder : f);
+          const folderTree = buildFolderTree(updatedFolders);
+          return { folders: updatedFolders, folderTree };
+        });
+      },
+      onRollback: () => {
+        set((state) => {
+          const restoredFolders = state.folders.map(f => f.id === folderId ? existingFolder : f);
+          const folderTree = buildFolderTree(restoredFolders);
+          return { folders: restoredFolders, folderTree };
+        });
+      },
+      errorMessage: 'Failed to update cover image position',
+    });
+
+    return result !== null;
+  },
+
+  // Remove cover image
+  removeCoverImage: async (accountId, folderId) => {
+    const { folders } = get();
+    const existingFolder = folders.find(f => f.id === folderId);
+
+    if (!existingFolder) {
+      toast.error('Folder not found');
+      return false;
+    }
+
+    // Apply optimistic update
+    const optimisticFolder: DocumentFolder = {
+      ...existingFolder,
+      cover_image_url: null,
+      cover_image_position: null,
+      updated_at: new Date().toISOString(),
+    };
+
+    const optimisticFolders = folders.map(f => f.id === folderId ? optimisticFolder : f);
+    const optimisticTree = buildFolderTree(optimisticFolders);
+    set({ folders: optimisticFolders, folderTree: optimisticTree, error: null });
+
+    try {
+      await documentFoldersApi.removeCoverImage(accountId, folderId);
+      toast.success('Cover image removed');
+      return true;
+    } catch {
+      // Rollback
+      const folderTree = buildFolderTree(folders);
+      set({ folders, folderTree });
+      toast.error('Failed to remove cover image');
+      return false;
+    }
+  },
 }));
 
 // Re-export types for convenience
-export type { DocumentFolder, CreateDocumentFolderRequest, UpdateDocumentFolderRequest };
+export type { DocumentFolder, CreateDocumentFolderRequest, UpdateDocumentFolderRequest, CoverImagePosition };

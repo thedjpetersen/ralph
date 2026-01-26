@@ -140,6 +140,30 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
+/* Cover Image Thumbnail in List View */
+.document-list-item-cover-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.document-list-item-cover-thumb:hover {
+  transform: scale(1.1);
+}
+
+.document-list-item-cover-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.document-list-item-has-cover .document-list-item-icon {
+  color: inherit;
+}
+
 /* Item Title */
 .document-list-item-title {
   flex: 1;
@@ -264,6 +288,10 @@
 
   .document-list-item:hover .document-list-item-icon {
     color: rgba(0, 0, 0, 0.7);
+  }
+
+  .document-list-item-cover-thumb {
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
   .document-list-item-title {
