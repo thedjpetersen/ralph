@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDocumentFoldersStore, type FolderTreeNode } from '../../stores/documentFolders';
 import { useAccountStore } from '../../stores/account';
 import { useDocumentExportStore } from '../../stores/documentExport';
+import { useDocumentShareStore } from '../../stores/documentShare';
 import { useStarredDocumentsStore, type StarredDocument } from '../../stores/starredDocuments';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import './DocumentFolders.css';
@@ -58,6 +59,15 @@ const ExportIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
     <path d="M12 8v4a1 1 0 01-1 1H3a1 1 0 01-1-1V8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M4 5l3-3 3 3M7 2v8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ShareIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <circle cx="10.5" cy="2.5" r="1.75" stroke="currentColor" strokeWidth="1.25"/>
+    <circle cx="3.5" cy="7" r="1.75" stroke="currentColor" strokeWidth="1.25"/>
+    <circle cx="10.5" cy="11.5" r="1.75" stroke="currentColor" strokeWidth="1.25"/>
+    <path d="M5 6l4-2.5M5 8l4 2.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
   </svg>
 );
 
@@ -119,6 +129,7 @@ interface FolderItemProps {
   onRename: (folderId: string, name: string) => void;
   onDelete: (folderId: string, folderName: string, documentCount: number) => void;
   onExport: (folderName: string) => void;
+  onShare: (folderId: string, folderName: string) => void;
   checkIsStarred?: (folderId: string) => boolean;
   onToggleStar?: (folderId: string, folderName: string) => void;
 }
@@ -131,6 +142,7 @@ function FolderItem({
   onRename,
   onDelete,
   onExport,
+  onShare,
   checkIsStarred,
   onToggleStar,
 }: FolderItemProps) {
@@ -235,6 +247,11 @@ function FolderItem({
     setShowMenu(false);
     onExport(folder.name);
   }, [folder.name, onExport]);
+
+  const handleShareClick = useCallback(() => {
+    setShowMenu(false);
+    onShare(folder.id, folder.name);
+  }, [folder.id, folder.name, onShare]);
 
   const handleStarClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -371,6 +388,14 @@ function FolderItem({
               )}
               <button
                 className="folder-menu-item"
+                onClick={handleShareClick}
+                role="menuitem"
+              >
+                <ShareIcon />
+                Share
+              </button>
+              <button
+                className="folder-menu-item"
                 onClick={handleExportClick}
                 role="menuitem"
               >
@@ -408,6 +433,7 @@ function FolderItem({
               onRename={onRename}
               onDelete={onDelete}
               onExport={onExport}
+              onShare={onShare}
               checkIsStarred={checkIsStarred}
               onToggleStar={onToggleStar}
             />
@@ -440,6 +466,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
     moveDocumentToFolder,
   } = useDocumentFoldersStore();
   const { openExportDialog } = useDocumentExportStore();
+  const { openShareDialog } = useDocumentShareStore();
   const { starredDocuments, toggleStar, isStarred } = useStarredDocumentsStore();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -564,6 +591,10 @@ You can export this document to any of these formats using the export dialog.`;
     });
   }, [openExportDialog, currentAccount]);
 
+  const handleShare = useCallback((folderId: string, folderName: string) => {
+    openShareDialog(folderId, folderName);
+  }, [openShareDialog]);
+
   const handleToggleStar = useCallback((folderId: string, folderName: string) => {
     toggleStar(folderId, folderName, 'folder');
   }, [toggleStar]);
@@ -687,6 +718,7 @@ You can export this document to any of these formats using the export dialog.`;
                 onRename={handleRename}
                 onDelete={handleDeleteRequest}
                 onExport={handleExport}
+                onShare={handleShare}
                 checkIsStarred={checkIsStarred}
                 onToggleStar={handleToggleStar}
               />
