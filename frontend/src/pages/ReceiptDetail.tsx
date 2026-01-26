@@ -1,11 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useReceiptsStore, type Receipt, type ReceiptStatus, type ReceiptSourceType, type VLMAnalysisResult } from '../stores/receipts';
+import { useReceiptsStore, type Receipt, type ReceiptStatus, type ReceiptSourceType, type VLMAnalysisResult, type UpdateReceiptRequest } from '../stores/receipts';
 import { useAccountStore } from '../stores/account';
 import { useTransactionsStore, type Transaction } from '../stores/transactions';
 import { PageTransition } from '../components/PageTransition';
 import { SettingsFormSkeleton } from '../components/skeletons';
 import './ReceiptDetail.css';
+
+interface EditableFields {
+  merchant_name: string;
+  merchant_address: string;
+  receipt_date: string;
+  total_amount: string;
+  tax_amount: string;
+  subtotal_amount: string;
+  payment_method: string;
+  receipt_number: string;
+  notes: string;
+}
 
 export function ReceiptDetail() {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +31,7 @@ export function ReceiptDetail() {
     fetchReceipt,
     deleteReceipt,
     reprocessReceipt,
+    updateReceipt,
     linkTransaction,
     unlinkTransaction,
   } = useReceiptsStore();
@@ -28,12 +41,33 @@ export function ReceiptDetail() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReprocessing, setIsReprocessing] = useState(false);
   const [isLinking, setIsLinking] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [reprocessError, setReprocessError] = useState<string | null>(null);
   const [linkError, setLinkError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = useState('');
+
+  // Image viewer state
+  const [showImageViewer, setShowImageViewer] = useState(false);
+  const [imageZoom, setImageZoom] = useState(1);
+  const [imagePan, setImagePan] = useState({ x: 0, y: 0 });
+
+  // Edit mode state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableFields, setEditableFields] = useState<EditableFields>({
+    merchant_name: '',
+    merchant_address: '',
+    receipt_date: '',
+    total_amount: '',
+    tax_amount: '',
+    subtotal_amount: '',
+    payment_method: '',
+    receipt_number: '',
+    notes: '',
+  });
 
   useEffect(() => {
     if (id && currentAccount?.id) {
@@ -60,6 +94,23 @@ export function ReceiptDetail() {
       setReceipt(currentReceipt);
     }
   }, [currentReceipt, id]);
+
+  // Initialize editable fields when receipt loads
+  useEffect(() => {
+    if (receipt) {
+      setEditableFields({
+        merchant_name: receipt.merchant_name || '',
+        merchant_address: receipt.merchant_address || '',
+        receipt_date: receipt.receipt_date ? receipt.receipt_date.split('T')[0] : '',
+        total_amount: receipt.total_amount !== undefined ? String(receipt.total_amount) : '',
+        tax_amount: receipt.tax_amount !== undefined ? String(receipt.tax_amount) : '',
+        subtotal_amount: receipt.subtotal_amount !== undefined ? String(receipt.subtotal_amount) : '',
+        payment_method: receipt.payment_method || '',
+        receipt_number: receipt.receipt_number || '',
+        notes: receipt.notes || '',
+      });
+    }
+  }, [receipt]);
 
   const handleDelete = async () => {
     if (!id || !currentAccount?.id) return;
@@ -119,6 +170,115 @@ export function ReceiptDetail() {
       setIsLinking(false);
     }
   };
+
+  // Image viewer handlers
+  const handleZoomIn = useCallback(() => {
+    setImageZoom((prev) => Math.min(prev + 0.25, 4));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setImageZoom((prev) => Math.max(prev - 0.25, 0.5));
+  }, []);
+
+  const handleResetZoom = useCallback(() => {
+    setImageZoom(1);
+    setImagePan({ x: 0, y: 0 });
+  }, []);
+
+  const handleImageWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      setImageZoom((prev) => Math.min(prev + 0.1, 4));
+    } else {
+      setImageZoom((prev) => Math.max(prev - 0.1, 0.5));
+    }
+  }, []);
+
+  const openImageViewer = useCallback(() => {
+    setShowImageViewer(true);
+    setImageZoom(1);
+    setImagePan({ x: 0, y: 0 });
+  }, []);
+
+  const closeImageViewer = useCallback(() => {
+    setShowImageViewer(false);
+    setImageZoom(1);
+    setImagePan({ x: 0, y: 0 });
+  }, []);
+
+  // Edit handlers
+  const handleEditFieldChange = useCallback(
+    (field: keyof EditableFields, value: string) => {
+      setEditableFields((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  const handleSaveChanges = async () => {
+    if (!id || !currentAccount?.id) return;
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      const updateData: UpdateReceiptRequest = {
+        merchant_name: editableFields.merchant_name || undefined,
+        merchant_address: editableFields.merchant_address || undefined,
+        receipt_date: editableFields.receipt_date || undefined,
+        total_amount: editableFields.total_amount ? parseFloat(editableFields.total_amount) : undefined,
+        tax_amount: editableFields.tax_amount ? parseFloat(editableFields.tax_amount) : undefined,
+        subtotal_amount: editableFields.subtotal_amount ? parseFloat(editableFields.subtotal_amount) : undefined,
+        payment_method: editableFields.payment_method || undefined,
+        receipt_number: editableFields.receipt_number || undefined,
+        notes: editableFields.notes || undefined,
+      };
+      const updated = await updateReceipt(currentAccount.id, id, updateData);
+      setReceipt(updated);
+      setIsEditing(false);
+    } catch {
+      setSaveError('Failed to save changes');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = useCallback(() => {
+    if (receipt) {
+      setEditableFields({
+        merchant_name: receipt.merchant_name || '',
+        merchant_address: receipt.merchant_address || '',
+        receipt_date: receipt.receipt_date ? receipt.receipt_date.split('T')[0] : '',
+        total_amount: receipt.total_amount !== undefined ? String(receipt.total_amount) : '',
+        tax_amount: receipt.tax_amount !== undefined ? String(receipt.tax_amount) : '',
+        subtotal_amount: receipt.subtotal_amount !== undefined ? String(receipt.subtotal_amount) : '',
+        payment_method: receipt.payment_method || '',
+        receipt_number: receipt.receipt_number || '',
+        notes: receipt.notes || '',
+      });
+    }
+    setIsEditing(false);
+    setSaveError(null);
+  }, [receipt]);
+
+  // Get image URL for the receipt
+  const getReceiptImageUrl = useCallback(() => {
+    if (!receipt) return null;
+    // Check if we have a storage key for the image
+    if (receipt.storage_key) {
+      // Construct the URL based on storage configuration
+      const baseUrl = import.meta.env.VITE_STORAGE_URL || '/api/storage';
+      return `${baseUrl}/${receipt.storage_bucket || 'receipts'}/${receipt.storage_key}`;
+    }
+    // Fallback to file_path if available
+    if (receipt.file_path) {
+      return receipt.file_path;
+    }
+    return null;
+  }, [receipt]);
+
+  const isImageFile = useCallback(() => {
+    if (!receipt) return false;
+    const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
+    return imageTypes.includes(receipt.mime_type);
+  }, [receipt]);
 
   const getStatusClass = (status: ReceiptStatus) => {
     switch (status) {
@@ -413,6 +573,7 @@ export function ReceiptDetail() {
         {deleteError && <div className="detail-error-message">{deleteError}</div>}
         {reprocessError && <div className="detail-error-message">{reprocessError}</div>}
         {linkError && <div className="detail-error-message">{linkError}</div>}
+        {saveError && <div className="detail-error-message">{saveError}</div>}
 
         <div className="detail-content">
           <div className="receipt-amount-section">
@@ -424,58 +585,216 @@ export function ReceiptDetail() {
             </div>
           </div>
 
+          {/* Receipt Image Viewer Section */}
+          {isImageFile() && (
+            <div className="detail-section">
+              <h2>Receipt Image</h2>
+              <div className="receipt-image-preview">
+                {getReceiptImageUrl() ? (
+                  <div className="image-preview-container">
+                    <img
+                      src={getReceiptImageUrl() || ''}
+                      alt={receipt.file_name}
+                      className="receipt-thumbnail"
+                      onClick={openImageViewer}
+                    />
+                    <button
+                      className="view-full-image-button"
+                      onClick={openImageViewer}
+                    >
+                      View Full Image
+                    </button>
+                  </div>
+                ) : (
+                  <div className="no-image-preview">
+                    <p>Image preview not available</p>
+                    <span className="no-image-hint">
+                      The receipt image may be stored externally or processing is required.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="detail-section">
-            <h2>Receipt Details</h2>
-            <div className="detail-grid">
-              <div className="detail-item">
-                <span className="detail-label">File Name</span>
-                <span className="detail-value">{receipt.file_name}</span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">File Type</span>
-                <span className="detail-value">{receipt.mime_type}</span>
-              </div>
-              <div className="detail-item">
-                <span className="detail-label">File Size</span>
-                <span className="detail-value">{formatFileSize(receipt.file_size)}</span>
-              </div>
-              {receipt.merchant_name && (
-                <div className="detail-item">
-                  <span className="detail-label">Merchant</span>
-                  <span className="detail-value">{receipt.merchant_name}</span>
-                </div>
-              )}
-              {receipt.merchant_address && (
-                <div className="detail-item">
-                  <span className="detail-label">Address</span>
-                  <span className="detail-value">{receipt.merchant_address}</span>
-                </div>
-              )}
-              {receipt.payment_method && (
-                <div className="detail-item">
-                  <span className="detail-label">Payment Method</span>
-                  <span className="detail-value">{receipt.payment_method}</span>
-                </div>
-              )}
-              {receipt.receipt_number && (
-                <div className="detail-item">
-                  <span className="detail-label">Receipt Number</span>
-                  <span className="detail-value">{receipt.receipt_number}</span>
-                </div>
-              )}
-              {receipt.subtotal_amount !== undefined && (
-                <div className="detail-item">
-                  <span className="detail-label">Subtotal</span>
-                  <span className="detail-value">{formatAmount(receipt.subtotal_amount, receipt.currency)}</span>
-                </div>
-              )}
-              {receipt.tax_amount !== undefined && (
-                <div className="detail-item">
-                  <span className="detail-label">Tax</span>
-                  <span className="detail-value">{formatAmount(receipt.tax_amount, receipt.currency)}</span>
+            <div className="section-header">
+              <h2>Receipt Details</h2>
+              {!isEditing ? (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="edit-button"
+                >
+                  Edit
+                </button>
+              ) : (
+                <div className="edit-actions">
+                  <button
+                    onClick={handleCancelEdit}
+                    className="cancel-edit-button"
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveChanges}
+                    className="save-button"
+                    disabled={isSaving}
+                  >
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </button>
                 </div>
               )}
             </div>
+            {isEditing ? (
+              <div className="edit-form">
+                <div className="edit-grid">
+                  <div className="edit-field">
+                    <label htmlFor="merchant_name">Merchant Name</label>
+                    <input
+                      type="text"
+                      id="merchant_name"
+                      value={editableFields.merchant_name}
+                      onChange={(e) => handleEditFieldChange('merchant_name', e.target.value)}
+                      placeholder="Enter merchant name"
+                    />
+                  </div>
+                  <div className="edit-field">
+                    <label htmlFor="merchant_address">Address</label>
+                    <input
+                      type="text"
+                      id="merchant_address"
+                      value={editableFields.merchant_address}
+                      onChange={(e) => handleEditFieldChange('merchant_address', e.target.value)}
+                      placeholder="Enter address"
+                    />
+                  </div>
+                  <div className="edit-field">
+                    <label htmlFor="receipt_date">Receipt Date</label>
+                    <input
+                      type="date"
+                      id="receipt_date"
+                      value={editableFields.receipt_date}
+                      onChange={(e) => handleEditFieldChange('receipt_date', e.target.value)}
+                    />
+                  </div>
+                  <div className="edit-field">
+                    <label htmlFor="total_amount">Total Amount</label>
+                    <input
+                      type="number"
+                      id="total_amount"
+                      step="0.01"
+                      value={editableFields.total_amount}
+                      onChange={(e) => handleEditFieldChange('total_amount', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="edit-field">
+                    <label htmlFor="subtotal_amount">Subtotal</label>
+                    <input
+                      type="number"
+                      id="subtotal_amount"
+                      step="0.01"
+                      value={editableFields.subtotal_amount}
+                      onChange={(e) => handleEditFieldChange('subtotal_amount', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="edit-field">
+                    <label htmlFor="tax_amount">Tax Amount</label>
+                    <input
+                      type="number"
+                      id="tax_amount"
+                      step="0.01"
+                      value={editableFields.tax_amount}
+                      onChange={(e) => handleEditFieldChange('tax_amount', e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="edit-field">
+                    <label htmlFor="payment_method">Payment Method</label>
+                    <input
+                      type="text"
+                      id="payment_method"
+                      value={editableFields.payment_method}
+                      onChange={(e) => handleEditFieldChange('payment_method', e.target.value)}
+                      placeholder="e.g., Credit Card, Cash"
+                    />
+                  </div>
+                  <div className="edit-field">
+                    <label htmlFor="receipt_number">Receipt Number</label>
+                    <input
+                      type="text"
+                      id="receipt_number"
+                      value={editableFields.receipt_number}
+                      onChange={(e) => handleEditFieldChange('receipt_number', e.target.value)}
+                      placeholder="Enter receipt number"
+                    />
+                  </div>
+                </div>
+                <div className="edit-field edit-field-full">
+                  <label htmlFor="notes">Notes</label>
+                  <textarea
+                    id="notes"
+                    value={editableFields.notes}
+                    onChange={(e) => handleEditFieldChange('notes', e.target.value)}
+                    placeholder="Add any notes about this receipt..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="detail-grid">
+                <div className="detail-item">
+                  <span className="detail-label">File Name</span>
+                  <span className="detail-value">{receipt.file_name}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">File Type</span>
+                  <span className="detail-value">{receipt.mime_type}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">File Size</span>
+                  <span className="detail-value">{formatFileSize(receipt.file_size)}</span>
+                </div>
+                {receipt.merchant_name && (
+                  <div className="detail-item">
+                    <span className="detail-label">Merchant</span>
+                    <span className="detail-value">{receipt.merchant_name}</span>
+                  </div>
+                )}
+                {receipt.merchant_address && (
+                  <div className="detail-item">
+                    <span className="detail-label">Address</span>
+                    <span className="detail-value">{receipt.merchant_address}</span>
+                  </div>
+                )}
+                {receipt.payment_method && (
+                  <div className="detail-item">
+                    <span className="detail-label">Payment Method</span>
+                    <span className="detail-value">{receipt.payment_method}</span>
+                  </div>
+                )}
+                {receipt.receipt_number && (
+                  <div className="detail-item">
+                    <span className="detail-label">Receipt Number</span>
+                    <span className="detail-value">{receipt.receipt_number}</span>
+                  </div>
+                )}
+                {receipt.subtotal_amount !== undefined && (
+                  <div className="detail-item">
+                    <span className="detail-label">Subtotal</span>
+                    <span className="detail-value">{formatAmount(receipt.subtotal_amount, receipt.currency)}</span>
+                  </div>
+                )}
+                {receipt.tax_amount !== undefined && (
+                  <div className="detail-item">
+                    <span className="detail-label">Tax</span>
+                    <span className="detail-value">{formatAmount(receipt.tax_amount, receipt.currency)}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="detail-section">
@@ -560,7 +879,7 @@ export function ReceiptDetail() {
             </div>
           )}
 
-          {receipt.notes && (
+          {receipt.notes && !isEditing && (
             <div className="detail-section">
               <h2>Notes</h2>
               <p className="detail-notes">{receipt.notes}</p>
@@ -655,6 +974,37 @@ export function ReceiptDetail() {
                 >
                   {isLinking ? 'Linking...' : 'Link Transaction'}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showImageViewer && getReceiptImageUrl() && (
+          <div className="image-viewer-overlay" onClick={closeImageViewer}>
+            <div className="image-viewer-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="image-viewer-controls">
+                <button onClick={handleZoomOut} className="zoom-button" title="Zoom Out">
+                  -
+                </button>
+                <span className="zoom-level">{Math.round(imageZoom * 100)}%</span>
+                <button onClick={handleZoomIn} className="zoom-button" title="Zoom In">
+                  +
+                </button>
+                <button onClick={handleResetZoom} className="reset-zoom-button" title="Reset Zoom">
+                  Reset
+                </button>
+                <button onClick={closeImageViewer} className="close-viewer-button" title="Close">
+                  Close
+                </button>
+              </div>
+              <div className="image-viewer-content" onWheel={handleImageWheel}>
+                <img
+                  src={getReceiptImageUrl() || ''}
+                  alt={receipt.file_name}
+                  style={{
+                    transform: `scale(${imageZoom}) translate(${imagePan.x / imageZoom}px, ${imagePan.y / imageZoom}px)`,
+                  }}
+                />
               </div>
             </div>
           </div>
