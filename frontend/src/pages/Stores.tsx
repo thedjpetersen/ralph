@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useStoresStore, type StoreType, type StoreStatus } from '../stores/stores';
+import { useStoresStore, type StoreType, type StoreStatus, type Store } from '../stores/stores';
 import { PageTransition } from '../components/PageTransition';
 import { AccountsListSkeleton } from '../components/skeletons';
 import './Stores.css';
@@ -24,6 +24,43 @@ const STATUS_OPTIONS: { value: StoreStatus | ''; label: string }[] = [
   { value: 'rejected', label: 'Rejected' },
 ];
 
+type SortField = 'name' | 'transaction_count' | 'total_spent';
+type SortDirection = 'asc' | 'desc';
+
+const SORT_OPTIONS: { value: SortField; label: string }[] = [
+  { value: 'name', label: 'Name' },
+  { value: 'transaction_count', label: 'Transaction Count' },
+  { value: 'total_spent', label: 'Total Spent' },
+];
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function getStoreIcon(type: StoreType): string {
+  switch (type) {
+    case 'retail':
+      return '🛍️';
+    case 'online':
+      return '💻';
+    case 'restaurant':
+      return '🍽️';
+    case 'grocery':
+      return '🛒';
+    case 'gas':
+      return '⛽';
+    case 'service':
+      return '🔧';
+    default:
+      return '🏪';
+  }
+}
+
 export function Stores() {
   const {
     stores,
@@ -38,6 +75,8 @@ export function Stores() {
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [typeFilter, setTypeFilter] = useState<StoreType | ''>('');
   const [statusFilter, setStatusFilter] = useState<StoreStatus | ''>('');
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   // Debounce search
   useEffect(() => {
@@ -93,6 +132,37 @@ export function Stores() {
   const handleStatusChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusFilter(e.target.value as StoreStatus | '');
   }, []);
+
+  const handleSortFieldChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortField(e.target.value as SortField);
+  }, []);
+
+  const toggleSortDirection = useCallback(() => {
+    setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  }, []);
+
+  const sortedStores = useMemo(() => {
+    const sorted = [...stores].sort((a: Store, b: Store) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'name':
+          comparison = (a.display_name || a.name).localeCompare(b.display_name || b.name);
+          break;
+        case 'transaction_count': {
+          // Use transaction_count if available, fall back to match_count
+          const aCount = a.transaction_count ?? a.match_count;
+          const bCount = b.transaction_count ?? b.match_count;
+          comparison = aCount - bCount;
+          break;
+        }
+        case 'total_spent':
+          comparison = (a.total_spent ?? 0) - (b.total_spent ?? 0);
+          break;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+    return sorted;
+  }, [stores, sortField, sortDirection]);
 
   const getStatusClass = (status: StoreStatus) => {
     switch (status) {
@@ -191,9 +261,29 @@ export function Stores() {
               </option>
             ))}
           </select>
+          <div className="sort-controls">
+            <select
+              value={sortField}
+              onChange={handleSortFieldChange}
+              className="filter-select"
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  Sort: {option.label}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={toggleSortDirection}
+              className="sort-direction-button"
+              aria-label={`Sort ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
+            >
+              {sortDirection === 'asc' ? '↑' : '↓'}
+            </button>
+          </div>
         </div>
 
-        {stores.length === 0 ? (
+        {sortedStores.length === 0 ? (
           <div className="stores-empty">
             <h2>No Stores Found</h2>
             <p>
@@ -209,16 +299,27 @@ export function Stores() {
           </div>
         ) : (
           <div className="stores-grid">
-            {stores.map((store) => (
+            {sortedStores.map((store) => (
               <Link
                 key={store.id}
                 to={`/stores/${store.id}`}
                 className="store-card"
               >
                 <div className="store-card-header">
-                  <h3 className="store-card-name">
-                    {store.display_name || store.name}
-                  </h3>
+                  <div className="store-card-title">
+                    {store.logo ? (
+                      <img
+                        src={store.logo}
+                        alt={`${store.display_name || store.name} logo`}
+                        className="store-logo"
+                      />
+                    ) : (
+                      <span className="store-icon">{getStoreIcon(store.type)}</span>
+                    )}
+                    <h3 className="store-card-name">
+                      {store.display_name || store.name}
+                    </h3>
+                  </div>
                   <span className={`store-status ${getStatusClass(store.status)}`}>
                     {store.status}
                   </span>
@@ -227,6 +328,20 @@ export function Stores() {
                 {store.description && (
                   <p className="store-card-description">{store.description}</p>
                 )}
+                <div className="store-card-stats">
+                  <div className="store-stat">
+                    <span className="stat-value">
+                      {store.transaction_count ?? store.match_count}
+                    </span>
+                    <span className="stat-label">Transactions</span>
+                  </div>
+                  <div className="store-stat">
+                    <span className="stat-value">
+                      {store.total_spent != null ? formatCurrency(store.total_spent) : '--'}
+                    </span>
+                    <span className="stat-label">Total Spent</span>
+                  </div>
+                </div>
                 <div className="store-card-details">
                   {store.aliases && store.aliases.length > 0 && (
                     <div className="store-detail">
@@ -242,10 +357,6 @@ export function Stores() {
                       </span>
                     </div>
                   )}
-                  <div className="store-detail">
-                    <span className="detail-label">Matches</span>
-                    <span className="detail-value">{store.match_count}</span>
-                  </div>
                 </div>
                 {store.tags && store.tags.length > 0 && (
                   <div className="store-card-tags">

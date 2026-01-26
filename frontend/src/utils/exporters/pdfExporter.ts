@@ -7,7 +7,6 @@ import {
   type DocumentExportData,
   type ExportOptions,
   type ExportResult,
-  getFormatConfig,
 } from './types';
 import { generateFilename, formatDate } from './helpers';
 
@@ -198,6 +197,5 @@ export function exportToPdfBlob(
     yPosition += lineHeightMm;
   }
 
-  const config = getFormatConfig('pdf');
-  return doc.output('blob', { type: config.mimeType });
+  return doc.output('blob');
 }

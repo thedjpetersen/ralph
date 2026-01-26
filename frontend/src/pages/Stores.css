@@ -264,6 +264,87 @@
   font-size: 0.75rem;
 }
 
+/* Sort controls */
+.sort-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.sort-direction-button {
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.sort-direction-button:hover {
+  background-color: #2a2a2a;
+  border-color: #646cff;
+}
+
+.sort-direction-button:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+/* Store card title with logo/icon */
+.store-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.store-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.store-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Store stats section */
+.store-card-stats {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.store-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 @media (prefers-color-scheme: light) {
   .stores-subtitle {
     color: rgba(0, 0, 0, 0.6);
@@ -318,5 +399,27 @@
   .store-tag-more {
     background-color: rgba(0, 0, 0, 0.1);
     color: rgba(0, 0, 0, 0.6);
+  }
+
+  .sort-direction-button {
+    background-color: #f9f9f9;
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .sort-direction-button:hover {
+    background-color: #eee;
+  }
+
+  .store-card-stats {
+    background-color: rgba(100, 108, 255, 0.08);
+  }
+
+  .stat-value {
+    color: #213547;
+  }
+
+  .stat-label {
+    color: rgba(0, 0, 0, 0.5);
   }
 }

@@ -35,6 +35,8 @@ export interface Store {
   receipt_patterns?: string[];
   match_count: number;
   merge_count: number;
+  transaction_count?: number;
+  total_spent?: number;
   created_at: string;
   updated_at: string;
   created_by?: string;

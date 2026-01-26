@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDocumentFoldersStore, type FolderTreeNode } from '../../stores/documentFolders';
 import { useAccountStore } from '../../stores/account';
+import { useDocumentExportStore } from '../../stores/documentExport';
 import './DocumentFolders.css';
 
 // Icons
@@ -51,6 +52,13 @@ const MoreIcon = () => (
   </svg>
 );
 
+const ExportIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M12 8v4a1 1 0 01-1 1H3a1 1 0 01-1-1V8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M4 5l3-3 3 3M7 2v8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 interface FolderItemProps {
   folder: FolderTreeNode;
   level: number;
@@ -58,6 +66,7 @@ interface FolderItemProps {
   onCreateSubfolder: (parentId: string) => void;
   onRename: (folderId: string, name: string) => void;
   onDelete: (folderId: string) => void;
+  onExport: (folderName: string) => void;
 }
 
 function FolderItem({
@@ -67,6 +76,7 @@ function FolderItem({
   onCreateSubfolder,
   onRename,
   onDelete,
+  onExport,
 }: FolderItemProps) {
   const {
     expandedFolderIds,
@@ -163,6 +173,11 @@ function FolderItem({
     setShowMenu(false);
     onDelete(folder.id);
   }, [folder.id, onDelete]);
+
+  const handleExportClick = useCallback(() => {
+    setShowMenu(false);
+    onExport(folder.name);
+  }, [folder.name, onExport]);
 
   // Drag handlers
   const handleDragStart = useCallback((e: React.DragEvent) => {
@@ -284,6 +299,14 @@ function FolderItem({
               )}
               <button
                 className="folder-menu-item"
+                onClick={handleExportClick}
+                role="menuitem"
+              >
+                <ExportIcon />
+                Export
+              </button>
+              <button
+                className="folder-menu-item"
                 onClick={handleRenameClick}
                 role="menuitem"
               >
@@ -312,6 +335,7 @@ function FolderItem({
               onCreateSubfolder={onCreateSubfolder}
               onRename={onRename}
               onDelete={onDelete}
+              onExport={onExport}
             />
           ))}
         </div>
@@ -341,6 +365,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
     moveFolderToParent,
     moveDocumentToFolder,
   } = useDocumentFoldersStore();
+  const { openExportDialog } = useDocumentExportStore();
 
   const [isCreating, setIsCreating] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -420,6 +445,30 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
       // Error is handled in store
     }
   }, [currentAccount, deleteFolder]);
+
+  const handleExport = useCallback((folderName: string) => {
+    // Open export dialog with sample document content
+    // In a real implementation, this would load the actual document content
+    const sampleContent = `This is the content from the "${folderName}" folder.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+This document demonstrates the export functionality which supports:
+- PDF format with title and metadata
+- Clean Markdown output
+- Styled HTML with embedded CSS
+- Plain text format
+
+You can export this document to any of these formats using the export dialog.`;
+
+    openExportDialog(sampleContent, {
+      title: folderName,
+      author: currentAccount?.name || 'Unknown Author',
+      createdAt: new Date().toISOString(),
+    });
+  }, [openExportDialog, currentAccount]);
 
   // Root drop zone for moving to root level
   const handleRootDragOver = useCallback((e: React.DragEvent) => {
@@ -511,6 +560,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
                 onCreateSubfolder={handleCreateSubfolder}
                 onRename={handleRename}
                 onDelete={handleDelete}
+                onExport={handleExport}
               />
             ))}
           </>
