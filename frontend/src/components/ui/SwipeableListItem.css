@@ -1,0 +1,102 @@
+/**
+ * SwipeableListItem styles
+ * Touch-friendly list item with swipe actions support
+ */
+
+.swipeable-list-item {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-bg-secondary);
+  /* Allow vertical scrolling but capture horizontal */
+  touch-action: pan-y pinch-zoom;
+}
+
+/* Action backgrounds */
+.swipeable-action-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.swipeable-action-bg--left {
+  left: 0;
+  right: auto;
+  justify-content: flex-start;
+}
+
+.swipeable-action-bg--right {
+  right: 0;
+  left: auto;
+  justify-content: flex-end;
+}
+
+/* Individual action buttons */
+.swipeable-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 100%;
+  min-height: 56px;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  pointer-events: auto;
+  transition: transform 0.15s ease;
+}
+
+.swipeable-action:hover {
+  transform: scale(1.1);
+}
+
+.swipeable-action:active {
+  transform: scale(0.95);
+}
+
+.swipeable-action svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Main content container */
+.swipeable-list-item-content {
+  position: relative;
+  background-color: var(--color-bg-secondary);
+  z-index: 1;
+  will-change: transform;
+}
+
+.swipeable-list-item-content.swiping {
+  /* No transition when actively swiping */
+  transition: none;
+}
+
+/* Ensure minimum touch target height */
+@media (hover: none) and (pointer: coarse) {
+  .swipeable-list-item {
+    min-height: 56px;
+  }
+
+  .swipeable-list-item-content {
+    min-height: 56px;
+  }
+
+  /* Remove tap highlight */
+  .swipeable-list-item-content {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Hover state for desktop/mouse */
+@media (hover: hover) and (pointer: fine) {
+  .swipeable-list-item:hover .swipeable-list-item-content {
+    background-color: var(--color-bg-hover);
+  }
+}

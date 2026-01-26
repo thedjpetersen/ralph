@@ -100,3 +100,108 @@
   padding: 1rem 1.5rem;
   border-top: 1px solid var(--color-border, #e5e7eb);
 }
+
+/* ==========================================================================
+   Touch-friendly Modal Enhancements
+   ========================================================================== */
+
+/* Drag handle for swipe-to-dismiss */
+.modal-drag-handle {
+  display: none;
+  width: 36px;
+  height: 4px;
+  margin: 8px auto 0;
+  background-color: var(--color-border-strong, rgba(0, 0, 0, 0.24));
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* Touch dismissible modal */
+.modal-touch-dismissible {
+  touch-action: pan-y;
+}
+
+.modal-swiping {
+  /* Disable transitions while swiping for responsive feel */
+  transition: none !important;
+}
+
+/* Touch device specific styles */
+@media (hover: none) and (pointer: coarse) {
+  /* Show drag handle on touch devices */
+  .modal-touch-dismissible .modal-drag-handle {
+    display: block;
+  }
+
+  /* Modal close button needs larger touch target */
+  .modal-close {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px;
+    margin: -10px;
+    margin-left: auto;
+  }
+
+  /* Adjust header for touch */
+  .modal-header {
+    padding: 0.75rem 1rem;
+    padding-top: 0.5rem;
+  }
+
+  /* Body padding for touch */
+  .modal-body {
+    padding: 1rem;
+  }
+
+  /* Footer adjustments for touch */
+  .modal-footer {
+    padding: 1rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  /* Make footer buttons full width on small screens */
+  .modal-footer .btn {
+    flex: 1;
+    min-height: 48px;
+  }
+
+  /* Remove tap highlight */
+  .modal {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Overlay needs to allow touch events through */
+  .modal-overlay {
+    touch-action: none;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .modal {
+    border-radius: 16px 16px 0 0;
+    max-height: calc(100vh - 1rem);
+    margin-bottom: 0;
+  }
+
+  /* All sizes become full-width on mobile */
+  .modal-sm,
+  .modal-md,
+  .modal-lg,
+  .modal-xl {
+    max-width: 100%;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    transition: none;
+  }
+}

@@ -1,0 +1,405 @@
+/**
+ * Touch-friendly styles for mobile devices
+ * Ensures minimum 44x44px touch targets and proper touch interaction feedback
+ */
+
+/* ==========================================================================
+   Touch Target Sizing
+   WCAG 2.1 AAA recommends 44x44px minimum for touch targets
+   ========================================================================== */
+
+/* Apply touch-friendly sizing on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  /* Generic interactive elements */
+  button,
+  [role="button"],
+  [role="menuitem"],
+  [role="option"],
+  [role="tab"],
+  [role="checkbox"],
+  [role="radio"],
+  [role="switch"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Links that act as buttons/navigation */
+  a.touch-target,
+  .nav-link,
+  .action-link {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Form inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  textarea,
+  select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  /* Icon buttons need explicit sizing */
+  .icon-btn,
+  .btn-icon-only,
+  [class*="icon-button"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px;
+  }
+
+  /* List items that are interactive */
+  li[role="option"],
+  li[role="menuitem"],
+  .list-item-interactive {
+    min-height: 48px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  /* Checkbox and radio labels need enough space */
+  label:has(input[type="checkbox"]),
+  label:has(input[type="radio"]) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+  }
+}
+
+/* ==========================================================================
+   Touch Feedback
+   Visual feedback for touch interactions
+   ========================================================================== */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Remove default tap highlight */
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  [tabindex]:not([tabindex="-1"]) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Active state feedback with scale */
+  .touch-feedback:active:not(:disabled),
+  button:active:not(:disabled),
+  [role="button"]:active:not([aria-disabled="true"]) {
+    transform: scale(0.97);
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Prevent text selection during touch interactions */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+}
+
+/* ==========================================================================
+   Swipeable Elements
+   Styles for elements that support swipe gestures
+   ========================================================================== */
+
+.swipeable {
+  position: relative;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+
+.swipeable-content {
+  position: relative;
+  background-color: var(--color-bg-secondary);
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+.swipeable-content.swiping {
+  transition: none;
+}
+
+/* Swipe action backgrounds */
+.swipe-action-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  transition: opacity 0.2s ease;
+}
+
+.swipe-action-bg--left {
+  left: 0;
+  background-color: var(--color-error);
+  color: white;
+  justify-content: flex-start;
+}
+
+.swipe-action-bg--right {
+  right: 0;
+  background-color: var(--color-accent);
+  color: white;
+  justify-content: flex-end;
+}
+
+/* Swipe action icons */
+.swipe-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+/* ==========================================================================
+   Long Press Context Menu
+   Styles for context menus triggered by long press
+   ========================================================================== */
+
+.long-press-target {
+  position: relative;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.long-press-target.pressing {
+  opacity: 0.8;
+}
+
+/* Context menu styles */
+.context-menu {
+  position: fixed;
+  z-index: 1100;
+  min-width: 180px;
+  max-width: 280px;
+  background-color: var(--color-bg-elevated);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 0.5rem 0;
+  animation: context-menu-appear 0.15s ease-out;
+  overflow: hidden;
+}
+
+.context-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1099;
+  background-color: transparent;
+}
+
+@keyframes context-menu-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  min-height: 48px;
+  border: none;
+  background: none;
+  color: var(--color-text-primary);
+  font-size: 0.9375rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.context-menu-item:hover,
+.context-menu-item:focus {
+  background-color: var(--color-bg-hover);
+  outline: none;
+}
+
+.context-menu-item:active {
+  background-color: var(--color-bg-active);
+}
+
+.context-menu-item--danger {
+  color: var(--color-error);
+}
+
+.context-menu-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-secondary);
+}
+
+.context-menu-item--danger .context-menu-item-icon {
+  color: var(--color-error);
+}
+
+.context-menu-divider {
+  height: 1px;
+  margin: 0.5rem 0;
+  background-color: var(--color-border);
+}
+
+/* ==========================================================================
+   Modal Touch Enhancements
+   Swipe-to-dismiss and touch-friendly modal styles
+   ========================================================================== */
+
+.modal-overlay {
+  /* Allow touch events to pass through to modal */
+  touch-action: none;
+}
+
+.modal.touch-dismissible {
+  touch-action: pan-y;
+}
+
+/* Drag handle indicator for swipe-to-dismiss */
+.modal-drag-handle {
+  display: none;
+  width: 36px;
+  height: 4px;
+  margin: 8px auto 0;
+  background-color: var(--color-border-strong);
+  border-radius: 2px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .modal.touch-dismissible .modal-drag-handle {
+    display: block;
+  }
+
+  /* Modal close button touch target */
+  .modal-close {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px;
+  }
+
+  /* Modal header spacing for touch */
+  .modal-header {
+    padding: 0.75rem 1rem;
+  }
+
+  /* Modal body padding for touch */
+  .modal-body {
+    padding: 1rem;
+  }
+
+  /* Modal footer buttons spacing */
+  .modal-footer {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .modal-footer .btn {
+    flex: 1;
+    min-height: 48px;
+  }
+}
+
+/* ==========================================================================
+   Tap Outside to Deselect
+   Styles for selection states that can be dismissed by tapping outside
+   ========================================================================== */
+
+.selectable-item {
+  position: relative;
+  cursor: pointer;
+}
+
+.selectable-item.selected {
+  background-color: var(--color-accent-light);
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.selectable-item.selected::after {
+  content: '';
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+  background-size: 14px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Selection mode overlay for tap-outside dismiss */
+.selection-mode-active .selectable-item:not(.selected) {
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   Mobile-specific spacing adjustments
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Increase spacing between interactive elements */
+  .btn + .btn,
+  button + button {
+    margin-left: 0.75rem;
+  }
+
+  /* Stack buttons vertically in tight spaces */
+  .btn-group--mobile-stack {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .btn-group--mobile-stack .btn {
+    width: 100%;
+  }
+
+  /* Safe area padding for notched devices */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+}

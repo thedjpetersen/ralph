@@ -3,7 +3,9 @@ import {
   useEffect,
   useRef,
   useCallback,
+  useState,
   type MouseEvent,
+  type TouchEvent as ReactTouchEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
@@ -23,6 +25,8 @@ export interface ModalProps {
   closeOnEscape?: boolean;
   showCloseButton?: boolean;
   initialFocus?: React.RefObject<HTMLElement | null>;
+  /** Enable swipe down to dismiss (mobile-friendly) */
+  swipeToDismiss?: boolean;
 }
 
 export function Modal({
@@ -37,8 +41,12 @@ export function Modal({
   closeOnEscape = true,
   showCloseButton = true,
   initialFocus,
+  swipeToDismiss = true,
 }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const touchStartRef = useRef<{ y: number; x: number; time: number } | null>(null);
 
   // Use focus trap hook for proper focus management
   useFocusTrap(modalRef, {
@@ -57,6 +65,58 @@ export function Modal({
     [closeOnOverlayClick, onClose]
   );
 
+  // Swipe to dismiss handlers
+  const handleTouchStart = useCallback(
+    (e: ReactTouchEvent) => {
+      if (!swipeToDismiss) return;
+
+      const touch = e.touches[0];
+      touchStartRef.current = {
+        y: touch.clientY,
+        x: touch.clientX,
+        time: Date.now(),
+      };
+    },
+    [swipeToDismiss]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: ReactTouchEvent) => {
+      if (!swipeToDismiss || !touchStartRef.current) return;
+
+      const touch = e.touches[0];
+      const deltaY = touch.clientY - touchStartRef.current.y;
+      const deltaX = touch.clientX - touchStartRef.current.x;
+
+      // Only track downward swipes (positive deltaY) that are more vertical than horizontal
+      if (deltaY > 0 && Math.abs(deltaY) > Math.abs(deltaX)) {
+        setIsSwiping(true);
+        // Apply resistance as the user swipes further
+        const resistance = 0.5;
+        setSwipeOffset(deltaY * resistance);
+      }
+    },
+    [swipeToDismiss]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    if (!swipeToDismiss || !touchStartRef.current) {
+      touchStartRef.current = null;
+      return;
+    }
+
+    const dismissThreshold = 100;
+
+    if (swipeOffset >= dismissThreshold) {
+      onClose();
+    }
+
+    // Reset state
+    setSwipeOffset(0);
+    setIsSwiping(false);
+    touchStartRef.current = null;
+  }, [swipeToDismiss, swipeOffset, onClose]);
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -68,23 +128,42 @@ export function Modal({
     }
   }, [isOpen]);
 
+  // Early return if modal is closed - state will reset naturally when component remounts
   if (!isOpen) return null;
+
+  // Calculate opacity based on swipe offset for visual feedback
+  const overlayOpacity = Math.max(0.5 - swipeOffset / 400, 0.2);
 
   const modalContent = (
     <div
       className="modal-overlay"
       onClick={handleOverlayClick}
       role="presentation"
+      style={{
+        backgroundColor: `rgba(0, 0, 0, ${overlayOpacity})`,
+      }}
     >
       <div
         ref={modalRef}
-        className={`modal modal-${size}`}
+        className={`modal modal-${size} ${swipeToDismiss ? 'modal-touch-dismissible' : ''} ${isSwiping ? 'modal-swiping' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
         aria-describedby={description ? 'modal-description' : undefined}
         tabIndex={-1}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+        style={{
+          transform: swipeOffset > 0 ? `translateY(${swipeOffset}px)` : undefined,
+          transition: isSwiping ? 'none' : 'transform 0.2s ease-out',
+        }}
       >
+        {/* Drag handle for swipe-to-dismiss indication */}
+        {swipeToDismiss && (
+          <div className="modal-drag-handle" aria-hidden="true" />
+        )}
         {(title || showCloseButton) && (
           <div className="modal-header">
             {title && (

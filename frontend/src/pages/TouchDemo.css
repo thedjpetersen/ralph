@@ -1,0 +1,147 @@
+/**
+ * Touch Demo page styles
+ */
+
+.touch-demo-page {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.touch-demo-page h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.touch-demo-subtitle {
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+}
+
+.demo-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  background-color: var(--color-bg-secondary);
+  border-radius: 12px;
+}
+
+.demo-section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.demo-description {
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+  margin-bottom: 1.5rem;
+}
+
+.button-grid {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.demo-list {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.demo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  min-height: 72px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.demo-list .swipeable-list-item:last-child .demo-item {
+  border-bottom: none;
+}
+
+.demo-item.selected {
+  background-color: var(--color-accent-light);
+}
+
+.demo-item-content h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.25rem;
+  color: var(--color-text-primary);
+}
+
+.demo-item-content p {
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.demo-item-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-accent);
+}
+
+.selection-hint {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: var(--color-accent-light);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: var(--color-accent);
+}
+
+.modal-demo-content {
+  font-size: 0.9375rem;
+}
+
+.modal-demo-content p {
+  margin: 0 0 1rem;
+  color: var(--color-text-secondary);
+}
+
+.modal-demo-content ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: var(--color-text-secondary);
+}
+
+.modal-demo-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Touch device hints */
+@media (hover: none) and (pointer: coarse) {
+  .demo-description::after {
+    content: ' (Touch device detected)';
+    color: var(--color-success);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .touch-demo-page {
+    padding: 1rem;
+  }
+
+  .demo-section {
+    padding: 1rem;
+  }
+
+  .button-grid {
+    flex-direction: column;
+  }
+
+  .button-grid .btn {
+    width: 100%;
+  }
+}
