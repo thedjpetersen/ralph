@@ -11,6 +11,7 @@ import { AIRewriteToolbar } from './AIRewriteToolbar';
 import { GhostRewritePreview } from './GhostRewritePreview';
 import { AIToneToolbar } from './AIToneToolbar';
 import { GhostTonePreview } from './GhostTonePreview';
+import { AICustomPromptToolbar } from './AICustomPromptToolbar';
 import { CommentHighlightOverlay } from './CommentHighlightOverlay';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { MobileTabBar } from './layout/MobileTabBar';
@@ -581,6 +582,7 @@ export function Layout() {
       <AIRewriteToolbar />
       <GhostTonePreview />
       <AIToneToolbar />
+      <AICustomPromptToolbar />
       <CommentHighlightOverlay />
       <MobileTabBar />
       <OptimisticSyncIndicator position="bottom-right" />

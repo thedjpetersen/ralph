@@ -98,6 +98,26 @@
   font-size: 0.75rem;
 }
 
+/* AI button styling */
+.formatting-toolbar-btn-ai {
+  background: linear-gradient(135deg, var(--color-purple-50, #faf5ff) 0%, transparent 100%);
+}
+
+.formatting-toolbar-btn-ai:hover {
+  background: linear-gradient(135deg, var(--color-purple-100, #f3e8ff) 0%, var(--color-purple-50, #faf5ff) 100%);
+  color: var(--color-purple-600, #9333ea);
+}
+
+.formatting-toolbar-ai-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-purple-500, #a855f7);
+}
+
+.formatting-toolbar-btn-ai:hover .formatting-toolbar-ai-icon {
+  color: var(--color-purple-600, #9333ea);
+}
+
 /* Divider between buttons and close */
 .formatting-toolbar-divider {
   width: 1px;
@@ -184,6 +204,19 @@
   .formatting-toolbar-close:hover {
     background: var(--color-gray-700, #374151);
     color: var(--color-gray-300, #d1d5db);
+  }
+
+  .formatting-toolbar-btn-ai {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, transparent 100%);
+  }
+
+  .formatting-toolbar-btn-ai:hover {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(147, 51, 234, 0.1) 100%);
+    color: var(--color-purple-400, #c084fc);
+  }
+
+  .formatting-toolbar-ai-icon {
+    color: var(--color-purple-400, #c084fc);
   }
 }
 

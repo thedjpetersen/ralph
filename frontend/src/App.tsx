@@ -82,6 +82,7 @@ const RetirementBacktest = lazy(() => import('./pages/RetirementBacktest').then(
 // Integration pages
 const Integrations = lazy(() => import('./pages/Integrations').then(m => ({ default: m.Integrations })));
 const GoogleDriveSettings = lazy(() => import('./pages/GoogleDriveSettings').then(m => ({ default: m.GoogleDriveSettings })));
+const GoogleDriveSync = lazy(() => import('./pages/GoogleDriveSync').then(m => ({ default: m.GoogleDriveSync })));
 const EmailSettings = lazy(() => import('./pages/EmailSettings').then(m => ({ default: m.EmailSettings })));
 
 // Admin pages
@@ -159,6 +160,7 @@ function App() {
         <Route path="/integrations" element={<Suspense fallback={<PageLoadingSpinner />}><Integrations /></Suspense>} />
         <Route path="/integrations/google-drive" element={<Suspense fallback={<PageLoadingSpinner />}><GoogleDriveSettings /></Suspense>} />
         <Route path="/integrations/google-drive/callback" element={<Suspense fallback={<PageLoadingSpinner />}><GoogleDriveSettings /></Suspense>} />
+        <Route path="/integrations/google-drive/sync" element={<Suspense fallback={<PageLoadingSpinner />}><GoogleDriveSync /></Suspense>} />
         <Route path="/integrations/email" element={<Suspense fallback={<PageLoadingSpinner />}><EmailSettings /></Suspense>} />
         <Route path="/integrations/email/callback" element={<Suspense fallback={<PageLoadingSpinner />}><EmailSettings /></Suspense>} />
 
