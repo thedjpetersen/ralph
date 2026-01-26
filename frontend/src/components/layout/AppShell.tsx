@@ -32,6 +32,7 @@ const FindReplaceDialog = lazy(() => import('../FindReplaceDialog').then(m => ({
 const ParagraphFocusOverlay = lazy(() => import('../ParagraphFocusOverlay').then(m => ({ default: m.ParagraphFocusOverlay })));
 const TypewriterScrollManager = lazy(() => import('../TypewriterScrollManager').then(m => ({ default: m.TypewriterScrollManager })));
 const OnboardingTour = lazy(() => import('../OnboardingTour').then(m => ({ default: m.OnboardingTour })));
+const AISummaryDialog = lazy(() => import('../AISummaryDialog').then(m => ({ default: m.AISummaryDialog })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -276,6 +277,7 @@ export function AppShell({ children }: AppShellProps) {
         <ParagraphFocusOverlay />
         <TypewriterScrollManager />
         <OnboardingTour />
+        <AISummaryDialog />
       </Suspense>
     </div>
   );

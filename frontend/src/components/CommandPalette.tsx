@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCommandPaletteStore, type Command, type CommandCategory } from '../stores/commandPalette';
 import { useFindReplaceStore } from '../stores/findReplace';
+import { useAISummaryStore } from '../stores/aiSummary';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
 import './CommandPalette.css';
@@ -53,6 +54,7 @@ const categoryLabels: Record<CommandCategory, string> = {
 function useCommands(): Command[] {
   const navigate = useNavigate();
   const { openDialog: openFindReplace } = useFindReplaceStore();
+  const { openSummaryDialog } = useAISummaryStore();
   const { closePalette } = useCommandPaletteStore();
 
   return useMemo(() => {
@@ -232,6 +234,31 @@ function useCommands(): Command[] {
         keywords: ['search', 'replace', 'substitute'],
         action: () => { openFindReplace(null, true); closePalette(); },
       },
+      {
+        id: 'ai-generate-summary',
+        label: 'Generate Summary',
+        category: 'ai',
+        description: 'Generate an AI summary of the document',
+        keywords: ['summarize', 'brief', 'overview', 'executive', 'tldr'],
+        action: () => {
+          // Use sample content for demo - in production this would use actual document content
+          const sampleContent = `This is a comprehensive financial planning document that covers various aspects of budget management and expense tracking.
+
+The document outlines strategies for effective spending control, including categorization of expenses, setting realistic budget limits, and implementing regular review cycles. Key topics include emergency fund planning, retirement savings strategies, and debt management approaches.
+
+Additionally, the document discusses methods for tracking monthly spending patterns and identifying areas where costs can be reduced without impacting quality of life. Recommendations include using digital tools for expense tracking, establishing clear financial goals, and maintaining a balanced approach between saving and spending.`;
+          openSummaryDialog(sampleContent, 'Financial Planning Document');
+          closePalette();
+        },
+      },
+      {
+        id: 'ai-summary-demo',
+        label: 'AI Summary Demo',
+        category: 'ai',
+        description: 'Try the AI summary generation feature',
+        keywords: ['summarize', 'demo', 'test', 'example'],
+        action: () => { navigate('/ai-summary-demo'); closePalette(); },
+      },
 
       // Settings
       {
@@ -277,7 +304,7 @@ function useCommands(): Command[] {
     ];
 
     return commands;
-  }, [navigate, openFindReplace, closePalette]);
+  }, [navigate, openFindReplace, openSummaryDialog, closePalette]);
 }
 
 // Highlight text component

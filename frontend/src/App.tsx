@@ -21,6 +21,7 @@ const SidebarDemo = lazy(() => import('./pages/SidebarDemo').then(m => ({ defaul
 const ToastDemo = lazy(() => import('./pages/ToastDemo').then(m => ({ default: m.ToastDemo })));
 const AuthorComparisonDemo = lazy(() => import('./pages/AuthorComparisonDemo').then(m => ({ default: m.AuthorComparisonDemo })));
 const TitleSuggestionsDemo = lazy(() => import('./pages/TitleSuggestionsDemo').then(m => ({ default: m.TitleSuggestionsDemo })));
+const AISummaryDemo = lazy(() => import('./pages/AISummaryDemo').then(m => ({ default: m.AISummaryDemo })));
 
 // Store pages
 const Stores = lazy(() => import('./pages/Stores').then(m => ({ default: m.Stores })));
@@ -57,6 +58,7 @@ const Bills = lazy(() => import('./pages/Bills').then(m => ({ default: m.Bills }
 // Financial pages
 const FinancialConnections = lazy(() => import('./pages/FinancialConnections').then(m => ({ default: m.FinancialConnections })));
 const FinancialAccounts = lazy(() => import('./pages/FinancialAccounts').then(m => ({ default: m.FinancialAccounts })));
+const FinancialTransactions = lazy(() => import('./pages/FinancialTransactions').then(m => ({ default: m.FinancialTransactions })));
 const BankTransactions = lazy(() => import('./pages/BankTransactions').then(m => ({ default: m.BankTransactions })));
 const BankTransactionDetail = lazy(() => import('./pages/BankTransactionDetail').then(m => ({ default: m.BankTransactionDetail })));
 
@@ -116,6 +118,7 @@ function App() {
         <Route path="/toast-demo" element={<Suspense fallback={<PageLoadingSpinner />}><ToastDemo /></Suspense>} />
         <Route path="/author-comparison-demo" element={<Suspense fallback={<PageLoadingSpinner />}><AuthorComparisonDemo /></Suspense>} />
         <Route path="/title-suggestions-demo" element={<Suspense fallback={<PageLoadingSpinner />}><TitleSuggestionsDemo /></Suspense>} />
+        <Route path="/ai-summary-demo" element={<Suspense fallback={<PageLoadingSpinner />}><AISummaryDemo /></Suspense>} />
         <Route path="/stores" element={<Suspense fallback={<PageLoadingSpinner />}><Stores /></Suspense>} />
         <Route path="/stores/new" element={<Suspense fallback={<PageLoadingSpinner />}><StoreForm /></Suspense>} />
         <Route path="/stores/:id" element={<Suspense fallback={<PageLoadingSpinner />}><StoreDetail /></Suspense>} />
@@ -141,6 +144,7 @@ function App() {
         <Route path="/bills" element={<Suspense fallback={<PageLoadingSpinner />}><Bills /></Suspense>} />
         <Route path="/connections" element={<Suspense fallback={<PageLoadingSpinner />}><FinancialConnections /></Suspense>} />
         <Route path="/financial-accounts" element={<Suspense fallback={<PageLoadingSpinner />}><FinancialAccounts /></Suspense>} />
+        <Route path="/financial-transactions" element={<Suspense fallback={<PageLoadingSpinner />}><FinancialTransactions /></Suspense>} />
         <Route path="/bank-transactions" element={<Suspense fallback={<PageLoadingSpinner />}><BankTransactions /></Suspense>} />
         <Route path="/bank-transactions/:id" element={<Suspense fallback={<PageLoadingSpinner />}><BankTransactionDetail /></Suspense>} />
         <Route path="/personas" element={<Suspense fallback={<PageLoadingSpinner />}><Personas /></Suspense>} />
