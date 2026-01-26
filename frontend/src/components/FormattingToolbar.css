@@ -93,6 +93,16 @@
   border-radius: 3px;
 }
 
+/* Code block button */
+.formatting-toolbar-btn-codeblock .formatting-toolbar-btn-icon {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.125rem 0.25rem;
+  background: var(--color-gray-100, #f3f4f6);
+  border-radius: 3px;
+}
+
 /* Link button - link icon styling */
 .formatting-toolbar-btn-link .formatting-toolbar-btn-icon {
   font-size: 0.75rem;
@@ -189,7 +199,8 @@
     background: var(--color-gray-600, #4b5563);
   }
 
-  .formatting-toolbar-btn-code .formatting-toolbar-btn-icon {
+  .formatting-toolbar-btn-code .formatting-toolbar-btn-icon,
+  .formatting-toolbar-btn-codeblock .formatting-toolbar-btn-icon {
     background: var(--color-gray-700, #374151);
   }
 

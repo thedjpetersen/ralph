@@ -155,7 +155,11 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
             action = 'underline';
             break;
           case 'e':
-            action = 'code';
+            if (e.shiftKey) {
+              action = 'codeblock';
+            } else {
+              action = 'code';
+            }
             break;
           case 'k':
             action = 'link';

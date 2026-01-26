@@ -6,6 +6,7 @@ export type FormatAction =
   | 'underline'
   | 'strikethrough'
   | 'code'
+  | 'codeblock'
   | 'link';
 
 export interface FormatActionConfig {
@@ -22,7 +23,8 @@ export const FORMAT_ACTIONS: FormatActionConfig[] = [
   { id: 'italic', label: 'Italic', icon: 'I', shortcut: 'Ctrl+I', prefix: '*', suffix: '*' },
   { id: 'underline', label: 'Underline', icon: 'U', shortcut: 'Ctrl+U', prefix: '<u>', suffix: '</u>' },
   { id: 'strikethrough', label: 'Strikethrough', icon: 'S', shortcut: 'Ctrl+Shift+S', prefix: '~~', suffix: '~~' },
-  { id: 'code', label: 'Code', icon: '<>', shortcut: 'Ctrl+E', prefix: '`', suffix: '`' },
+  { id: 'code', label: 'Inline Code', icon: '<>', shortcut: 'Ctrl+E', prefix: '`', suffix: '`' },
+  { id: 'codeblock', label: 'Code Block', icon: '{}', shortcut: 'Ctrl+Shift+E', prefix: '\n```\n', suffix: '\n```\n' },
   { id: 'link', label: 'Link', icon: '🔗', shortcut: 'Ctrl+K', prefix: '[', suffix: '](url)' },
 ];
 
