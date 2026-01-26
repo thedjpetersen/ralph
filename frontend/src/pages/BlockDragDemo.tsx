@@ -9,6 +9,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { PageTransition } from '../components/PageTransition';
 import { GhostTextTextarea } from '../components/GhostTextTextarea';
 import { BlockEditor } from '../components/BlockEditor';
+import { EditorPreferencesPanel } from '../components/EditorPreferencesPanel';
 import { Button } from '../components/ui/Button';
 import { useBlockDragStore, selectCanUndo } from '../stores/blockDrag';
 import { toast } from '../stores/toast';
@@ -98,9 +99,23 @@ const UndoIcon = () => (
   </svg>
 );
 
+const SettingsIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path
+      d="M6.5 1.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1.293l.646.647a.5.5 0 0 1 0 .707L9.5 4.793v.914l.646.646a.5.5 0 0 1 0 .707l-.646.647v.914l.646.646a.5.5 0 0 1 0 .707l-.646.647v.914l.646.646a.5.5 0 0 1 0 .707l-.646.647v1.293a.5.5 0 0 1-.5.5H7a.5.5 0 0 1-.5-.5v-1.293l-.646-.647a.5.5 0 0 1 0-.707l.646-.647v-.914l-.646-.646a.5.5 0 0 1 0-.707l.646-.647v-.914l-.646-.646a.5.5 0 0 1 0-.707L6.5 4.793V3.5l-.646-.647a.5.5 0 0 1 0-.707l.646-.646V1.5z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.25" />
+  </svg>
+);
+
 export function BlockDragDemo() {
   const [content, setContent] = useState(SAMPLE_CONTENT);
   const [showRawEditor, setShowRawEditor] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
   const canUndo = useBlockDragStore(selectCanUndo);
   const { undo } = useBlockDragStore();
 
@@ -183,6 +198,15 @@ export function BlockDragDemo() {
                 Undo Reorder
               </Button>
             )}
+            <Button
+              variant="ghost"
+              onClick={() => setShowPreferences(true)}
+              className="preferences-btn"
+              title="Editor Preferences"
+            >
+              <SettingsIcon />
+              Preferences
+            </Button>
           </div>
 
           {showRawEditor ? (
@@ -334,6 +358,11 @@ export function BlockDragDemo() {
           </div>
         </section>
       </div>
+
+      <EditorPreferencesPanel
+        isOpen={showPreferences}
+        onClose={() => setShowPreferences(false)}
+      />
     </PageTransition>
   );
 }

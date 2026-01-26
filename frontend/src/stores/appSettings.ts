@@ -20,6 +20,8 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   wordWrap: true,
   fontSize: 16,
   fontFamily: 'system',
+  lineHeight: 1.6,
+  editorWidth: 'medium',
   tabSize: 2,
   commentSortOrder: 'newest',
 };
@@ -48,6 +50,9 @@ export interface GeneralSettings {
   confirmOnExit: boolean;
 }
 
+export type EditorFontFamily = 'system' | 'serif' | 'sans-serif' | 'monospace' | 'georgia';
+export type EditorWidth = 'narrow' | 'medium' | 'wide' | 'full';
+
 export interface EditorSettings {
   smartTypography: boolean;
   paragraphFocus: boolean;
@@ -56,7 +61,9 @@ export interface EditorSettings {
   lineNumbers: boolean;
   wordWrap: boolean;
   fontSize: number;
-  fontFamily: 'system' | 'serif' | 'sans-serif' | 'monospace';
+  fontFamily: EditorFontFamily;
+  lineHeight: number;
+  editorWidth: EditorWidth;
   tabSize: number;
   commentSortOrder: CommentSortOrder;
 }

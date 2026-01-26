@@ -29,6 +29,7 @@ const AIWritingPromptsDemo = lazy(() => import('./pages/AIWritingPromptsDemo').t
 const CommentsSortDemo = lazy(() => import('./pages/CommentsSortDemo').then(m => ({ default: m.CommentsSortDemo })));
 const CodeBlockDemo = lazy(() => import('./pages/CodeBlockDemo').then(m => ({ default: m.CodeBlockDemo })));
 const BlockDragDemo = lazy(() => import('./pages/BlockDragDemo').then(m => ({ default: m.BlockDragDemo })));
+const EditorPreferencesDemo = lazy(() => import('./pages/EditorPreferencesDemo').then(m => ({ default: m.EditorPreferencesDemo })));
 
 // Store pages
 const Stores = lazy(() => import('./pages/Stores').then(m => ({ default: m.Stores })));
@@ -133,6 +134,7 @@ function App() {
         <Route path="/comments-sort-demo" element={<Suspense fallback={<PageLoadingSpinner />}><CommentsSortDemo /></Suspense>} />
         <Route path="/code-block-demo" element={<Suspense fallback={<PageLoadingSpinner />}><CodeBlockDemo /></Suspense>} />
         <Route path="/block-drag-demo" element={<Suspense fallback={<PageLoadingSpinner />}><BlockDragDemo /></Suspense>} />
+        <Route path="/editor-preferences-demo" element={<Suspense fallback={<PageLoadingSpinner />}><EditorPreferencesDemo /></Suspense>} />
         <Route path="/stores" element={<Suspense fallback={<PageLoadingSpinner />}><Stores /></Suspense>} />
         <Route path="/stores/new" element={<Suspense fallback={<PageLoadingSpinner />}><StoreForm /></Suspense>} />
         <Route path="/stores/:id" element={<Suspense fallback={<PageLoadingSpinner />}><StoreDetail /></Suspense>} />

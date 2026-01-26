@@ -336,15 +336,34 @@ function EditorSection() {
             value={settings.fontFamily}
             onChange={(e) =>
               updateEditorSettings({
-                fontFamily: e.target.value as 'system' | 'serif' | 'sans-serif' | 'monospace',
+                fontFamily: e.target.value as 'system' | 'serif' | 'sans-serif' | 'monospace' | 'georgia',
               })
             }
           >
             <option value="system">System default</option>
-            <option value="serif">Serif</option>
-            <option value="sans-serif">Sans-serif</option>
-            <option value="monospace">Monospace</option>
+            <option value="serif">Serif (Georgia, Times)</option>
+            <option value="sans-serif">Sans-serif (Helvetica, Arial)</option>
+            <option value="monospace">Monospace (Courier)</option>
+            <option value="georgia">Georgia</option>
           </select>
+        </div>
+        <div className="setting-item">
+          <label className="setting-label">
+            Line height
+            <span className="setting-description">Spacing between lines of text</span>
+          </label>
+          <div className="font-size-control">
+            <input
+              type="range"
+              min="1.4"
+              max="2.0"
+              step="0.1"
+              value={settings.lineHeight}
+              onChange={(e) => updateEditorSettings({ lineHeight: Number(e.target.value) })}
+              className="setting-range"
+            />
+            <span className="font-size-value">{settings.lineHeight.toFixed(1)}</span>
+          </div>
         </div>
         <div className="setting-item">
           <label className="setting-label">
@@ -359,6 +378,30 @@ function EditorSection() {
             <option value={2}>2 spaces</option>
             <option value={4}>4 spaces</option>
             <option value={8}>8 spaces</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="settings-group">
+        <h3>Layout</h3>
+        <div className="setting-item">
+          <label className="setting-label">
+            Editor width
+            <span className="setting-description">The width of the writing area</span>
+          </label>
+          <select
+            className="setting-select"
+            value={settings.editorWidth}
+            onChange={(e) =>
+              updateEditorSettings({
+                editorWidth: e.target.value as 'narrow' | 'medium' | 'wide' | 'full',
+              })
+            }
+          >
+            <option value="narrow">Narrow</option>
+            <option value="medium">Medium</option>
+            <option value="wide">Wide</option>
+            <option value="full">Full Width</option>
           </select>
         </div>
       </div>

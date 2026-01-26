@@ -24,6 +24,7 @@ import {
   type Block,
   type BlockType,
 } from '../stores/blockDrag';
+import { useEditorStyles } from '../hooks/useEditorStyles';
 import './BlockEditor.css';
 
 interface BlockEditorProps {
@@ -93,6 +94,9 @@ export function BlockEditor({
   className = '',
   enableDrag = true,
 }: BlockEditorProps) {
+  // Get editor style settings
+  const { style: editorStyle } = useEditorStyles();
+
   // Get drag state from store
   const isDragging = useBlockDragStore(selectIsDragging);
   const draggedBlockIndex = useBlockDragStore(selectDraggedBlockIndex);
@@ -230,6 +234,7 @@ export function BlockEditor({
     <div
       className={`block-editor ${isDragging ? 'block-editor-dragging' : ''} ${className}`}
       onDragLeave={handleContainerDragLeave}
+      style={editorStyle}
     >
       {blocks.map((block, index) => {
         const showDropBefore =

@@ -5,10 +5,14 @@
   padding: 1rem;
   padding-left: 2.5rem; /* Extra space for drag handles */
   min-height: 200px;
+  /* Default values, overridden by inline styles from useEditorStyles */
   font-family: inherit;
   font-size: 1rem;
   line-height: 1.6;
+  max-width: 720px;
+  margin: 0 auto;
   color: var(--color-text, #1f2937);
+  transition: font-size 0.2s ease, line-height 0.2s ease, max-width 0.3s ease;
 }
 
 /* Empty state */

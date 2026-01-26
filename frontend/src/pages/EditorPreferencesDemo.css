@@ -1,0 +1,214 @@
+.editor-prefs-demo {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.editor-prefs-demo .demo-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.editor-prefs-demo .demo-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.editor-prefs-demo .demo-header p {
+  color: var(--color-text-secondary);
+  font-size: 1.125rem;
+}
+
+/* Controls Section */
+.demo-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.open-prefs-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.current-settings {
+  width: 100%;
+  max-width: 600px;
+}
+
+.current-settings h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.settings-display {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.setting-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+}
+
+.chip-label {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+}
+
+.chip-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Preview Section */
+.demo-preview {
+  margin-bottom: 2rem;
+}
+
+.demo-preview h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.preview-container {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+.preview-content {
+  margin: 0 auto;
+  transition: font-size 0.2s ease, line-height 0.2s ease, max-width 0.3s ease;
+}
+
+.preview-h1 {
+  font-size: 1.75em;
+  font-weight: 700;
+  margin: 0 0 0.75em;
+  color: var(--color-text-primary);
+}
+
+.preview-h2 {
+  font-size: 1.4em;
+  font-weight: 600;
+  margin: 1.25em 0 0.5em;
+  color: var(--color-text-primary);
+}
+
+.preview-h3 {
+  font-size: 1.15em;
+  font-weight: 600;
+  margin: 1em 0 0.5em;
+  color: var(--color-text-primary);
+}
+
+.preview-paragraph {
+  margin: 0 0 1em;
+  color: var(--color-text-secondary);
+}
+
+.preview-blockquote {
+  margin: 1em 0;
+  padding-left: 1em;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.preview-list {
+  margin: 0 0 1em;
+  padding-left: 1.5em;
+  color: var(--color-text-secondary);
+}
+
+.preview-list li {
+  margin-bottom: 0.5em;
+}
+
+/* Features Section */
+.demo-features {
+  margin-bottom: 2rem;
+}
+
+.demo-features h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.feature-card {
+  padding: 1.25rem;
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.feature-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .editor-prefs-demo {
+    padding: 1rem;
+  }
+
+  .demo-controls {
+    padding: 1.25rem;
+  }
+
+  .settings-display {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .setting-chip {
+    justify-content: space-between;
+  }
+
+  .preview-container {
+    padding: 1rem;
+  }
+}
