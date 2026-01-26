@@ -1,0 +1,324 @@
+/* Document List Container */
+.document-list {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+}
+
+.document-list-loading,
+.document-list-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 24px;
+}
+
+/* Loading Skeleton */
+.document-list-loading-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.document-list-skeleton-item {
+  height: 36px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: document-list-skeleton-shimmer 1.5s infinite;
+}
+
+@keyframes document-list-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* List Header */
+.document-list-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 4px;
+}
+
+.document-list-header-icon {
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.document-list-header-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-list-header-date {
+  width: 70px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.document-list-header-words {
+  width: 70px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.document-list-header-actions {
+  width: 56px;
+  flex-shrink: 0;
+}
+
+/* List Items Container */
+.document-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* List Item */
+.document-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.document-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.document-list-item:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+.document-list-item:active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.document-list-item-starred {
+  background-color: rgba(251, 191, 36, 0.05);
+}
+
+.document-list-item-starred:hover {
+  background-color: rgba(251, 191, 36, 0.1);
+}
+
+/* Item Icon */
+.document-list-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.document-list-item:hover .document-list-item-icon {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Item Title */
+.document-list-item-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.87);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Item Date */
+.document-list-item-date {
+  width: 70px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Item Word Count */
+.document-list-item-words {
+  width: 70px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Item Actions */
+.document-list-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 56px;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.document-list-item:hover .document-list-item-actions,
+.document-list-item:focus-within .document-list-item-actions {
+  opacity: 1;
+}
+
+/* Action Button */
+.document-list-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, transform 0.15s;
+}
+
+.document-list-action-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.document-list-action-btn:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: 1px;
+}
+
+.document-list-action-btn.starred {
+  color: #fbbf24;
+}
+
+.document-list-action-btn.starred:hover {
+  color: #fbbf24;
+  transform: scale(1.1);
+}
+
+/* Light Mode */
+@media (prefers-color-scheme: light) {
+  .document-list-skeleton-item {
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.03) 25%,
+      rgba(0, 0, 0, 0.08) 50%,
+      rgba(0, 0, 0, 0.03) 75%
+    );
+    background-size: 200% 100%;
+  }
+
+  .document-list-header {
+    color: rgba(0, 0, 0, 0.4);
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .document-list-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .document-list-item:active {
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .document-list-item-starred {
+    background-color: rgba(251, 191, 36, 0.08);
+  }
+
+  .document-list-item-starred:hover {
+    background-color: rgba(251, 191, 36, 0.12);
+  }
+
+  .document-list-item-icon {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .document-list-item:hover .document-list-item-icon {
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .document-list-item-title {
+    color: #213547;
+  }
+
+  .document-list-item-date,
+  .document-list-item-words {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .document-list-action-btn {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .document-list-action-btn:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* Responsive: Hide columns on smaller screens */
+@media (max-width: 480px) {
+  .document-list-header-words,
+  .document-list-item-words {
+    display: none;
+  }
+
+  .document-list-header-date,
+  .document-list-item-date {
+    width: 50px;
+  }
+}
+
+@media (max-width: 360px) {
+  .document-list-header-date,
+  .document-list-item-date,
+  .document-list-header-words,
+  .document-list-item-words {
+    display: none;
+  }
+
+  .document-list-item-actions {
+    width: 32px;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .document-list-item {
+    padding: 10px 8px;
+    min-height: 44px;
+  }
+
+  .document-list-item-actions {
+    opacity: 1;
+  }
+
+  .document-list-action-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
