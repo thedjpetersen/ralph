@@ -1,14 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePersonasStore, type Persona, type PersonaStatus } from '../stores/personas';
+import { useCommunityPersonasStore } from '../stores/communityPersonas';
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
 import { AccountsListSkeleton } from '../components/skeletons';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { ClonePersonaDialog } from '../components/ClonePersonaDialog';
+import { CloneCommunityPersonaDialog } from '../components/CloneCommunityPersonaDialog';
 import { useDeleteConfirmation } from '../hooks/useDeleteConfirmation';
 import { toast } from '../stores/toast';
 import './Personas.css';
+
+type TabType = 'my-personas' | 'community';
 
 const STATUS_OPTIONS: { value: PersonaStatus | ''; label: string }[] = [
   { value: '', label: 'All Statuses' },
@@ -29,8 +33,20 @@ export function Personas() {
     clonePersona,
   } = usePersonasStore();
 
+  const {
+    communityPersonas,
+    isLoading: isCommunityLoading,
+    error: communityError,
+    searchQuery,
+    fetchCommunityPersonas,
+    setSearchQuery,
+    cloneFromCommunity,
+  } = useCommunityPersonasStore();
+
+  const [activeTab, setActiveTab] = useState<TabType>('my-personas');
   const [statusFilter, setStatusFilter] = useState<PersonaStatus | ''>('');
   const [personaToClone, setPersonaToClone] = useState<Persona | null>(null);
+  const [communityPersonaToClone, setCommunityPersonaToClone] = useState<Persona | null>(null);
   const [isCloning, setIsCloning] = useState(false);
 
   // Delete confirmation hook
@@ -59,6 +75,12 @@ export function Personas() {
       fetchPersonas(currentAccount.id, { status: statusFilter || undefined });
     }
   }, [currentAccount?.id, statusFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (activeTab === 'community') {
+      fetchCommunityPersonas({ search: searchQuery || undefined });
+    }
+  }, [activeTab, searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleStatusChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusFilter(e.target.value as PersonaStatus | '');
@@ -116,6 +138,40 @@ export function Personas() {
     }
   };
 
+  const handleCommunityClone = (persona: Persona) => {
+    setCommunityPersonaToClone(persona);
+  };
+
+  const handleCommunityCloneConfirm = async (data: { name: string; is_public: boolean }) => {
+    if (!currentAccount?.id || !communityPersonaToClone) return;
+    setIsCloning(true);
+    try {
+      const result = await cloneFromCommunity(
+        currentAccount.id,
+        communityPersonaToClone,
+        data.name,
+        data.is_public
+      );
+      if (result) {
+        setCommunityPersonaToClone(null);
+        // Refresh user's personas list
+        fetchPersonas(currentAccount.id, { status: statusFilter || undefined });
+      }
+    } finally {
+      setIsCloning(false);
+    }
+  };
+
+  const handleCommunityCloneCancel = () => {
+    if (!isCloning) {
+      setCommunityPersonaToClone(null);
+    }
+  };
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, [setSearchQuery]);
+
   if (!currentAccount) {
     return (
       <PageTransition>
@@ -171,124 +227,265 @@ export function Personas() {
         <div className="personas-header">
           <div className="personas-header-row">
             <div>
-              <h1>Personas</h1>
-              <p className="personas-subtitle">Manage spending personas and profiles</p>
+              <h1>Authors</h1>
+              <p className="personas-subtitle">Manage your authors and discover community creations</p>
             </div>
-            <button onClick={handleCreateNew} className="create-persona-button">
-              Add Persona
-            </button>
+            {activeTab === 'my-personas' && (
+              <button onClick={handleCreateNew} className="create-persona-button">
+                Add Author
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="personas-filters">
-          <select
-            value={statusFilter}
-            onChange={handleStatusChange}
-            className="filter-select"
+        {/* Tabs */}
+        <div className="personas-tabs">
+          <button
+            className={`personas-tab ${activeTab === 'my-personas' ? 'active' : ''}`}
+            onClick={() => setActiveTab('my-personas')}
           >
-            {STATUS_OPTIONS.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
+            My Authors
+          </button>
+          <button
+            className={`personas-tab ${activeTab === 'community' ? 'active' : ''}`}
+            onClick={() => setActiveTab('community')}
+          >
+            Community
+          </button>
         </div>
 
-        {personas.length === 0 ? (
-          <div className="personas-empty">
-            <h2>No Personas Found</h2>
-            <p>You haven't created any personas yet.</p>
-            <button onClick={handleCreateNew} className="create-persona-link">
-              Add your first persona
-            </button>
-          </div>
-        ) : (
-          <div className="personas-grid">
-            {personas.map((persona) => (
-              <div key={persona.id} className="persona-card">
-                <div className="persona-card-header">
-                  {persona.avatar_url ? (
-                    <div className="persona-avatar">
-                      <img src={persona.avatar_url} alt={persona.name} />
-                    </div>
-                  ) : (
-                    <div className="persona-avatar-placeholder">
-                      {persona.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="persona-card-info">
-                    <h3 className="persona-card-name">
-                      {persona.name}
-                      {persona.is_default && (
-                        <span className="default-badge">Default</span>
-                      )}
-                      {persona.is_public && (
-                        <span className="public-badge">Public</span>
-                      )}
-                    </h3>
-                    <div className="persona-status-row">
-                      <span className={`persona-status ${getStatusClass(persona.status)}`}>
-                        {persona.status}
-                      </span>
-                      {persona.cloned_from_name && (
-                        <span className="persona-lineage">
-                          Based on {persona.cloned_from_name}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {persona.description && (
-                  <p className="persona-card-description">{persona.description}</p>
-                )}
-                <div className="persona-card-details">
-                  {persona.spending_profile && (
-                    <div className="persona-detail">
-                      <span className="detail-label">Spending Profile</span>
-                      <span className="detail-value">{persona.spending_profile}</span>
-                    </div>
-                  )}
-                  <div className="persona-detail">
-                    <span className="detail-label">Created</span>
-                    <span className="detail-value">
-                      {new Date(persona.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-                <div className="persona-card-actions">
-                  <button
-                    onClick={() => handleEdit(persona)}
-                    className="edit-persona-button"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleClone(persona)}
-                    className="clone-persona-button"
-                    title="Create a copy of this persona"
-                  >
-                    Clone
-                  </button>
-                  {!persona.is_default && (
-                    <button
-                      onClick={() => handleSetDefault(persona)}
-                      className="default-persona-button"
-                    >
-                      Set Default
-                    </button>
-                  )}
-                  <button
-                    onClick={() => confirmDelete(persona)}
-                    className="delete-persona-button"
-                    disabled={persona.is_default}
-                    title={persona.is_default ? 'Cannot delete default persona' : ''}
-                  >
-                    Delete
-                  </button>
-                </div>
+        {/* My Personas Tab */}
+        {activeTab === 'my-personas' && (
+          <>
+            <div className="personas-filters">
+              <select
+                value={statusFilter}
+                onChange={handleStatusChange}
+                className="filter-select"
+              >
+                {STATUS_OPTIONS.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {personas.length === 0 ? (
+              <div className="personas-empty">
+                <h2>No Authors Found</h2>
+                <p>You haven't created any authors yet.</p>
+                <button onClick={handleCreateNew} className="create-persona-link">
+                  Add your first author
+                </button>
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="personas-grid">
+                {personas.map((persona) => (
+                  <div key={persona.id} className="persona-card">
+                    <div className="persona-card-header">
+                      {persona.avatar_url ? (
+                        <div className="persona-avatar">
+                          <img src={persona.avatar_url} alt={persona.name} />
+                        </div>
+                      ) : (
+                        <div className="persona-avatar-placeholder">
+                          {persona.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="persona-card-info">
+                        <h3 className="persona-card-name">
+                          {persona.name}
+                          {persona.is_default && (
+                            <span className="default-badge">Default</span>
+                          )}
+                          {persona.is_public && (
+                            <span className="public-badge">Public</span>
+                          )}
+                        </h3>
+                        <div className="persona-status-row">
+                          <span className={`persona-status ${getStatusClass(persona.status)}`}>
+                            {persona.status}
+                          </span>
+                          {persona.cloned_from_name && (
+                            <span className="persona-lineage">
+                              Based on {persona.cloned_from_name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    {persona.description && (
+                      <p className="persona-card-description">{persona.description}</p>
+                    )}
+                    <div className="persona-card-details">
+                      {persona.spending_profile && (
+                        <div className="persona-detail">
+                          <span className="detail-label">Spending Profile</span>
+                          <span className="detail-value">{persona.spending_profile}</span>
+                        </div>
+                      )}
+                      <div className="persona-detail">
+                        <span className="detail-label">Created</span>
+                        <span className="detail-value">
+                          {new Date(persona.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {/* Usage stats for public personas */}
+                      {persona.is_public && (
+                        <>
+                          <div className="persona-detail">
+                            <span className="detail-label">Clones</span>
+                            <span className="detail-value">{persona.clone_count || 0}</span>
+                          </div>
+                          <div className="persona-detail">
+                            <span className="detail-label">Uses</span>
+                            <span className="detail-value">{persona.use_count || 0}</span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <div className="persona-card-actions">
+                      <button
+                        onClick={() => handleEdit(persona)}
+                        className="edit-persona-button"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleClone(persona)}
+                        className="clone-persona-button"
+                        title="Create a copy of this author"
+                      >
+                        Clone
+                      </button>
+                      {!persona.is_default && (
+                        <button
+                          onClick={() => handleSetDefault(persona)}
+                          className="default-persona-button"
+                        >
+                          Set Default
+                        </button>
+                      )}
+                      <button
+                        onClick={() => confirmDelete(persona)}
+                        className="delete-persona-button"
+                        disabled={persona.is_default}
+                        title={persona.is_default ? 'Cannot delete default author' : ''}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Community Tab */}
+        {activeTab === 'community' && (
+          <>
+            <div className="personas-filters">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="Search community authors..."
+                className="search-input"
+              />
+            </div>
+
+            {isCommunityLoading ? (
+              <AccountsListSkeleton count={6} />
+            ) : communityError ? (
+              <div className="personas-error">
+                <h2>Error</h2>
+                <p>{communityError}</p>
+                <button
+                  onClick={() => fetchCommunityPersonas({ search: searchQuery || undefined })}
+                  className="retry-button"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : communityPersonas.length === 0 ? (
+              <div className="personas-empty">
+                <h2>No Community Authors Found</h2>
+                <p>
+                  {searchQuery
+                    ? 'No authors match your search. Try different keywords.'
+                    : 'No authors have been shared yet. Be the first to share!'}
+                </p>
+              </div>
+            ) : (
+              <div className="personas-grid">
+                {communityPersonas.map((persona) => (
+                  <div key={persona.id} className="persona-card community-card">
+                    <div className="persona-card-header">
+                      {persona.avatar_url ? (
+                        <div className="persona-avatar">
+                          <img src={persona.avatar_url} alt={persona.name} />
+                        </div>
+                      ) : (
+                        <div className="persona-avatar-placeholder">
+                          {persona.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="persona-card-info">
+                        <h3 className="persona-card-name">{persona.name}</h3>
+                        {/* Creator attribution */}
+                        <div className="persona-creator">
+                          {persona.creator_avatar_url ? (
+                            <img
+                              src={persona.creator_avatar_url}
+                              alt={persona.creator_name || 'Creator'}
+                              className="creator-avatar"
+                            />
+                          ) : (
+                            <span className="creator-avatar-placeholder">
+                              {(persona.creator_name || 'U').charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          <span className="creator-name">
+                            by {persona.creator_name || 'Anonymous'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {persona.description && (
+                      <p className="persona-card-description">{persona.description}</p>
+                    )}
+                    <div className="persona-card-details">
+                      {persona.spending_profile && (
+                        <div className="persona-detail">
+                          <span className="detail-label">Style</span>
+                          <span className="detail-value">{persona.spending_profile}</span>
+                        </div>
+                      )}
+                      <div className="persona-detail">
+                        <span className="detail-label">Clones</span>
+                        <span className="detail-value">{persona.clone_count || 0}</span>
+                      </div>
+                      <div className="persona-detail">
+                        <span className="detail-label">Uses</span>
+                        <span className="detail-value">{persona.use_count || 0}</span>
+                      </div>
+                    </div>
+                    <div className="persona-card-actions">
+                      <button
+                        onClick={() => handleCommunityClone(persona)}
+                        className="clone-persona-button community-clone-button"
+                        title="Add this author to your collection"
+                      >
+                        Add to My Authors
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {/* Delete Confirmation Dialog */}
@@ -296,14 +493,14 @@ export function Personas() {
           isOpen={showDeleteConfirm}
           onClose={cancelDelete}
           onConfirm={executeDelete}
-          title="Delete Persona"
+          title="Delete Author"
           description={`Are you sure you want to delete "${personaToDelete?.name}"?`}
-          confirmLabel="Delete Persona"
+          confirmLabel="Delete Author"
           cancelLabel="Cancel"
           variant="danger"
           isLoading={isDeleting}
         >
-          <p>This action cannot be undone. All data associated with this persona will be permanently removed.</p>
+          <p>This action cannot be undone. All data associated with this author will be permanently removed.</p>
         </ConfirmDialog>
 
         {/* Clone Persona Dialog */}
@@ -312,6 +509,15 @@ export function Personas() {
           onClose={handleCloneCancel}
           onConfirm={handleCloneConfirm}
           persona={personaToClone}
+          isLoading={isCloning}
+        />
+
+        {/* Clone Community Persona Dialog */}
+        <CloneCommunityPersonaDialog
+          isOpen={communityPersonaToClone !== null}
+          onClose={handleCommunityCloneCancel}
+          onConfirm={handleCommunityCloneConfirm}
+          persona={communityPersonaToClone}
           isLoading={isCloning}
         />
       </div>

@@ -2271,6 +2271,12 @@ export interface Persona {
   cloned_from?: string;
   cloned_from_name?: string;
   is_public?: boolean;
+  // Creator attribution for community personas
+  creator_name?: string;
+  creator_avatar_url?: string;
+  // Usage statistics
+  clone_count?: number;
+  use_count?: number;
 }
 
 export interface ListPersonasResponse {
@@ -2382,6 +2388,68 @@ export const personasApi = {
       throw new Error('Failed to set persona as default');
     }
     return response.json();
+  },
+};
+
+// Community Personas API (public personas from all users)
+export interface ListCommunityPersonasParams {
+  limit?: number;
+  offset?: number;
+  search?: string;
+}
+
+export interface ListCommunityPersonasResponse {
+  personas: Persona[];
+  total: number;
+}
+
+export const communityPersonasApi = {
+  async list(params?: ListCommunityPersonasParams): Promise<ListCommunityPersonasResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+    if (params?.search) searchParams.set('search', params.search);
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/community/personas${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch community personas');
+    }
+    return response.json();
+  },
+
+  async get(id: string): Promise<Persona> {
+    const response = await fetch(`${API_BASE}/community/personas/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch community persona');
+    }
+    return response.json();
+  },
+
+  async clone(accountId: string, personaId: string, name: string, isPublic: boolean = false): Promise<Persona> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/personas/clone-from-community`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source_persona_id: personaId,
+        name,
+        is_public: isPublic,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to clone community persona');
+    }
+    return response.json();
+  },
+
+  async trackUsage(personaId: string): Promise<void> {
+    await fetch(`${API_BASE}/community/personas/${personaId}/usage`, {
+      method: 'POST',
+    });
   },
 };
 
