@@ -1,5 +1,6 @@
 export { Button, type ButtonProps, type ButtonVariant, type ButtonSize } from './Button';
 export { Input, type InputProps, type InputSize } from './Input';
+export { TextArea, type TextAreaProps, type TextAreaSize } from './TextArea';
 export { Select, type SelectProps, type SelectOption, type SelectSize } from './Select';
 export {
   MultiSelect,

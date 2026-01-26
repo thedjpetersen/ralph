@@ -52,6 +52,7 @@ describe('FindReplaceDialog', () => {
     // Reset store state before each test
     useFindReplaceStore.setState({
       isOpen: false,
+      showReplaceMode: false,
       searchText: '',
       replaceText: '',
       matchCase: false,
@@ -79,7 +80,7 @@ describe('FindReplaceDialog', () => {
   });
 
   it('renders dialog when open', () => {
-    useFindReplaceStore.setState({ isOpen: true });
+    useFindReplaceStore.setState({ isOpen: true, showReplaceMode: true });
 
     render(<FindReplaceDialog />);
     expect(screen.getByRole('dialog', { name: 'Find and Replace' })).toBeInTheDocument();
@@ -87,7 +88,7 @@ describe('FindReplaceDialog', () => {
   });
 
   it('shows search and replace inputs', () => {
-    useFindReplaceStore.setState({ isOpen: true });
+    useFindReplaceStore.setState({ isOpen: true, showReplaceMode: true });
 
     render(<FindReplaceDialog />);
     expect(screen.getByLabelText('Search text')).toBeInTheDocument();
@@ -188,6 +189,7 @@ describe('FindReplaceDialog', () => {
 
     useFindReplaceStore.setState({
       isOpen: true,
+      showReplaceMode: true,
       targetElement: textarea,
       searchText: 'hello',
       replaceText: 'goodbye',
@@ -212,6 +214,7 @@ describe('FindReplaceDialog', () => {
 
     useFindReplaceStore.setState({
       isOpen: true,
+      showReplaceMode: true,
       targetElement: textarea,
       searchText: 'hello',
       replaceText: 'goodbye',
@@ -404,6 +407,7 @@ describe('FindReplaceDialog', () => {
 
       useFindReplaceStore.setState({
         isOpen: true,
+        showReplaceMode: true,
         targetElement: textarea,
         searchText: 'hello',
         replaceText: 'goodbye',
@@ -434,6 +438,7 @@ describe('FindReplaceDialog', () => {
 
       useFindReplaceStore.setState({
         isOpen: true,
+        showReplaceMode: true,
         targetElement: textarea,
         searchText: 'hello',
         replaceText: 'goodbye',
@@ -512,6 +517,7 @@ describe('FindReplace Store', () => {
   beforeEach(() => {
     useFindReplaceStore.setState({
       isOpen: false,
+      showReplaceMode: false,
       searchText: '',
       replaceText: '',
       matchCase: false,
