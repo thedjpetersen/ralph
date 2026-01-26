@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { useAISuggestionStore, useAISuggestion } from '../stores/aiSuggestions';
 import { useSmartTypographyStore } from '../stores/smartTypography';
+import { useParagraphFocusStore } from '../stores/paragraphFocus';
 import './GhostTextTextarea.css';
 
 export interface GhostTextTextareaProps
@@ -49,6 +50,48 @@ export function GhostTextTextarea({
   const { fetchSuggestion, fetchContinueWriting, dismissSuggestion, acceptSuggestion, acceptPartialSuggestion } =
     useAISuggestionStore();
   const smartTypography = useSmartTypographyStore();
+  const { setTargetElement: setParagraphFocusTarget } = useParagraphFocusStore();
+
+  // Register textarea with paragraph focus store when mounted/focused
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const handleFocus = () => {
+      setParagraphFocusTarget(textarea);
+    };
+
+    const handleBlur = () => {
+      // Only clear if this textarea was the target
+      const currentTarget = useParagraphFocusStore.getState().targetElement;
+      if (currentTarget === textarea) {
+        // Don't clear immediately - allow time for focus to transfer
+        setTimeout(() => {
+          const stillFocused = document.activeElement === textarea;
+          if (!stillFocused) {
+            const newTarget = useParagraphFocusStore.getState().targetElement;
+            if (newTarget === textarea) {
+              // Keep the target if no new one was set
+              // This allows the overlay to persist when clicking elsewhere
+            }
+          }
+        }, 100);
+      }
+    };
+
+    textarea.addEventListener('focus', handleFocus);
+    textarea.addEventListener('blur', handleBlur);
+
+    // Set as target if already focused
+    if (document.activeElement === textarea) {
+      setParagraphFocusTarget(textarea);
+    }
+
+    return () => {
+      textarea.removeEventListener('focus', handleFocus);
+      textarea.removeEventListener('blur', handleBlur);
+    };
+  }, [setParagraphFocusTarget]);
 
   // Debounced fetch suggestion
   const debouncedFetchSuggestion = useCallback(

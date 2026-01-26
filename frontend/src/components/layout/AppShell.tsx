@@ -15,8 +15,10 @@ import { CommentHighlightOverlay } from '../CommentHighlightOverlay';
 import { DocumentExportDialog } from '../DocumentExportDialog';
 import { FormattingToolbar } from '../FormattingToolbar';
 import { FindReplaceDialog } from '../FindReplaceDialog';
+import { ParagraphFocusOverlay } from '../ParagraphFocusOverlay';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useFindReplaceStore } from '../../stores/findReplace';
+import { useParagraphFocusStore } from '../../stores/paragraphFocus';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
 import './AppShell.css';
@@ -30,6 +32,7 @@ export function AppShell({ children }: AppShellProps) {
   const { fetchAccounts } = useAccountStore();
   const { fetchUser } = useUserStore();
   const { openDialog: openFindReplace, closeDialog: closeFindReplace } = useFindReplaceStore();
+  const { toggle: toggleParagraphFocus } = useParagraphFocusStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -118,6 +121,14 @@ export function AppShell({ children }: AppShellProps) {
       description: 'Find and replace',
       allowInInput: true,
     },
+    {
+      key: 'f',
+      metaKey: true,
+      shiftKey: true,
+      action: toggleParagraphFocus,
+      description: 'Toggle paragraph focus mode',
+      allowInInput: true,
+    },
   ]);
 
   return (
@@ -194,6 +205,7 @@ export function AppShell({ children }: AppShellProps) {
       <DocumentExportDialog />
       <FormattingToolbar />
       <FindReplaceDialog />
+      <ParagraphFocusOverlay />
     </div>
   );
 }
