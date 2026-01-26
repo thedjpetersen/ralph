@@ -1,0 +1,140 @@
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.table-wrapper:focus {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+/* Head */
+.table-head {
+  background-color: var(--color-bg-secondary, #f9fafb);
+}
+
+.table-head .table-row {
+  border-bottom: 2px solid var(--color-border, #e5e7eb);
+}
+
+/* Header cells */
+.table-header {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text, #374151);
+  white-space: nowrap;
+}
+
+.table-header-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.table-header-sortable:hover {
+  background-color: var(--color-bg-hover, #f3f4f6);
+}
+
+.table-header-sortable:focus-visible {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: -2px;
+}
+
+.table-header-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.table-sort-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.table-header-sorted-asc .table-sort-icon,
+.table-header-sorted-desc .table-sort-icon {
+  color: var(--color-primary, #3b82f6);
+}
+
+/* Body */
+.table-body .table-row {
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.table-body .table-row:last-child {
+  border-bottom: none;
+}
+
+/* Foot */
+.table-foot {
+  background-color: var(--color-bg-secondary, #f9fafb);
+}
+
+.table-foot .table-row {
+  border-top: 2px solid var(--color-border, #e5e7eb);
+}
+
+.table-foot .table-cell {
+  font-weight: 600;
+}
+
+/* Data cells */
+.table-cell {
+  padding: 0.75rem 1rem;
+  color: var(--color-text, #374151);
+}
+
+.table-cell-left {
+  text-align: left;
+}
+
+.table-cell-center {
+  text-align: center;
+}
+
+.table-cell-right {
+  text-align: right;
+}
+
+/* Row states */
+.table-row-selected {
+  background-color: var(--color-bg-selected, #eff6ff);
+}
+
+/* Variants */
+.table-striped .table-body .table-row:nth-child(even) {
+  background-color: var(--color-bg-secondary, #f9fafb);
+}
+
+.table-striped .table-body .table-row-selected:nth-child(even) {
+  background-color: var(--color-bg-selected, #eff6ff);
+}
+
+.table-hoverable .table-body .table-row:hover {
+  background-color: var(--color-bg-hover, #f3f4f6);
+}
+
+.table-hoverable .table-body .table-row-selected:hover {
+  background-color: var(--color-bg-selected-hover, #dbeafe);
+}
+
+.table-bordered {
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.table-bordered .table-header,
+.table-bordered .table-cell {
+  border: 1px solid var(--color-border, #e5e7eb);
+}
+
+.table-compact .table-header,
+.table-compact .table-cell {
+  padding: 0.5rem 0.75rem;
+}
