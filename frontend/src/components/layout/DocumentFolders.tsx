@@ -1,11 +1,14 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useDocumentFoldersStore, type FolderTreeNode } from '../../stores/documentFolders';
 import { useAccountStore } from '../../stores/account';
 import { useDocumentExportStore } from '../../stores/documentExport';
 import { useDocumentShareStore } from '../../stores/documentShare';
 import { useDocumentImportStore } from '../../stores/documentImport';
 import { useStarredDocumentsStore, type StarredDocument } from '../../stores/starredDocuments';
+import { useContextMenuStore } from '../../stores/contextMenu';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { ContextMenu, type ContextMenuItem } from '../ui/ContextMenu';
+import { toast } from '../../stores/toast';
 import './DocumentFolders.css';
 
 // Icons
@@ -92,6 +95,32 @@ const StarIcon = ({ filled }: { filled?: boolean }) => (
   </svg>
 );
 
+// Context menu icons
+const OpenIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M2.5 4.5h9M2.5 7h9M2.5 9.5h6" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+  </svg>
+);
+
+const RenameIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M10.5 1.5l2 2-7 7H3.5v-2l7-7z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const DuplicateIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.25"/>
+    <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" strokeWidth="1.25"/>
+  </svg>
+);
+
+const DeleteIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M2.5 4h9M5.5 4V2.5a1 1 0 011-1h1a1 1 0 011 1V4M10 4v7.5a1 1 0 01-1 1H5a1 1 0 01-1-1V4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 // Starred Item component for the favorites section
 interface StarredItemProps {
   item: StarredDocument;
@@ -138,6 +167,8 @@ interface FolderItemProps {
   onDelete: (folderId: string, folderName: string, documentCount: number) => void;
   onExport: (folderName: string) => void;
   onShare: (folderId: string, folderName: string) => void;
+  onDuplicate: (folderId: string, folderName: string) => void;
+  onOpen: (folderId: string) => void;
   checkIsStarred?: (folderId: string) => boolean;
   onToggleStar?: (folderId: string, folderName: string) => void;
 }
@@ -151,6 +182,8 @@ function FolderItem({
   onDelete,
   onExport,
   onShare,
+  onDuplicate,
+  onOpen,
   checkIsStarred,
   onToggleStar,
 }: FolderItemProps) {
@@ -266,6 +299,22 @@ function FolderItem({
     onToggleStar?.(folder.id, folder.name);
   }, [folder.id, folder.name, onToggleStar]);
 
+  // Context menu handler
+  const { openDocumentMenu } = useContextMenuStore();
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openDocumentMenu(
+      { x: e.clientX, y: e.clientY },
+      {
+        folderId: folder.id,
+        folderName: folder.name,
+        documentCount: folder.document_count,
+      }
+    );
+  }, [folder.id, folder.name, folder.document_count, openDocumentMenu]);
+
   // Drag handlers
   const handleDragStart = useCallback((e: React.DragEvent) => {
     e.dataTransfer.setData('application/folder-id', folder.id);
@@ -319,6 +368,7 @@ function FolderItem({
         className={`folder-item ${isSelected ? 'selected' : ''} ${isDragging ? 'dragging' : ''} ${isDropTarget ? 'drop-target' : ''}`}
         style={{ paddingLeft: `${12 + level * 16}px` }}
         onClick={handleClick}
+        onContextMenu={handleContextMenu}
         draggable={!isEditing}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
@@ -442,6 +492,8 @@ function FolderItem({
               onDelete={onDelete}
               onExport={onExport}
               onShare={onShare}
+              onDuplicate={onDuplicate}
+              onOpen={onOpen}
               checkIsStarred={checkIsStarred}
               onToggleStar={onToggleStar}
             />
@@ -616,6 +668,98 @@ You can export this document to any of these formats using the export dialog.`;
     return isStarred(folderId);
   }, [isStarred]);
 
+  // Context menu handlers
+  const handleDuplicate = useCallback((_folderId: string, folderName: string) => {
+    // In a real app, this would duplicate the folder
+    toast.success(`"${folderName}" duplicated`);
+  }, []);
+
+  const handleOpen = useCallback((folderId: string) => {
+    // Select and expand the folder
+    const { setSelectedFolderId, toggleFolderExpanded, expandedFolderIds } = useDocumentFoldersStore.getState();
+    setSelectedFolderId(folderId);
+    if (!expandedFolderIds.has(folderId)) {
+      toggleFolderExpanded(folderId);
+    }
+  }, []);
+
+  // Context menu state
+  const {
+    isOpen: contextMenuOpen,
+    menuType,
+    position: contextMenuPosition,
+    documentData,
+    closeMenu
+  } = useContextMenuStore();
+
+  // Handle context menu actions
+  const handleContextMenuOpen = useCallback(() => {
+    if (documentData) {
+      handleOpen(documentData.folderId);
+    }
+    closeMenu();
+  }, [documentData, handleOpen, closeMenu]);
+
+  const handleContextMenuRename = useCallback(() => {
+    if (documentData) {
+      // Trigger a rename prompt via toast - in a real implementation
+      // this would focus the rename input for the folder
+      toast.info(`Press F2 to rename "${documentData.folderName}"`);
+    }
+    closeMenu();
+  }, [documentData, closeMenu]);
+
+  const handleContextMenuDuplicate = useCallback(() => {
+    if (documentData) {
+      handleDuplicate(documentData.folderId, documentData.folderName);
+    }
+    closeMenu();
+  }, [documentData, handleDuplicate, closeMenu]);
+
+  const handleContextMenuDelete = useCallback(() => {
+    if (documentData) {
+      handleDeleteRequest(documentData.folderId, documentData.folderName, documentData.documentCount);
+    }
+    closeMenu();
+  }, [documentData, handleDeleteRequest, closeMenu]);
+
+  // Build context menu items
+  const documentContextMenuItems: ContextMenuItem[] = useMemo(() => {
+    if (menuType !== 'document' || !documentData) return [];
+
+    return [
+      {
+        id: 'open',
+        label: 'Open',
+        icon: <OpenIcon />,
+        shortcut: '↵',
+        onClick: handleContextMenuOpen,
+      },
+      {
+        id: 'rename',
+        label: 'Rename',
+        icon: <RenameIcon />,
+        shortcut: 'F2',
+        onClick: handleContextMenuRename,
+      },
+      {
+        id: 'duplicate',
+        label: 'Duplicate',
+        icon: <DuplicateIcon />,
+        shortcut: '⌘D',
+        onClick: handleContextMenuDuplicate,
+      },
+      {
+        id: 'delete',
+        label: 'Delete',
+        icon: <DeleteIcon />,
+        shortcut: '⌫',
+        danger: true,
+        onClick: handleContextMenuDelete,
+      },
+    ];
+  }, [menuType, documentData, handleContextMenuOpen, handleContextMenuRename, handleContextMenuDuplicate, handleContextMenuDelete]);
+
   // Root drop zone for moving to root level
   const handleRootDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -742,6 +886,8 @@ You can export this document to any of these formats using the export dialog.`;
                 onDelete={handleDeleteRequest}
                 onExport={handleExport}
                 onShare={handleShare}
+                onDuplicate={handleDuplicate}
+                onOpen={handleOpen}
                 checkIsStarred={checkIsStarred}
                 onToggleStar={handleToggleStar}
               />
@@ -793,6 +939,15 @@ You can export this document to any of these formats using the export dialog.`;
           </p>
         )}
       </ConfirmDialog>
+
+      {/* Document context menu */}
+      <ContextMenu
+        isOpen={contextMenuOpen && menuType === 'document'}
+        position={contextMenuPosition}
+        items={documentContextMenuItems}
+        onClose={closeMenu}
+        header={documentData?.folderName}
+      />
     </div>
   );
 }

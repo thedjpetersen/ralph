@@ -20,6 +20,8 @@ export interface ContextMenuItem {
   danger?: boolean;
   /** Whether the item is disabled */
   disabled?: boolean;
+  /** Keyboard shortcut to display */
+  shortcut?: string;
   /** Click handler */
   onClick: () => void;
 }
@@ -225,6 +227,11 @@ export function ContextMenu({
               </span>
             )}
             <span className="context-menu-item-label">{item.label}</span>
+            {item.shortcut && (
+              <span className="context-menu-item-shortcut" aria-hidden="true">
+                {item.shortcut}
+              </span>
+            )}
           </button>
         ))}
       </div>

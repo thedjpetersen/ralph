@@ -2,8 +2,38 @@ import { useMemo, useCallback, useSyncExternalStore } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { useCommentHighlightStore, useCommentHighlight, useCommentSearchFilter, hexToRgba, getAuthorColor } from '../stores/commentHighlight';
 import { useAppSettingsStore, type CommentSortOrder } from '../stores/appSettings';
+import { useContextMenuStore } from '../stores/contextMenu';
 import { CommentSearchFilter } from './CommentSearchFilter';
+import { ContextMenu, type ContextMenuItem } from './ui/ContextMenu';
+import { toast } from '../stores/toast';
 import './CommentsPanel.css';
+
+// Context menu icons
+const CopyIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.25"/>
+    <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" strokeWidth="1.25"/>
+  </svg>
+);
+
+const ResolveIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M3 7.5l2.5 2.5L11 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const DismissIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+const ReplyIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M5 4L2 7l3 3" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M2 7h7a3 3 0 013 3v1" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 function getReducedMotionSnapshot() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -110,6 +140,97 @@ export function CommentsPanel({
       highlightFromComment(commentId, targetElementId);
     }
   }, [focusComment, targetElementId, highlightFromComment]);
+
+  // Context menu state and handlers
+  const {
+    isOpen: contextMenuOpen,
+    menuType,
+    position: contextMenuPosition,
+    commentData,
+    openCommentMenu,
+    closeMenu
+  } = useContextMenuStore();
+
+  const handleContextMenu = useCallback((e: React.MouseEvent, commentId: string, commentText: string, authorId?: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openCommentMenu(
+      { x: e.clientX, y: e.clientY },
+      { commentId, commentText, authorId }
+    );
+  }, [openCommentMenu]);
+
+  const handleCopyComment = useCallback(async () => {
+    if (commentData) {
+      try {
+        await navigator.clipboard.writeText(commentData.commentText);
+        toast.success('Comment copied to clipboard');
+      } catch {
+        toast.error('Failed to copy comment');
+      }
+    }
+    closeMenu();
+  }, [commentData, closeMenu]);
+
+  const handleResolveComment = useCallback(() => {
+    if (commentData) {
+      // In a real app, this would mark the comment as resolved
+      toast.success('Comment resolved');
+    }
+    closeMenu();
+  }, [commentData, closeMenu]);
+
+  const handleDismissComment = useCallback(() => {
+    if (commentData) {
+      // In a real app, this would dismiss/hide the comment
+      toast.info('Comment dismissed');
+    }
+    closeMenu();
+  }, [commentData, closeMenu]);
+
+  const handleReplyComment = useCallback(() => {
+    if (commentData) {
+      // In a real app, this would open a reply input
+      toast.info('Reply feature coming soon');
+    }
+    closeMenu();
+  }, [commentData, closeMenu]);
+
+  // Build context menu items
+  const commentContextMenuItems: ContextMenuItem[] = useMemo(() => {
+    if (menuType !== 'comment' || !commentData) return [];
+
+    return [
+      {
+        id: 'copy',
+        label: 'Copy',
+        icon: <CopyIcon />,
+        shortcut: '⌘C',
+        onClick: handleCopyComment,
+      },
+      {
+        id: 'resolve',
+        label: 'Resolve',
+        icon: <ResolveIcon />,
+        shortcut: '⌘R',
+        onClick: handleResolveComment,
+      },
+      {
+        id: 'dismiss',
+        label: 'Dismiss',
+        icon: <DismissIcon />,
+        shortcut: 'Esc',
+        onClick: handleDismissComment,
+      },
+      {
+        id: 'reply',
+        label: 'Reply',
+        icon: <ReplyIcon />,
+        shortcut: '⌘↵',
+        onClick: handleReplyComment,
+      },
+    ];
+  }, [menuType, commentData, handleCopyComment, handleResolveComment, handleDismissComment, handleReplyComment]);
 
   // Get current sort option label
   const currentSortOption = SORT_OPTIONS.find(opt => opt.value === sortOrder);
@@ -230,6 +351,7 @@ export function CommentsPanel({
                   onMouseEnter={() => handleCommentMouseEnter(comment.id)}
                   onMouseLeave={handleCommentMouseLeave}
                   onClick={() => handleCommentClick(comment.id)}
+                  onContextMenu={(e) => handleContextMenu(e, comment.id, comment.text, comment.authorId)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -263,6 +385,15 @@ export function CommentsPanel({
         </LayoutGroup>
         )}
       </div>
+
+      {/* Comment context menu */}
+      <ContextMenu
+        isOpen={contextMenuOpen && menuType === 'comment'}
+        position={contextMenuPosition}
+        items={commentContextMenuItems}
+        onClose={closeMenu}
+        header="Comment"
+      />
     </motion.div>
   );
 }

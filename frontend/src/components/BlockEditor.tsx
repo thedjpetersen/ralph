@@ -24,8 +24,41 @@ import {
   type Block,
   type BlockType,
 } from '../stores/blockDrag';
+import { useContextMenuStore } from '../stores/contextMenu';
+import { ContextMenu, type ContextMenuItem } from './ui/ContextMenu';
+import { toast } from '../stores/toast';
 import { useEditorStyles } from '../hooks/useEditorStyles';
 import './BlockEditor.css';
+
+// Context menu icons
+const CopyIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.25"/>
+    <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" strokeWidth="1.25"/>
+  </svg>
+);
+
+const CutIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <circle cx="4" cy="10" r="2" stroke="currentColor" strokeWidth="1.25"/>
+    <circle cx="10" cy="10" r="2" stroke="currentColor" strokeWidth="1.25"/>
+    <path d="M5.5 8.5L10 2M8.5 8.5L4 2" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+  </svg>
+);
+
+const AICommentIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M7 1v2M7 11v2M1 7h2M11 7h2" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+    <circle cx="7" cy="7" r="3" stroke="currentColor" strokeWidth="1.25"/>
+  </svg>
+);
+
+const DefineIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M2 3h10M2 7h7M2 11h10" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+    <circle cx="11" cy="7" r="2" stroke="currentColor" strokeWidth="1.25"/>
+  </svg>
+);
 
 interface BlockEditorProps {
   /** The markdown content to render as blocks */
@@ -121,6 +154,109 @@ export function BlockEditor({
   useEffect(() => {
     setBlocks(blocks);
   }, [blocks, setBlocks]);
+
+  // Context menu state and handlers
+  const {
+    isOpen: contextMenuOpen,
+    menuType,
+    position: contextMenuPosition,
+    editorData,
+    openEditorMenu,
+    closeMenu
+  } = useContextMenuStore();
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    // Get selected text
+    const selection = window.getSelection();
+    const selectedText = selection?.toString() || '';
+
+    // Only show context menu if there's a text selection
+    if (selectedText.trim()) {
+      e.preventDefault();
+      e.stopPropagation();
+      openEditorMenu(
+        { x: e.clientX, y: e.clientY },
+        { selectedText }
+      );
+    }
+  }, [openEditorMenu]);
+
+  const handleCopy = useCallback(async () => {
+    if (editorData?.selectedText) {
+      try {
+        await navigator.clipboard.writeText(editorData.selectedText);
+        toast.success('Copied to clipboard');
+      } catch {
+        toast.error('Failed to copy');
+      }
+    }
+    closeMenu();
+  }, [editorData, closeMenu]);
+
+  const handleCut = useCallback(async () => {
+    if (editorData?.selectedText) {
+      try {
+        await navigator.clipboard.writeText(editorData.selectedText);
+        toast.success('Cut to clipboard');
+        // Note: In a full implementation, we'd also remove the selected text from the content
+      } catch {
+        toast.error('Failed to cut');
+      }
+    }
+    closeMenu();
+  }, [editorData, closeMenu]);
+
+  const handleAIComment = useCallback(() => {
+    if (editorData?.selectedText) {
+      toast.info(`AI Comment for: "${editorData.selectedText.substring(0, 30)}..."`);
+      // In a real implementation, this would trigger an AI comment generation
+    }
+    closeMenu();
+  }, [editorData, closeMenu]);
+
+  const handleDefine = useCallback(() => {
+    if (editorData?.selectedText) {
+      toast.info(`Looking up definition: "${editorData.selectedText}"`);
+      // In a real implementation, this would open a definition popup or panel
+    }
+    closeMenu();
+  }, [editorData, closeMenu]);
+
+  // Build context menu items
+  const editorContextMenuItems: ContextMenuItem[] = useMemo(() => {
+    if (menuType !== 'editor' || !editorData) return [];
+
+    return [
+      {
+        id: 'copy',
+        label: 'Copy',
+        icon: <CopyIcon />,
+        shortcut: '⌘C',
+        onClick: handleCopy,
+      },
+      {
+        id: 'cut',
+        label: 'Cut',
+        icon: <CutIcon />,
+        shortcut: '⌘X',
+        onClick: handleCut,
+      },
+      {
+        id: 'ai-comment',
+        label: 'AI Comment',
+        icon: <AICommentIcon />,
+        shortcut: '⌘⇧C',
+        onClick: handleAIComment,
+      },
+      {
+        id: 'define',
+        label: 'Define',
+        icon: <DefineIcon />,
+        shortcut: '⌘D',
+        onClick: handleDefine,
+      },
+    ];
+  }, [menuType, editorData, handleCopy, handleCut, handleAIComment, handleDefine]);
 
   // Handle drag start
   const handleDragStart = useCallback(
@@ -234,6 +370,7 @@ export function BlockEditor({
     <div
       className={`block-editor ${isDragging ? 'block-editor-dragging' : ''} ${className}`}
       onDragLeave={handleContainerDragLeave}
+      onContextMenu={handleContextMenu}
       style={editorStyle}
     >
       {blocks.map((block, index) => {
@@ -263,6 +400,15 @@ export function BlockEditor({
           </BlockWrapper>
         );
       })}
+
+      {/* Editor selection context menu */}
+      <ContextMenu
+        isOpen={contextMenuOpen && menuType === 'editor'}
+        position={contextMenuPosition}
+        items={editorContextMenuItems}
+        onClose={closeMenu}
+        header="Selection"
+      />
     </div>
   );
 }
