@@ -885,8 +885,47 @@ export interface UpdateLineItemRequest {
   metadata?: Record<string, unknown>;
 }
 
+export interface ListAllLineItemsParams {
+  category?: string;
+  start_date?: string;
+  end_date?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface LineItemWithTransaction extends LineItem {
+  transaction_id: string;
+  transaction_date: string;
+  merchant_name?: string;
+}
+
+export interface ListAllLineItemsResponse {
+  line_items: LineItemWithTransaction[];
+  total: number;
+}
+
 // Line Items API methods (account-scoped, nested under transactions)
 export const lineItemsApi = {
+  async listAll(accountId: string, params?: ListAllLineItemsParams): Promise<ListAllLineItemsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.category) searchParams.set('category', params.category);
+    if (params?.start_date) searchParams.set('start_date', params.start_date);
+    if (params?.end_date) searchParams.set('end_date', params.end_date);
+    if (params?.search) searchParams.set('search', params.search);
+    if (params?.limit) searchParams.set('limit', params.limit.toString());
+    if (params?.offset) searchParams.set('offset', params.offset.toString());
+
+    const query = searchParams.toString();
+    const url = `${API_BASE}/accounts/${accountId}/line-items${query ? `?${query}` : ''}`;
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch line items');
+    }
+    return response.json();
+  },
+
   async list(accountId: string, transactionId: string): Promise<ListLineItemsResponse> {
     const url = `${API_BASE}/accounts/${accountId}/transactions/${transactionId}/line-items`;
 
