@@ -192,6 +192,28 @@
   font-weight: 500;
 }
 
+.public-badge {
+  padding: 0.125rem 0.5rem;
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.persona-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.persona-lineage {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
 .persona-status {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -267,6 +289,20 @@
 
 .edit-persona-button:hover {
   background-color: rgba(100, 108, 255, 0.1);
+}
+
+.clone-persona-button {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid #f39c12;
+  color: #f39c12;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.clone-persona-button:hover {
+  background-color: rgba(243, 156, 18, 0.1);
 }
 
 .default-persona-button {
@@ -443,5 +479,9 @@
   .cancel-button:hover:not(:disabled) {
     background-color: rgba(0, 0, 0, 0.05);
     border-color: #bbb;
+  }
+
+  .persona-lineage {
+    color: rgba(0, 0, 0, 0.5);
   }
 }

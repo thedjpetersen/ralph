@@ -25,6 +25,7 @@ interface FormData {
   avatar_url: string;
   spending_profile: string;
   is_default: boolean;
+  is_public: boolean;
 }
 
 const initialFormData: FormData = {
@@ -33,6 +34,7 @@ const initialFormData: FormData = {
   avatar_url: '',
   spending_profile: '',
   is_default: false,
+  is_public: false,
 };
 
 export function PersonaForm() {
@@ -54,6 +56,7 @@ export function PersonaForm() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [clonedFromName, setClonedFromName] = useState<string | null>(null);
 
   useEffect(() => {
     if (id && currentAccount?.id) {
@@ -85,7 +88,11 @@ export function PersonaForm() {
       avatar_url: persona.avatar_url || '',
       spending_profile: persona.spending_profile || '',
       is_default: persona.is_default,
+      is_public: persona.is_public || false,
     });
+    if (persona.cloned_from_name) {
+      setClonedFromName(persona.cloned_from_name);
+    }
   };
 
   const handleInputChange = (
@@ -122,6 +129,7 @@ export function PersonaForm() {
       avatar_url: formData.avatar_url.trim() || undefined,
       spending_profile: formData.spending_profile || undefined,
       is_default: formData.is_default,
+      is_public: formData.is_public,
     };
 
     try {
@@ -259,6 +267,13 @@ export function PersonaForm() {
           <div className="form-section">
             <h2>Settings</h2>
 
+            {clonedFromName && (
+              <div className="lineage-banner">
+                <span className="lineage-icon">&#8618;</span>
+                <span>Based on <strong>{clonedFromName}</strong></span>
+              </div>
+            )}
+
             <div className="form-group">
               <label htmlFor="spending_profile" className="form-label">
                 Spending Profile
@@ -296,6 +311,23 @@ export function PersonaForm() {
             </div>
             <p className="form-help checkbox-help">
               The default persona is used when no specific persona is selected.
+            </p>
+
+            <div className="form-group form-checkbox">
+              <input
+                type="checkbox"
+                id="is_public"
+                name="is_public"
+                checked={formData.is_public}
+                onChange={handleInputChange}
+                className="checkbox-input"
+              />
+              <label htmlFor="is_public" className="checkbox-label">
+                Make this persona public
+              </label>
+            </div>
+            <p className="form-help checkbox-help">
+              Public personas can be discovered and cloned by other users.
             </p>
           </div>
 

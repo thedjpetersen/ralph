@@ -9,6 +9,11 @@ import {
 import { executeOptimisticMutation, generateMutationId } from './optimistic';
 import { toast } from './toast';
 
+interface ClonePersonaRequest {
+  name: string;
+  is_public?: boolean;
+}
+
 interface PersonasState {
   // State
   personas: Persona[];
@@ -28,6 +33,8 @@ interface PersonasState {
   setDefault: (accountId: string, id: string) => Promise<Persona | null>;
   /** Switch to a different persona (optimistic author toggle) */
   switchPersona: (id: string) => void;
+  /** Clone an existing persona with custom name */
+  clonePersona: (accountId: string, sourceId: string, data: ClonePersonaRequest) => Promise<Persona | null>;
 }
 
 // Generate optimistic persona ID
@@ -291,6 +298,83 @@ export const usePersonasStore = create<PersonasState>()((set, get) => ({
       // Immediate local switch - no server call needed for current selection
       set({ currentPersona: persona });
     }
+  },
+
+  // Clone an existing persona with a new name
+  clonePersona: async (accountId, sourceId, data) => {
+    const { personas, total } = get();
+    const sourcePersona = personas.find(p => p.id === sourceId);
+
+    if (!sourcePersona) {
+      toast.error('Source persona not found');
+      return null;
+    }
+
+    // Create clone data from source
+    const cloneData: CreatePersonaRequest = {
+      name: data.name,
+      description: sourcePersona.description,
+      avatar_url: sourcePersona.avatar_url,
+      spending_profile: sourcePersona.spending_profile,
+      preferences: sourcePersona.preferences,
+      metadata: sourcePersona.metadata,
+      is_default: false, // Clones are never default
+      cloned_from: sourceId,
+      cloned_from_name: sourcePersona.name,
+      is_public: data.is_public || false,
+    };
+
+    // Create optimistic persona
+    const optimisticId = generateOptimisticPersonaId();
+    const optimisticPersona: Persona = {
+      id: optimisticId,
+      account_id: accountId,
+      name: data.name,
+      description: sourcePersona.description,
+      avatar_url: sourcePersona.avatar_url,
+      spending_profile: sourcePersona.spending_profile,
+      preferences: sourcePersona.preferences,
+      metadata: sourcePersona.metadata,
+      is_default: false,
+      status: 'active',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      cloned_from: sourceId,
+      cloned_from_name: sourcePersona.name,
+      is_public: data.is_public || false,
+    };
+
+    // Apply optimistic update immediately
+    set({
+      personas: [...personas, optimisticPersona],
+      total: total + 1,
+      error: null,
+    });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('persona-clone'),
+      type: 'persona:clone',
+      optimisticData: optimisticPersona,
+      previousData: { personas, total },
+      mutationFn: () => personasApi.create(accountId, cloneData),
+      onSuccess: (newPersona) => {
+        // Replace optimistic persona with real one
+        set((state) => ({
+          personas: state.personas
+            .filter(p => p.id !== optimisticId)
+            .concat(newPersona),
+        }));
+      },
+      onRollback: () => {
+        // Restore previous state
+        set({ personas, total });
+      },
+      successMessage: `Cloned "${sourcePersona.name}" as "${data.name}"`,
+      errorMessage: 'Failed to clone persona',
+    });
+
+    return result;
   },
 }));
 

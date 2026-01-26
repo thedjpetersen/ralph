@@ -5,6 +5,7 @@ import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
 import { AccountsListSkeleton } from '../components/skeletons';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { ClonePersonaDialog } from '../components/ClonePersonaDialog';
 import { useDeleteConfirmation } from '../hooks/useDeleteConfirmation';
 import { toast } from '../stores/toast';
 import './Personas.css';
@@ -25,9 +26,12 @@ export function Personas() {
     fetchPersonas,
     deletePersona,
     setDefault,
+    clonePersona,
   } = usePersonasStore();
 
   const [statusFilter, setStatusFilter] = useState<PersonaStatus | ''>('');
+  const [personaToClone, setPersonaToClone] = useState<Persona | null>(null);
+  const [isCloning, setIsCloning] = useState(false);
 
   // Delete confirmation hook
   const {
@@ -86,6 +90,29 @@ export function Personas() {
       toast.success(`${persona.name} set as default persona`);
     } catch {
       toast.error('Failed to set default persona');
+    }
+  };
+
+  const handleClone = (persona: Persona) => {
+    setPersonaToClone(persona);
+  };
+
+  const handleCloneConfirm = async (data: { name: string; is_public: boolean }) => {
+    if (!currentAccount?.id || !personaToClone) return;
+    setIsCloning(true);
+    try {
+      const result = await clonePersona(currentAccount.id, personaToClone.id, data);
+      if (result) {
+        setPersonaToClone(null);
+      }
+    } finally {
+      setIsCloning(false);
+    }
+  };
+
+  const handleCloneCancel = () => {
+    if (!isCloning) {
+      setPersonaToClone(null);
     }
   };
 
@@ -195,10 +222,20 @@ export function Personas() {
                       {persona.is_default && (
                         <span className="default-badge">Default</span>
                       )}
+                      {persona.is_public && (
+                        <span className="public-badge">Public</span>
+                      )}
                     </h3>
-                    <span className={`persona-status ${getStatusClass(persona.status)}`}>
-                      {persona.status}
-                    </span>
+                    <div className="persona-status-row">
+                      <span className={`persona-status ${getStatusClass(persona.status)}`}>
+                        {persona.status}
+                      </span>
+                      {persona.cloned_from_name && (
+                        <span className="persona-lineage">
+                          Based on {persona.cloned_from_name}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {persona.description && (
@@ -224,6 +261,13 @@ export function Personas() {
                     className="edit-persona-button"
                   >
                     Edit
+                  </button>
+                  <button
+                    onClick={() => handleClone(persona)}
+                    className="clone-persona-button"
+                    title="Create a copy of this persona"
+                  >
+                    Clone
                   </button>
                   {!persona.is_default && (
                     <button
@@ -261,6 +305,15 @@ export function Personas() {
         >
           <p>This action cannot be undone. All data associated with this persona will be permanently removed.</p>
         </ConfirmDialog>
+
+        {/* Clone Persona Dialog */}
+        <ClonePersonaDialog
+          isOpen={personaToClone !== null}
+          onClose={handleCloneCancel}
+          onConfirm={handleCloneConfirm}
+          persona={personaToClone}
+          isLoading={isCloning}
+        />
       </div>
     </PageTransition>
   );

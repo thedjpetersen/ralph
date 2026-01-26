@@ -2268,6 +2268,9 @@ export interface Persona {
   updated_at: string;
   created_by?: string;
   updated_by?: string;
+  cloned_from?: string;
+  cloned_from_name?: string;
+  is_public?: boolean;
 }
 
 export interface ListPersonasResponse {
@@ -2290,6 +2293,9 @@ export interface CreatePersonaRequest {
   spending_profile?: string;
   preferences?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  cloned_from?: string;
+  cloned_from_name?: string;
+  is_public?: boolean;
 }
 
 export interface UpdatePersonaRequest {
@@ -2301,6 +2307,7 @@ export interface UpdatePersonaRequest {
   spending_profile?: string;
   preferences?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  is_public?: boolean;
 }
 
 // Persona API methods (account-scoped)

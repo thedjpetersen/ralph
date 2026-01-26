@@ -1,0 +1,101 @@
+.clone-persona-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.clone-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.clone-form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.clone-form-input {
+  padding: 0.75rem 1rem;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 0.5rem;
+  color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.clone-form-input:focus {
+  outline: none;
+  border-color: #646cff;
+}
+
+.clone-form-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.clone-form-error {
+  font-size: 0.75rem;
+  color: #ff4d4f;
+  margin: 0;
+}
+
+.clone-form-help {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0;
+  margin-top: -0.5rem;
+}
+
+.clone-form-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.clone-checkbox-input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #646cff;
+  cursor: pointer;
+}
+
+.clone-checkbox-input:disabled {
+  cursor: not-allowed;
+}
+
+.clone-checkbox-label {
+  font-size: 0.875rem;
+  color: #e0e0e0;
+  cursor: pointer;
+}
+
+.clone-lineage-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(100, 108, 255, 0.1);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.clone-lineage-label {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.clone-lineage-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #646cff;
+}
+
+.clone-dialog-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
