@@ -376,3 +376,109 @@ test('capture fe-test-003 evidence - transactions page', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Transactions' })).toBeVisible({ timeout: 10000 });
   await page.screenshot({ path: 'test-results/evidence/fe-test-003-evidence.png', fullPage: true });
 });
+
+const mockReceipts = [
+  {
+    id: 'receipt-001',
+    account_id: 'account-001',
+    source_type: 'upload',
+    status: 'processed',
+    file_name: 'receipt-2024-01-15.pdf',
+    merchant_name: 'Whole Foods Market',
+    total_amount: 125.50,
+    currency: 'USD',
+    receipt_date: '2024-01-15',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'receipt-002',
+    account_id: 'account-001',
+    source_type: 'email',
+    status: 'pending',
+    file_name: 'amazon-receipt.pdf',
+    merchant_name: 'Amazon',
+    total_amount: 89.99,
+    currency: 'USD',
+    receipt_date: '2024-01-14',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'receipt-003',
+    account_id: 'account-001',
+    source_type: 'scan',
+    status: 'processing',
+    file_name: 'starbucks.jpg',
+    merchant_name: 'Starbucks',
+    total_amount: 12.45,
+    currency: 'USD',
+    receipt_date: '2024-01-13',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+];
+
+test('capture receipt-003 evidence - upload modal', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('clockzen-user-storage', JSON.stringify({
+      state: {
+        user: {
+          id: 'user-001',
+          email: 'test@example.com',
+          name: 'Test User',
+          avatar: null,
+          createdAt: new Date().toISOString(),
+        },
+        preferences: { theme: 'system', language: 'en', notifications: { email: true, push: false } },
+      },
+      version: 0,
+    }));
+
+    localStorage.setItem('clockzen-account-storage', JSON.stringify({
+      state: {
+        currentAccount: {
+          id: 'account-001',
+          name: 'Personal Finance',
+          email: 'test@example.com',
+          currency: 'USD',
+          timezone: 'America/New_York',
+          createdAt: new Date().toISOString(),
+        },
+      },
+      version: 0,
+    }));
+  });
+
+  await page.route('**/api/user', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockUser) });
+  });
+
+  await page.route('**/api/accounts', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAccounts) });
+  });
+
+  await page.route('**/api/accounts/account-001/receipts*', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ receipts: mockReceipts, total: mockReceipts.length }),
+    });
+  });
+
+  await page.route('**/api/stores', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ stores: [] }) });
+  });
+
+  await page.goto('/receipts');
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByRole('heading', { name: 'Receipts' })).toBeVisible({ timeout: 10000 });
+
+  // Click the Upload button to open the modal
+  await page.click('button[aria-label="Upload new receipt"]');
+
+  // Wait for the upload modal to appear
+  await expect(page.getByRole('dialog', { name: 'Upload Receipts' })).toBeVisible({ timeout: 5000 });
+
+  await page.screenshot({ path: 'test-results/evidence/receipt-003-evidence.png', fullPage: false });
+});
