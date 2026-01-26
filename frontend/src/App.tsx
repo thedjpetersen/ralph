@@ -46,6 +46,7 @@ const Budget = lazy(() => import('./pages/Budget').then(m => ({ default: m.Budge
 const Budgets = lazy(() => import('./pages/Budgets').then(m => ({ default: m.Budgets })));
 const BudgetDetail = lazy(() => import('./pages/BudgetDetail').then(m => ({ default: m.BudgetDetail })));
 const BudgetForm = lazy(() => import('./components/BudgetForm').then(m => ({ default: m.BudgetForm })));
+const BudgetGoals = lazy(() => import('./pages/BudgetGoals').then(m => ({ default: m.BudgetGoals })));
 
 // Financial pages
 const FinancialConnections = lazy(() => import('./pages/FinancialConnections').then(m => ({ default: m.FinancialConnections })));
@@ -117,6 +118,7 @@ function App() {
         <Route path="/budgets/new" element={<Suspense fallback={<PageLoadingSpinner />}><BudgetForm /></Suspense>} />
         <Route path="/budgets/:id" element={<Suspense fallback={<PageLoadingSpinner />}><BudgetDetail /></Suspense>} />
         <Route path="/budgets/:id/edit" element={<Suspense fallback={<PageLoadingSpinner />}><BudgetForm /></Suspense>} />
+        <Route path="/budgets/:id/goals" element={<Suspense fallback={<PageLoadingSpinner />}><BudgetGoals /></Suspense>} />
         <Route path="/connections" element={<Suspense fallback={<PageLoadingSpinner />}><FinancialConnections /></Suspense>} />
         <Route path="/financial-accounts" element={<Suspense fallback={<PageLoadingSpinner />}><FinancialAccounts /></Suspense>} />
         <Route path="/bank-transactions" element={<Suspense fallback={<PageLoadingSpinner />}><BankTransactions /></Suspense>} />

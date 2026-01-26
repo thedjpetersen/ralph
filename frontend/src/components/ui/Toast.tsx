@@ -1,4 +1,26 @@
 /* eslint-disable react-refresh/only-export-components */
+/**
+ * @deprecated This context-based toast system is deprecated.
+ * Please use the unified store-based toast system instead:
+ *
+ * import { toast } from '../stores/toast';
+ *
+ * // Usage:
+ * toast.success('Success message');
+ * toast.error('Error message');
+ * toast.warning('Warning message');
+ * toast.info('Info message');
+ *
+ * // With options:
+ * toast.success('Message', { duration: 5000, action: { label: 'Undo', onClick: () => {} } });
+ *
+ * // Dismiss:
+ * const id = toast.success('Message');
+ * toast.dismiss(id);
+ * toast.dismissAll();
+ *
+ * The store-based system is automatically rendered via ToastContainer in AppShell.
+ */
 import {
   createContext,
   useContext,

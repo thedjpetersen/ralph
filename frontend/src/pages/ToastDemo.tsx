@@ -15,6 +15,10 @@ export function ToastDemo() {
     toast.info('Your session will expire in 5 minutes.');
   };
 
+  const showWarningToast = () => {
+    toast.warning('This action cannot be undone.');
+  };
+
   const showToastWithAction = () => {
     toast.error('Item deleted.', {
       action: {
@@ -66,6 +70,9 @@ export function ToastDemo() {
             <button className="demo-button demo-button-info" onClick={showInfoToast}>
               Show Info
             </button>
+            <button className="demo-button demo-button-warning" onClick={showWarningToast}>
+              Show Warning
+            </button>
           </div>
         </section>
 
@@ -113,7 +120,7 @@ export function ToastDemo() {
             <li>Manual dismiss with X button or swipe</li>
             <li>Action button support (e.g., Undo)</li>
             <li>Maximum 3 toasts visible, older ones queue</li>
-            <li>Success: green accent, Error: red accent, Info: blue accent</li>
+            <li>Success: green accent, Error: red accent, Warning: yellow accent, Info: blue accent</li>
             <li>Respects prefers-reduced-motion</li>
             <li>Accessible with ARIA attributes</li>
           </ul>

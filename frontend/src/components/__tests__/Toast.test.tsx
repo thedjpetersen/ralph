@@ -257,6 +257,15 @@ describe('ToastContainer', () => {
       expect(screen.getByRole('alert')).toHaveClass('toast-error')
     })
 
+    it('renders warning toast with warning class', () => {
+      useToastStore.setState({
+        toasts: [{ id: '1', type: 'warning', message: 'Warning' }],
+        queue: [],
+      })
+      render(<ToastContainer />)
+      expect(screen.getByRole('alert')).toHaveClass('toast-warning')
+    })
+
     it('renders info toast with info class', () => {
       useToastStore.setState({
         toasts: [{ id: '1', type: 'info', message: 'Info' }],

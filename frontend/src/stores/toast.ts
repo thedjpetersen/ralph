@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 export interface ToastAction {
   label: string;
@@ -105,6 +105,14 @@ toast.error = (message: string, options?: Partial<Omit<Toast, 'id' | 'message' |
 toast.info = (message: string, options?: Partial<Omit<Toast, 'id' | 'message' | 'type'>>) => {
   return useToastStore.getState().addToast({
     type: 'info',
+    message,
+    ...options,
+  });
+};
+
+toast.warning = (message: string, options?: Partial<Omit<Toast, 'id' | 'message' | 'type'>>) => {
+  return useToastStore.getState().addToast({
+    type: 'warning',
     message,
     ...options,
   });
