@@ -10,6 +10,7 @@ import { PageTransition } from '../components/PageTransition';
 import { GhostTextTextarea } from '../components/GhostTextTextarea';
 import { BlockEditor } from '../components/BlockEditor';
 import { EditorPreferencesPanel } from '../components/EditorPreferencesPanel';
+import { StickyDocumentHeader } from '../components/StickyDocumentHeader';
 import { Button } from '../components/ui/Button';
 import { useBlockDragStore, selectCanUndo } from '../stores/blockDrag';
 import { useDocumentPreviewUpdater } from '../stores/documentPreviews';
@@ -151,13 +152,46 @@ export function BlockDragDemo() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [canUndo, handleUndo]);
 
+  // Toolbar content for the sticky header
+  const toolbarContent = (
+    <>
+      <Button
+        variant={showRawEditor ? 'secondary' : 'primary'}
+        onClick={() => setShowRawEditor(!showRawEditor)}
+      >
+        {showRawEditor ? 'Show Block View' : 'Show Raw Markdown'}
+      </Button>
+      {canUndo && (
+        <Button
+          variant="secondary"
+          onClick={handleUndo}
+          className="undo-btn"
+        >
+          <UndoIcon />
+          Undo Reorder
+        </Button>
+      )}
+      <Button
+        variant="ghost"
+        onClick={() => setShowPreferences(true)}
+        className="preferences-btn"
+        title="Editor Preferences"
+      >
+        <SettingsIcon />
+        Preferences
+      </Button>
+    </>
+  );
+
   return (
     <PageTransition>
       <div className="block-drag-demo">
-        <header className="demo-header">
-          <h1>Block-Level Drag & Drop</h1>
-          <p>Reorder content blocks by dragging them to new positions</p>
-        </header>
+        <StickyDocumentHeader
+          title="Block-Level Drag & Drop"
+          subtitle="Reorder content blocks by dragging them to new positions"
+          toolbar={toolbarContent}
+          className="block-drag-demo-header"
+        />
 
         <section className="demo-instructions">
           <h2>How to Use</h2>
@@ -184,34 +218,6 @@ export function BlockDragDemo() {
         </section>
 
         <section className="demo-editor-section">
-          <div className="demo-toolbar">
-            <Button
-              variant={showRawEditor ? 'secondary' : 'primary'}
-              onClick={() => setShowRawEditor(!showRawEditor)}
-            >
-              {showRawEditor ? 'Show Block View' : 'Show Raw Markdown'}
-            </Button>
-            <div className="demo-toolbar-spacer" />
-            {canUndo && (
-              <Button
-                variant="secondary"
-                onClick={handleUndo}
-                className="undo-btn"
-              >
-                <UndoIcon />
-                Undo Reorder
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              onClick={() => setShowPreferences(true)}
-              className="preferences-btn"
-              title="Editor Preferences"
-            >
-              <SettingsIcon />
-              Preferences
-            </Button>
-          </div>
 
           {showRawEditor ? (
             <div className="block-drag-demo-raw-editor">
