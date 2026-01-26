@@ -39,6 +39,7 @@ interface AccountState {
   fetchMembers: (accountId: string) => Promise<void>;
   inviteMember: (accountId: string, email: string, role: AccountMember['role']) => Promise<AccountMember>;
   removeMember: (accountId: string, memberId: string) => Promise<void>;
+  leaveAccount: (accountId: string) => Promise<void>;
 }
 
 const API_BASE = '/api';
@@ -244,6 +245,40 @@ export const useAccountStore = create<AccountState>()(
             members: state.members.filter((m) => m.id !== memberId),
             isLoading: false,
           }));
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
+        }
+      },
+
+      // Leave an account (current user removes themselves)
+      leaveAccount: async (accountId) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(
+            `${API_BASE}/accounts/${accountId}/leave`,
+            {
+              method: 'POST',
+            }
+          );
+          if (!response.ok) {
+            throw new Error('Failed to leave account');
+          }
+          set((state) => {
+            const newAccounts = state.accounts.filter((a) => a.id !== accountId);
+            const newCurrentAccount =
+              state.currentAccount?.id === accountId
+                ? newAccounts[0] || null
+                : state.currentAccount;
+            return {
+              accounts: newAccounts,
+              currentAccount: newCurrentAccount,
+              isLoading: false,
+            };
+          });
         } catch (err) {
           set({
             error: err instanceof Error ? err.message : 'Unknown error',

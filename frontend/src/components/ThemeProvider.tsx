@@ -61,35 +61,3 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-
-/**
- * Hook to get current effective theme
- */
-export function useTheme() {
-  const theme = useAppSettingsStore((state) => state.settings.appearance.theme);
-  const updateAppearanceSettings = useAppSettingsStore((state) => state.updateAppearanceSettings);
-
-  const getEffectiveTheme = useCallback((): ThemeMode => {
-    if (theme === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return theme;
-  }, [theme]);
-
-  const setTheme = useCallback((newTheme: 'light' | 'dark' | 'system') => {
-    updateAppearanceSettings({ theme: newTheme });
-  }, [updateAppearanceSettings]);
-
-  const toggleTheme = useCallback(() => {
-    const currentEffective = getEffectiveTheme();
-    setTheme(currentEffective === 'dark' ? 'light' : 'dark');
-  }, [getEffectiveTheme, setTheme]);
-
-  return {
-    theme,
-    effectiveTheme: getEffectiveTheme(),
-    setTheme,
-    toggleTheme,
-    isDark: getEffectiveTheme() === 'dark',
-  };
-}

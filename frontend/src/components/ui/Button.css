@@ -73,12 +73,12 @@
 
 .btn-ghost {
   background-color: transparent;
-  color: var(--color-text, #374151);
-  border-color: var(--color-border, #d1d5db);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background-color: var(--color-bg-hover, #f3f4f6);
+  background-color: var(--color-bg-hover);
 }
 
 /* Full width */
@@ -116,7 +116,7 @@
 }
 
 .btn-ghost .spinner-icon {
-  color: var(--color-text, #374151);
+  color: var(--color-text-primary);
 }
 
 @keyframes spin {
@@ -171,7 +171,7 @@
   }
 
   .btn-ghost:active:not(:disabled) {
-    background-color: var(--color-bg-hover, #f3f4f6);
+    background-color: var(--color-bg-hover);
   }
 
   .btn-sm {

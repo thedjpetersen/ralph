@@ -1,6 +1,6 @@
 .organized-settings {
   min-height: 100vh;
-  background-color: #1a1a1a;
+  background-color: var(--color-bg-primary);
 }
 
 .settings-layout {
@@ -14,7 +14,7 @@
 .settings-sidebar {
   width: 260px;
   padding: 1.5rem;
-  border-right: 1px solid #333;
+  border-right: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   height: 100vh;
@@ -31,7 +31,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-secondary);
   text-decoration: none;
   font-size: 0.875rem;
   margin-bottom: 1rem;
@@ -39,14 +39,14 @@
 }
 
 .back-link:hover {
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
 }
 
 .sidebar-header h1 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
 }
 
 .settings-nav {
@@ -63,7 +63,7 @@
   padding: 0.75rem 1rem;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-secondary);
   font-size: 0.9375rem;
   cursor: pointer;
   border-radius: 8px;
@@ -73,13 +73,13 @@
 }
 
 .nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.87);
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 .nav-item.active {
-  background-color: rgba(100, 108, 255, 0.15);
-  color: #646cff;
+  background-color: var(--color-accent-light);
+  color: var(--color-accent);
 }
 
 .nav-item svg {
@@ -88,16 +88,16 @@
 
 .save-status {
   padding-top: 1rem;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--color-border);
   font-size: 0.8125rem;
 }
 
 .save-status .saving {
-  color: #f39c12;
+  color: var(--color-warning);
 }
 
 .save-status .saved {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-tertiary);
 }
 
 /* Main Content */
@@ -131,19 +131,19 @@
   margin: 0 0 0.5rem;
   font-size: 1.5rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
 }
 
 .section-header p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-tertiary);
   font-size: 0.9375rem;
 }
 
 /* Settings Groups */
 .settings-group {
-  background-color: #2a2a2a;
-  border: 1px solid #333;
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -153,7 +153,7 @@
   margin: 0 0 1rem;
   font-size: 1rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
 }
 
 .setting-item {
@@ -167,14 +167,14 @@
 .setting-label {
   display: block;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
   margin-bottom: 0.5rem;
 }
 
 .setting-description {
   display: block;
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-tertiary);
   margin-top: 0.25rem;
 }
 
@@ -182,10 +182,10 @@
   width: 100%;
   max-width: 300px;
   padding: 0.625rem 1rem;
-  background-color: #1a1a1a;
-  border: 1px solid #444;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
   font-size: 0.9375rem;
   cursor: pointer;
   appearance: none;
@@ -197,36 +197,36 @@
 
 .setting-select:focus {
   outline: none;
-  border-color: #646cff;
-  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-light);
 }
 
 .setting-input {
   width: 100%;
   max-width: 400px;
   padding: 0.625rem 1rem;
-  background-color: #1a1a1a;
-  border: 1px solid #444;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
   font-size: 0.9375rem;
   box-sizing: border-box;
 }
 
 .setting-input:focus {
   outline: none;
-  border-color: #646cff;
-  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-light);
 }
 
 .setting-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-text-muted);
 }
 
 .setting-range {
   width: 100%;
   max-width: 200px;
-  accent-color: #646cff;
+  accent-color: var(--color-accent);
 }
 
 /* Font Size Control */
@@ -237,7 +237,7 @@
 }
 
 .font-size-value {
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
   font-size: 0.875rem;
   min-width: 45px;
 }
@@ -263,19 +263,19 @@
 }
 
 .theme-option:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--color-bg-hover);
 }
 
 .theme-option.active {
-  border-color: #646cff;
-  background-color: rgba(100, 108, 255, 0.1);
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-light);
 }
 
 .theme-preview {
   width: 64px;
   height: 44px;
   border-radius: 6px;
-  border: 1px solid #444;
+  border: 1px solid var(--color-border-strong);
 }
 
 .theme-preview-light {
@@ -292,7 +292,7 @@
 
 .theme-label {
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
 }
 
 /* Color Options */
@@ -340,17 +340,17 @@
 
 .toggle-visibility {
   padding: 0.625rem 1rem;
-  background-color: #333;
-  border: 1px solid #444;
+  background-color: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-strong);
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 0.8125rem;
   transition: background-color 0.2s;
 }
 
 .toggle-visibility:hover {
-  background-color: #3a3a3a;
+  background-color: var(--color-bg-hover);
 }
 
 /* Reset Section */
@@ -363,12 +363,12 @@
 
 .reset-section p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
 }
 
 .reset-preview {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--color-bg-secondary);
   border-radius: 8px;
   padding: 1rem;
 }
@@ -376,14 +376,14 @@
 .reset-preview h4 {
   margin: 0 0 0.75rem;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
 }
 
 .reset-preview ul {
   margin: 0;
   padding-left: 1.25rem;
   font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-secondary);
 }
 
 .reset-preview li {
@@ -404,7 +404,7 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--color-bg-secondary);
   border-radius: 8px;
 }
 
@@ -423,7 +423,7 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #646cff 0%, #9b59b6 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #9b59b6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -440,13 +440,13 @@
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
 }
 
 .avatar-email {
   margin: 0.25rem 0 0;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-tertiary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -484,7 +484,7 @@
 }
 
 .danger-title {
-  color: #ff6b6b !important;
+  color: var(--color-error) !important;
 }
 
 .danger-content {
@@ -504,13 +504,13 @@
   margin: 0 0 0.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--color-text-primary);
 }
 
 .danger-item-info p {
   margin: 0;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-tertiary);
 }
 
 .delete-confirm-content {
@@ -527,160 +527,15 @@
 
 .settings-error h2 {
   margin: 0 0 0.5rem;
-  color: #ff6b6b;
+  color: var(--color-error);
 }
 
 .settings-error p {
   margin: 0 0 1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-text-secondary);
 }
 
-/* Light Mode */
-@media (prefers-color-scheme: light) {
-  .organized-settings {
-    background-color: #f5f5f5;
-  }
-
-  .settings-sidebar {
-    border-right-color: #ddd;
-  }
-
-  .back-link {
-    color: rgba(0, 0, 0, 0.6);
-  }
-
-  .back-link:hover {
-    color: rgba(0, 0, 0, 0.87);
-  }
-
-  .sidebar-header h1 {
-    color: #213547;
-  }
-
-  .nav-item {
-    color: rgba(0, 0, 0, 0.6);
-  }
-
-  .nav-item:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-    color: rgba(0, 0, 0, 0.87);
-  }
-
-  .nav-item.active {
-    background-color: rgba(100, 108, 255, 0.1);
-    color: #646cff;
-  }
-
-  .save-status {
-    border-top-color: #ddd;
-  }
-
-  .save-status .saved {
-    color: rgba(0, 0, 0, 0.5);
-  }
-
-  .section-header h2 {
-    color: #213547;
-  }
-
-  .section-header p {
-    color: rgba(0, 0, 0, 0.5);
-  }
-
-  .settings-group {
-    background-color: #fff;
-    border-color: #ddd;
-  }
-
-  .settings-group h3 {
-    color: #213547;
-  }
-
-  .setting-label {
-    color: #213547;
-  }
-
-  .setting-description {
-    color: rgba(0, 0, 0, 0.5);
-  }
-
-  .setting-select,
-  .setting-input {
-    background-color: #f9f9f9;
-    border-color: #ccc;
-    color: #213547;
-  }
-
-  .setting-input::placeholder {
-    color: rgba(0, 0, 0, 0.3);
-  }
-
-  .toggle-visibility {
-    background-color: #eee;
-    border-color: #ccc;
-    color: #213547;
-  }
-
-  .toggle-visibility:hover {
-    background-color: #e5e5e5;
-  }
-
-  .reset-section p {
-    color: rgba(0, 0, 0, 0.6);
-  }
-
-  .reset-preview {
-    background-color: #f5f5f5;
-  }
-
-  .reset-preview h4 {
-    color: #213547;
-  }
-
-  .reset-preview ul {
-    color: rgba(0, 0, 0, 0.6);
-  }
-
-  .profile-avatar-section {
-    background-color: #f5f5f5;
-  }
-
-  .avatar-name {
-    color: #213547;
-  }
-
-  .avatar-email {
-    color: rgba(0, 0, 0, 0.5);
-  }
-
-  .theme-option:hover {
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-
-  .theme-preview {
-    border-color: #ccc;
-  }
-
-  .theme-label {
-    color: #213547;
-  }
-
-  .danger-zone {
-    background-color: rgba(255, 107, 107, 0.05);
-  }
-
-  .danger-item-info h4 {
-    color: #213547;
-  }
-
-  .danger-item-info p {
-    color: rgba(0, 0, 0, 0.5);
-  }
-
-  .settings-error p {
-    color: rgba(0, 0, 0, 0.6);
-  }
-}
+/* Light mode is now handled by CSS variables in index.css */
 
 /* Responsive Design */
 @media (max-width: 900px) {
@@ -693,7 +548,7 @@
     height: auto;
     position: relative;
     border-right: none;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--color-border);
     padding: 1rem;
   }
 

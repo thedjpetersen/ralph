@@ -2,7 +2,7 @@
 .app-shell {
   display: flex;
   min-height: 100vh;
-  background-color: #0f0f0f;
+  background-color: var(--color-bg-primary);
 }
 
 /* Skip to main content link */
@@ -130,15 +130,15 @@
   }
 }
 
-/* Light mode support */
-@media (prefers-color-scheme: light) {
-  .app-shell {
-    background-color: #f5f5f5;
-  }
+/* Light mode support via class */
+:root.light .app-shell,
+[data-theme="light"] .app-shell {
+  background-color: var(--color-bg-secondary);
+}
 
-  .app-shell-sidebar-overlay {
-    background-color: rgba(0, 0, 0, 0.3);
-  }
+:root.light .app-shell-sidebar-overlay,
+[data-theme="light"] .app-shell-sidebar-overlay {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 /* Reduced motion support */

@@ -41,7 +41,7 @@
   align-items: center;
   flex-shrink: 0;
   border-radius: 9999px;
-  background-color: var(--color-border, #d1d5db);
+  background-color: var(--color-border-strong);
   transition: background-color 0.2s ease, box-shadow 0.15s ease;
 }
 
@@ -144,13 +144,13 @@
 .switch-text {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-text, #374151);
+  color: var(--color-text-primary);
   line-height: 1.25;
 }
 
 .switch-description {
   font-size: 0.75rem;
-  color: var(--color-text-muted, #6b7280);
+  color: var(--color-text-secondary);
   line-height: 1.25;
 }
 

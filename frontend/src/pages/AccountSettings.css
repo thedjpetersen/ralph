@@ -1,5 +1,5 @@
 .account-settings-page {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -55,6 +55,29 @@
 
 .back-button:hover {
   background-color: #747bff;
+}
+
+/* Section Styles */
+.settings-section {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.section-header .section-title {
+  margin: 0;
 }
 
 .settings-form {
@@ -171,6 +194,284 @@
   cursor: not-allowed;
 }
 
+/* Invite Button & Form */
+.invite-button {
+  padding: 0.625rem 1.25rem;
+  background-color: #646cff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.invite-button:hover {
+  background-color: #747bff;
+}
+
+.invite-form-container {
+  margin-bottom: 1.5rem;
+}
+
+.invite-form {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.invite-form h3 {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+}
+
+.invite-form-row {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.invite-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.submit-button {
+  padding: 0.625rem 1.25rem;
+  background-color: #646cff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #747bff;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Members List */
+.members-list {
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.members-empty {
+  padding: 3rem;
+  text-align: center;
+}
+
+.members-empty p {
+  margin: 0;
+}
+
+.members-empty-hint {
+  margin-top: 0.5rem !important;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.875rem;
+}
+
+.members-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.members-table th,
+.members-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.members-table th {
+  background-color: rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.members-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.members-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.member-name {
+  font-weight: 500;
+}
+
+.member-email {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.role-badge.owner {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.role-badge.admin {
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+}
+
+.role-badge.member {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.joined-date {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.875rem;
+}
+
+.remove-button {
+  padding: 0.375rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid rgba(255, 107, 107, 0.5);
+  border-radius: 6px;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.remove-button:hover:not(:disabled) {
+  background-color: rgba(255, 107, 107, 0.1);
+  border-color: #ff6b6b;
+}
+
+.remove-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Danger Section (Leave Account) */
+.danger-section {
+  background-color: rgba(255, 107, 107, 0.05);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.danger-title {
+  color: #ff6b6b;
+}
+
+.danger-description {
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+.leave-button {
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  border: 1px solid #ff6b6b;
+  border-radius: 6px;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.leave-button:hover {
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
+.leave-confirm {
+  background-color: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.leave-confirm-message {
+  margin: 0 0 1rem;
+}
+
+.leave-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.confirm-leave-button {
+  padding: 0.625rem 1.25rem;
+  background-color: #ff6b6b;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.confirm-leave-button:hover:not(:disabled) {
+  background-color: #ff5252;
+}
+
+.confirm-leave-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .invite-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .members-table th:nth-child(3),
+  .members-table td:nth-child(3) {
+    display: none;
+  }
+
+  .form-actions,
+  .invite-form-actions,
+  .leave-confirm-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button,
+  .invite-form-actions button,
+  .leave-confirm-actions button {
+    width: 100%;
+  }
+}
+
+/* Light mode */
 @media (prefers-color-scheme: light) {
   .settings-subtitle {
     color: rgba(0, 0, 0, 0.6);
@@ -179,6 +480,10 @@
   .settings-loading,
   .settings-error {
     background-color: #f5f5f5;
+  }
+
+  .section-title {
+    color: #213547;
   }
 
   .settings-form {
@@ -213,5 +518,58 @@
   .cancel-button:hover {
     background-color: rgba(0, 0, 0, 0.05);
     border-color: #bbb;
+  }
+
+  .invite-form {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .members-list {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .members-empty-hint {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .members-table th,
+  .members-table td {
+    border-bottom-color: #eee;
+  }
+
+  .members-table th {
+    background-color: #f5f5f5;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .members-table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .member-email {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .role-badge.member {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .joined-date {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .danger-section {
+    background-color: rgba(255, 107, 107, 0.05);
+  }
+
+  .danger-description {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .leave-confirm {
+    background-color: rgba(255, 107, 107, 0.08);
   }
 }
