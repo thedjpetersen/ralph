@@ -10,12 +10,17 @@ export interface ParagraphFocusState {
   // Current paragraph index (0-based)
   currentParagraphIndex: number;
 
+  // Whether sidebar and panels should be hidden in focus mode
+  hideSidebarAndPanels: boolean;
+
   // Actions
   toggle: () => void;
   enable: () => void;
   disable: () => void;
   setTargetElement: (element: HTMLTextAreaElement | HTMLInputElement | null) => void;
   updateCurrentParagraph: () => void;
+  setHideSidebarAndPanels: (hide: boolean) => void;
+  toggleHideSidebarAndPanels: () => void;
 }
 
 /**
@@ -56,6 +61,7 @@ export const useParagraphFocusStore = create<ParagraphFocusState>()((set, get) =
   isEnabled: false,
   targetElement: null,
   currentParagraphIndex: 0,
+  hideSidebarAndPanels: true, // Default to hiding sidebar/panels when focus mode is on
 
   toggle: () => {
     const state = get();
@@ -94,6 +100,14 @@ export const useParagraphFocusStore = create<ParagraphFocusState>()((set, get) =
 
     set({ currentParagraphIndex: paragraphIndex });
   },
+
+  setHideSidebarAndPanels: (hide) => {
+    set({ hideSidebarAndPanels: hide });
+  },
+
+  toggleHideSidebarAndPanels: () => {
+    set({ hideSidebarAndPanels: !get().hideSidebarAndPanels });
+  },
 }));
 
 // Individual selectors for stable references
@@ -101,16 +115,20 @@ const selectIsEnabled = (state: ParagraphFocusState) => state.isEnabled;
 const selectTargetElement = (state: ParagraphFocusState) => state.targetElement;
 const selectCurrentParagraphIndex = (state: ParagraphFocusState) =>
   state.currentParagraphIndex;
+const selectHideSidebarAndPanels = (state: ParagraphFocusState) =>
+  state.hideSidebarAndPanels;
 
 // Combined hook using individual selectors
 export function useParagraphFocus() {
   const isEnabled = useParagraphFocusStore(selectIsEnabled);
   const targetElement = useParagraphFocusStore(selectTargetElement);
   const currentParagraphIndex = useParagraphFocusStore(selectCurrentParagraphIndex);
+  const hideSidebarAndPanels = useParagraphFocusStore(selectHideSidebarAndPanels);
 
   return {
     isEnabled,
     targetElement,
     currentParagraphIndex,
+    hideSidebarAndPanels,
   };
 }

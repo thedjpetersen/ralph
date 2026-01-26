@@ -150,6 +150,32 @@
   }
 }
 
+/* Focus mode - hide sidebar and panels for distraction-free writing */
+.app-shell.focus-mode-active .app-shell-sidebar-wrapper {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.app-shell.focus-mode-active .app-shell-main-wrapper,
+.app-shell.focus-mode-active .app-shell-main-wrapper.sidebar-collapsed {
+  margin-left: 0;
+}
+
+/* Hide top navigation in focus mode */
+.app-shell.focus-mode-active .app-shell-main-wrapper > header,
+.app-shell.focus-mode-active .app-shell-main-wrapper > nav {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Smooth transitions for focus mode */
+.app-shell-sidebar-wrapper,
+.app-shell-main-wrapper {
+  transition: transform 0.3s ease, margin-left 0.3s ease, opacity 0.3s ease;
+}
+
 /* Print styles */
 @media print {
   .app-shell-sidebar-wrapper,

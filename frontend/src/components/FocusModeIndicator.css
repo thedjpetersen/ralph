@@ -1,0 +1,224 @@
+/* Focus Mode Status Bar Indicator */
+.focus-mode-indicator {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background-color: rgba(30, 30, 35, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  z-index: 9997;
+  animation: focusModeIndicatorSlideIn 0.3s ease-out;
+}
+
+@keyframes focusModeIndicatorSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.focus-mode-indicator-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.focus-mode-indicator-icon {
+  color: #9f7aea; /* Purple to indicate focus mode */
+  flex-shrink: 0;
+}
+
+.focus-mode-indicator-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+}
+
+.focus-mode-indicator-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.focus-mode-indicator-shortcut kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.focus-mode-indicator-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.focus-mode-indicator-toggle,
+.focus-mode-indicator-exit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.focus-mode-indicator-toggle:hover,
+.focus-mode-indicator-exit:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.focus-mode-indicator-toggle.active {
+  color: #9f7aea;
+}
+
+.focus-mode-indicator-toggle.active:hover {
+  color: #b794f6;
+}
+
+.focus-mode-indicator-exit:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  .focus-mode-indicator {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .focus-mode-indicator-label {
+    color: rgba(0, 0, 0, 0.9);
+  }
+
+  .focus-mode-indicator-shortcut kbd {
+    color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .focus-mode-indicator-actions {
+    border-left-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .focus-mode-indicator-toggle,
+  .focus-mode-indicator-exit {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .focus-mode-indicator-toggle:hover,
+  .focus-mode-indicator-exit:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    color: rgba(0, 0, 0, 0.9);
+  }
+
+  .focus-mode-indicator-exit:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
+  }
+}
+
+/* Data theme support for light mode */
+:root.light .focus-mode-indicator,
+[data-theme="light"] .focus-mode-indicator {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+:root.light .focus-mode-indicator-label,
+[data-theme="light"] .focus-mode-indicator-label {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+:root.light .focus-mode-indicator-shortcut kbd,
+[data-theme="light"] .focus-mode-indicator-shortcut kbd {
+  color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+:root.light .focus-mode-indicator-actions,
+[data-theme="light"] .focus-mode-indicator-actions {
+  border-left-color: rgba(0, 0, 0, 0.1);
+}
+
+:root.light .focus-mode-indicator-toggle,
+:root.light .focus-mode-indicator-exit,
+[data-theme="light"] .focus-mode-indicator-toggle,
+[data-theme="light"] .focus-mode-indicator-exit {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+:root.light .focus-mode-indicator-toggle:hover,
+:root.light .focus-mode-indicator-exit:hover,
+[data-theme="light"] .focus-mode-indicator-toggle:hover,
+[data-theme="light"] .focus-mode-indicator-exit:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+:root.light .focus-mode-indicator-exit:hover,
+[data-theme="light"] .focus-mode-indicator-exit:hover {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .focus-mode-indicator {
+    animation: none;
+  }
+
+  .focus-mode-indicator-toggle,
+  .focus-mode-indicator-exit {
+    transition: none;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .focus-mode-indicator {
+    bottom: calc(64px + 16px + env(safe-area-inset-bottom, 0px));
+    padding: 6px 10px;
+    gap: 8px;
+  }
+
+  .focus-mode-indicator-shortcut {
+    display: none;
+  }
+
+  .focus-mode-indicator-label {
+    font-size: 12px;
+  }
+}

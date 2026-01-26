@@ -10,7 +10,7 @@ import { CommandPalette } from '../CommandPalette';
 import { QuickSwitcher } from '../QuickSwitcher';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useFindReplaceStore } from '../../stores/findReplace';
-import { useParagraphFocusStore } from '../../stores/paragraphFocus';
+import { useParagraphFocusStore, useParagraphFocus } from '../../stores/paragraphFocus';
 import { useTypewriterScrollStore } from '../../stores/typewriterScroll';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
@@ -46,6 +46,7 @@ const AIToneAnalyzerPanel = lazy(() => import('../AIToneAnalyzerPanel').then(m =
 const AIVocabularyEnhancerPanel = lazy(() => import('../AIVocabularyEnhancerPanel').then(m => ({ default: m.AIVocabularyEnhancerPanel })));
 const AIVocabularySuggestionPopup = lazy(() => import('../AIVocabularySuggestionPopup').then(m => ({ default: m.AIVocabularySuggestionPopup })));
 const AIReadabilityPanel = lazy(() => import('../AIReadabilityPanel').then(m => ({ default: m.AIReadabilityPanel })));
+const FocusModeIndicator = lazy(() => import('../FocusModeIndicator').then(m => ({ default: m.FocusModeIndicator })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -57,6 +58,7 @@ export function AppShell({ children }: AppShellProps) {
   const { fetchUser } = useUserStore();
   const { openDialog: openFindReplace, closeDialog: closeFindReplace } = useFindReplaceStore();
   const { toggle: toggleParagraphFocus } = useParagraphFocusStore();
+  const { isEnabled: isFocusModeEnabled, hideSidebarAndPanels } = useParagraphFocus();
   const { toggle: toggleTypewriterScroll } = useTypewriterScrollStore();
   const { shouldShowTour, startTour } = useOnboarding();
   const { togglePalette: toggleCommandPalette, closePalette: closeCommandPalette } = useCommandPaletteStore();
@@ -292,8 +294,11 @@ export function AppShell({ children }: AppShellProps) {
     },
   ]);
 
+  // Determine if we should hide sidebar and panels based on focus mode
+  const shouldHideUI = isFocusModeEnabled && hideSidebarAndPanels;
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${shouldHideUI ? 'focus-mode-active' : ''}`}>
       {/* Skip to main content link for keyboard users */}
       <a
         href="#main-content"
@@ -380,6 +385,7 @@ export function AppShell({ children }: AppShellProps) {
         <AIVocabularyEnhancerPanel />
         <AIVocabularySuggestionPopup />
         <AIReadabilityPanel />
+        <FocusModeIndicator />
       </Suspense>
     </div>
   );
