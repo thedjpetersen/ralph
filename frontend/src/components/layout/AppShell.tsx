@@ -17,6 +17,7 @@ import { useUserStore } from '../../stores/user';
 import { useOnboarding } from '../../stores/onboarding';
 import { useCommandPaletteStore } from '../../stores/commandPalette';
 import { useQuickSwitcherStore } from '../../stores/quickSwitcher';
+import { useAIToneAnalyzerStore } from '../../stores/aiToneAnalyzer';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -34,6 +35,7 @@ const TypewriterScrollManager = lazy(() => import('../TypewriterScrollManager').
 const OnboardingTour = lazy(() => import('../OnboardingTour').then(m => ({ default: m.OnboardingTour })));
 const AISummaryDialog = lazy(() => import('../AISummaryDialog').then(m => ({ default: m.AISummaryDialog })));
 const AIOutlineDialog = lazy(() => import('../AIOutlineDialog').then(m => ({ default: m.AIOutlineDialog })));
+const AIToneAnalyzerPanel = lazy(() => import('../AIToneAnalyzerPanel').then(m => ({ default: m.AIToneAnalyzerPanel })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -49,6 +51,7 @@ export function AppShell({ children }: AppShellProps) {
   const { shouldShowTour, startTour } = useOnboarding();
   const { togglePalette: toggleCommandPalette, closePalette: closeCommandPalette } = useCommandPaletteStore();
   const { toggleSwitcher: toggleQuickSwitcher, closeSwitcher: closeQuickSwitcher } = useQuickSwitcherStore();
+  const { togglePanel: toggleToneAnalyzer, closePanel: closeToneAnalyzer } = useAIToneAnalyzerStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -149,6 +152,7 @@ export function AppShell({ children }: AppShellProps) {
         closeFindReplace();
         closeCommandPalette();
         closeQuickSwitcher();
+        closeToneAnalyzer();
       },
       description: 'Close menus',
       allowInInput: true,
@@ -194,6 +198,13 @@ export function AppShell({ children }: AppShellProps) {
       shiftKey: true,
       action: toggleTypewriterScroll,
       description: 'Toggle typewriter scroll mode',
+      allowInInput: true,
+    },
+    {
+      key: 't',
+      altKey: true,
+      action: toggleToneAnalyzer,
+      description: 'Toggle tone analyzer panel',
       allowInInput: true,
     },
   ]);
@@ -280,6 +291,7 @@ export function AppShell({ children }: AppShellProps) {
         <OnboardingTour />
         <AISummaryDialog />
         <AIOutlineDialog />
+        <AIToneAnalyzerPanel />
       </Suspense>
     </div>
   );

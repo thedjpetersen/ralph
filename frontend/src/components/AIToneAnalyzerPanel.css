@@ -1,0 +1,548 @@
+/**
+ * AI Tone Analyzer Panel Styles
+ */
+
+/* CSS Variables for theming */
+.ai-tone-analyzer-panel {
+  --tone-meter-left: #ef4444;
+  --tone-meter-center: #eab308;
+  --tone-meter-right: #22c55e;
+  --tone-meter-loading: #9ca3af;
+  --tone-panel-bg: var(--color-surface, #ffffff);
+  --tone-panel-border: var(--color-border, #e5e7eb);
+  --tone-panel-text: var(--color-text, #1f2937);
+  --tone-panel-text-secondary: var(--color-text-secondary, #6b7280);
+  --tone-panel-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ai-tone-analyzer-panel {
+    --tone-panel-bg: var(--color-surface-dark, #1f2937);
+    --tone-panel-border: var(--color-border-dark, #374151);
+    --tone-panel-text: var(--color-text-dark, #f9fafb);
+    --tone-panel-text-secondary: var(--color-text-secondary-dark, #9ca3af);
+  }
+}
+
+/* Panel container */
+.ai-tone-analyzer-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 320px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: var(--tone-panel-bg);
+  border: 1px solid var(--tone-panel-border);
+  border-radius: 12px;
+  box-shadow: var(--tone-panel-shadow);
+  z-index: 1000;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Scrollbar styling */
+.ai-tone-analyzer-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-tone-analyzer-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ai-tone-analyzer-panel::-webkit-scrollbar-thumb {
+  background: var(--tone-panel-border);
+  border-radius: 3px;
+}
+
+/* Header */
+.tone-analyzer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--tone-panel-border);
+}
+
+.tone-analyzer-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tone-analyzer-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary, #3b82f6);
+}
+
+.tone-analyzer-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--tone-panel-text);
+}
+
+.tone-analyzer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--tone-panel-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.tone-analyzer-close:hover {
+  background: var(--tone-panel-border);
+  color: var(--tone-panel-text);
+}
+
+.tone-analyzer-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Error state */
+.tone-analyzer-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.tone-analyzer-error button {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.tone-analyzer-error button:hover {
+  background: #fecaca;
+}
+
+/* Empty state */
+.tone-analyzer-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--tone-panel-text-secondary);
+}
+
+.tone-analyzer-empty svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.tone-analyzer-empty p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: var(--tone-panel-text);
+}
+
+.tone-analyzer-hint {
+  font-size: 12px;
+  color: var(--tone-panel-text-secondary);
+}
+
+/* Tone meters container */
+.tone-analyzer-meters {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Individual tone meter */
+.tone-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tone-meter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tone-meter-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tone-panel-text);
+}
+
+.tone-meter-value {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tone-panel-text-secondary);
+  padding: 2px 8px;
+  background: var(--tone-panel-border);
+  border-radius: 10px;
+}
+
+.tone-meter-track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.tone-meter-gradient {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    var(--tone-meter-left),
+    var(--tone-meter-center) 50%,
+    var(--tone-meter-right)
+  );
+  opacity: 0.3;
+}
+
+.tone-meter-indicator {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 0 2px white;
+  z-index: 2;
+}
+
+.tone-meter-target {
+  position: absolute;
+  top: 50%;
+  width: 4px;
+  height: 16px;
+  margin-left: -2px;
+  margin-top: -8px;
+  background: var(--tone-panel-text);
+  opacity: 0.4;
+  border-radius: 2px;
+  z-index: 1;
+}
+
+.tone-meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--tone-panel-text-secondary);
+}
+
+.tone-meter-left-label,
+.tone-meter-right-label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Stats row */
+.tone-analyzer-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--tone-panel-border);
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.tone-analyzer-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tone-panel-text-secondary);
+}
+
+.tone-analyzer-stat svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tone-analyzer-tracking {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #22c55e;
+}
+
+.tone-analyzer-tracking-dot {
+  width: 6px;
+  height: 6px;
+  background: #22c55e;
+  border-radius: 50%;
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Target tone section */
+.tone-analyzer-target-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tone-analyzer-target-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid var(--tone-panel-border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--tone-panel-text);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.tone-analyzer-target-toggle:hover {
+  background: var(--tone-panel-border);
+}
+
+.tone-analyzer-target-toggle svg:first-child {
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary, #3b82f6);
+}
+
+.tone-analyzer-chevron {
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  color: var(--tone-panel-text-secondary);
+  transition: transform 0.2s;
+}
+
+.tone-analyzer-chevron.open {
+  transform: rotate(180deg);
+}
+
+.tone-analyzer-target-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  background: var(--tone-panel-border);
+  border-radius: 8px;
+}
+
+.tone-analyzer-preset {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 120px;
+  padding: 8px 12px;
+  background: var(--tone-panel-bg);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--tone-panel-text);
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.tone-analyzer-preset:hover {
+  border-color: var(--color-primary, #3b82f6);
+}
+
+.tone-analyzer-preset.active {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.tone-analyzer-clear {
+  flex: 1 1 100%;
+  color: var(--tone-panel-text-secondary);
+}
+
+.tone-analyzer-clear:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* Suggestions section */
+.tone-analyzer-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tone-analyzer-suggestions-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tone-panel-text);
+}
+
+.tone-suggestion {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--tone-panel-border);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-primary, #3b82f6);
+}
+
+.tone-suggestion-increase {
+  border-left-color: #22c55e;
+}
+
+.tone-suggestion-decrease {
+  border-left-color: #f59e0b;
+}
+
+.tone-suggestion-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary, #3b82f6);
+}
+
+.tone-suggestion-increase .tone-suggestion-icon {
+  color: #22c55e;
+}
+
+.tone-suggestion-decrease .tone-suggestion-icon {
+  color: #f59e0b;
+}
+
+.tone-suggestion-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tone-suggestion-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.tone-suggestion-message {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--tone-panel-text);
+  line-height: 1.4;
+}
+
+.tone-suggestion-example {
+  margin: 0;
+  font-size: 12px;
+  color: var(--tone-panel-text-secondary);
+  font-style: italic;
+}
+
+/* Target comparison section */
+.tone-analyzer-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tone-analyzer-comparison-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tone-panel-text);
+}
+
+.tone-analyzer-comparison-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tone-comparison-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--tone-panel-border);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.tone-comparison-dim {
+  font-weight: 500;
+  color: var(--tone-panel-text);
+}
+
+.tone-comparison-status {
+  font-weight: 500;
+}
+
+.tone-comparison-match .tone-comparison-status {
+  color: #22c55e;
+}
+
+.tone-comparison-high .tone-comparison-status {
+  color: #f59e0b;
+}
+
+.tone-comparison-low .tone-comparison-status {
+  color: #ef4444;
+}
+
+/* Footer */
+.tone-analyzer-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--tone-panel-border);
+  font-size: 11px;
+  color: var(--tone-panel-text-secondary);
+}
+
+.tone-analyzer-footer kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 6px;
+  margin-right: 6px;
+  background: var(--tone-panel-bg);
+  border: 1px solid var(--tone-panel-border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  box-shadow: 0 1px 0 var(--tone-panel-border);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ai-tone-analyzer-panel {
+    right: 10px;
+    left: 10px;
+    width: auto;
+    top: auto;
+    bottom: 70px;
+    max-height: 50vh;
+  }
+}
