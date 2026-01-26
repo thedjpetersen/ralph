@@ -10,6 +10,17 @@
   border-top: 1px solid #333;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0);
+  /* Safe area support for notched devices */
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+  /* Smooth transition for scroll hide/show */
+  transform: translateY(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hidden state for scroll behavior */
+.mobile-tab-bar-hidden {
+  transform: translateY(calc(100% + env(safe-area-inset-bottom, 0)));
 }
 
 /* Show on mobile devices */
@@ -68,7 +79,7 @@
   letter-spacing: 0.02em;
 }
 
-/* Add button - center prominent button */
+/* Add button - center prominent button (legacy) */
 .mobile-tab-bar-add {
   position: relative;
 }
@@ -102,6 +113,47 @@
 
 .mobile-tab-bar-add.active .mobile-tab-bar-label {
   color: #646cff;
+}
+
+/* AI button - center prominent button */
+.mobile-tab-bar-ai {
+  position: relative;
+}
+
+.mobile-tab-bar-ai-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 50%;
+  color: white;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: -12px;
+}
+
+.mobile-tab-bar-ai:hover .mobile-tab-bar-ai-button {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
+}
+
+.mobile-tab-bar-ai:active .mobile-tab-bar-ai-button {
+  transform: scale(0.95);
+}
+
+.mobile-tab-bar-ai .mobile-tab-bar-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-tab-bar-ai.active .mobile-tab-bar-label {
+  color: #8b5cf6;
+}
+
+.mobile-tab-bar-ai.active .mobile-tab-bar-ai-button {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
 }
 
 /* Overlay for More menu */
@@ -233,6 +285,14 @@
     color: rgba(0, 0, 0, 0.5);
   }
 
+  .mobile-tab-bar-ai .mobile-tab-bar-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .mobile-tab-bar-ai.active .mobile-tab-bar-label {
+    color: #8b5cf6;
+  }
+
   .mobile-tab-bar-overlay {
     background-color: rgba(0, 0, 0, 0.3);
   }
@@ -275,5 +335,33 @@
     width: 44px;
     height: 44px;
     margin-top: -10px;
+  }
+
+  .mobile-tab-bar-ai-button {
+    width: 44px;
+    height: 44px;
+    margin-top: -10px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-tab-bar {
+    transition: none;
+  }
+
+  .mobile-tab-bar-item,
+  .mobile-tab-bar-add-button,
+  .mobile-tab-bar-ai-button,
+  .mobile-tab-bar-more-menu {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Print styles - hide mobile tab bar */
+@media print {
+  .mobile-tab-bar {
+    display: none !important;
   }
 }

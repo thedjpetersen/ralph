@@ -1,125 +1,96 @@
-import { useState, useCallback } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useCommandPaletteStore } from '../../stores/commandPalette';
 import './MobileTabBar.css';
 
-interface MoreMenuItem {
-  label: string;
-  path: string;
-  icon: React.ReactNode;
+// Custom hook for scroll-based hide/show behavior
+function useScrollDirection() {
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const ticking = useRef(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const scrollDelta = currentScrollY - lastScrollY.current;
+
+          // Only hide/show after a minimum scroll threshold (10px)
+          if (Math.abs(scrollDelta) > 10) {
+            if (scrollDelta > 0 && currentScrollY > 50) {
+              // Scrolling down and past initial threshold - hide
+              setIsVisible(false);
+            } else if (scrollDelta < 0) {
+              // Scrolling up - show
+              setIsVisible(true);
+            }
+          }
+
+          // Always show at the top of the page
+          if (currentScrollY < 10) {
+            setIsVisible(true);
+          }
+
+          lastScrollY.current = currentScrollY;
+          ticking.current = false;
+        });
+        ticking.current = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return isVisible;
 }
 
-const moreMenuItems: MoreMenuItem[] = [
-  {
-    label: 'Budgets',
-    path: '/budgets',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M10 6v8M6 10h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'Stores',
-    path: '/stores',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <path d="M3 7l2-4h10l2 4M3 7v9a1 1 0 001 1h12a1 1 0 001-1V7M3 7h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'Accounts',
-    path: '/accounts',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <rect x="3" y="4" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M3 8h14" stroke="currentColor" strokeWidth="1.5"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'Settings',
-    path: '/settings',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-        <circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5"/>
-        <path d="M10 2v2M10 16v2M18 10h-2M4 10H2M15.66 4.34l-1.42 1.42M5.76 14.24l-1.42 1.42M15.66 15.66l-1.42-1.42M5.76 5.76L4.34 4.34" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
-  },
-];
-
 export function MobileTabBar() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const { togglePalette } = useCommandPaletteStore();
+  const isVisible = useScrollDirection();
+  const [isAIMenuOpen, setIsAIMenuOpen] = useState(false);
 
-  const handleAddClick = useCallback(() => {
-    // Navigate to receipt upload as the primary "Add" action
-    navigate('/receipts/upload');
-  }, [navigate]);
+  const handleAIClick = useCallback(() => {
+    // Open command palette filtered to AI commands
+    togglePalette();
+  }, [togglePalette]);
 
-  const handleMoreClick = useCallback(() => {
-    setIsMoreMenuOpen((prev) => !prev);
+  const handleAIMenuClose = useCallback(() => {
+    setIsAIMenuOpen(false);
   }, []);
 
-  const handleMoreMenuClose = useCallback(() => {
-    setIsMoreMenuOpen(false);
-  }, []);
+  // Check if current path is an AI-related route
+  const isAIActive = location.pathname.includes('/ai-') || isAIMenuOpen;
 
-  const handleMoreMenuItemClick = useCallback((path: string) => {
-    navigate(path);
-    setIsMoreMenuOpen(false);
-  }, [navigate]);
-
-  // Check if current path matches any of the more menu items
-  const isMoreMenuActive = moreMenuItems.some((item) =>
-    location.pathname.startsWith(item.path)
-  );
+  // Check if current path is a document/editor route
+  const isEditorActive = location.pathname.startsWith('/receipts/upload') ||
+    location.pathname.includes('/edit');
 
   return (
     <>
-      {/* Overlay for More menu */}
-      {isMoreMenuOpen && (
+      {/* Overlay for AI menu */}
+      {isAIMenuOpen && (
         <div
           className="mobile-tab-bar-overlay"
-          onClick={handleMoreMenuClose}
+          onClick={handleAIMenuClose}
           aria-hidden="true"
         />
       )}
 
-      {/* More menu popup */}
-      {isMoreMenuOpen && (
-        <div
-          className="mobile-tab-bar-more-menu"
-          role="menu"
-          aria-label="More navigation options"
-        >
-          {moreMenuItems.map((item) => (
-            <button
-              key={item.path}
-              className={`mobile-tab-bar-more-item ${
-                location.pathname.startsWith(item.path) ? 'active' : ''
-              }`}
-              onClick={() => handleMoreMenuItemClick(item.path)}
-              role="menuitem"
-            >
-              <span className="mobile-tab-bar-more-icon">{item.icon}</span>
-              <span className="mobile-tab-bar-more-label">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      <nav className="mobile-tab-bar" role="navigation" aria-label="Mobile navigation">
-        {/* Home Tab */}
+      <nav
+        className={`mobile-tab-bar ${isVisible ? '' : 'mobile-tab-bar-hidden'}`}
+        role="navigation"
+        aria-label="Mobile navigation"
+      >
+        {/* Documents Tab */}
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
             `mobile-tab-bar-item ${isActive ? 'active' : ''}`
           }
-          aria-label="Home"
+          aria-label="Documents"
         >
           <svg
             className="mobile-tab-bar-icon"
@@ -130,23 +101,29 @@ export function MobileTabBar() {
             aria-hidden="true"
           >
             <path
-              d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V10.5z"
+              d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
               stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
+            <path
+              d="M9 7h6M9 11h6M9 15h4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
           </svg>
-          <span className="mobile-tab-bar-label">Home</span>
+          <span className="mobile-tab-bar-label">Documents</span>
         </NavLink>
 
-        {/* Receipts Tab */}
+        {/* Editor Tab */}
         <NavLink
-          to="/receipts"
-          className={({ isActive }) =>
-            `mobile-tab-bar-item ${isActive || location.pathname.startsWith('/receipts') ? 'active' : ''}`
+          to="/receipts/upload"
+          className={() =>
+            `mobile-tab-bar-item ${isEditorActive ? 'active' : ''}`
           }
-          aria-label="Receipts"
+          aria-label="Editor"
         >
           <svg
             className="mobile-tab-bar-icon"
@@ -157,29 +134,23 @@ export function MobileTabBar() {
             aria-hidden="true"
           >
             <path
-              d="M5 4h14a1 1 0 011 1v14l-2.5-1.5L15 19l-2.5-1.5L10 19l-2.5-1.5L5 19V5a1 1 0 011-1z"
+              d="M12 20h9M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z"
               stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            <path
-              d="M9 9h6M9 13h4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
           </svg>
-          <span className="mobile-tab-bar-label">Receipts</span>
+          <span className="mobile-tab-bar-label">Editor</span>
         </NavLink>
 
-        {/* Add Tab (center, prominent) */}
+        {/* AI Tab (center, prominent) */}
         <button
-          className="mobile-tab-bar-item mobile-tab-bar-add"
-          onClick={handleAddClick}
-          aria-label="Add receipt"
+          className={`mobile-tab-bar-item mobile-tab-bar-ai ${isAIActive ? 'active' : ''}`}
+          onClick={handleAIClick}
+          aria-label="AI features"
         >
-          <span className="mobile-tab-bar-add-button">
+          <span className="mobile-tab-bar-ai-button">
             <svg
               width="24"
               height="24"
@@ -188,23 +159,24 @@ export function MobileTabBar() {
               aria-hidden="true"
             >
               <path
-                d="M12 5v14M5 12h14"
+                d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="1.5"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </span>
-          <span className="mobile-tab-bar-label">Add</span>
+          <span className="mobile-tab-bar-label">AI</span>
         </button>
 
-        {/* Purchases Tab */}
+        {/* Profile Tab */}
         <NavLink
-          to="/transactions"
+          to="/profile"
           className={({ isActive }) =>
-            `mobile-tab-bar-item ${isActive || location.pathname.startsWith('/transactions') ? 'active' : ''}`
+            `mobile-tab-bar-item ${isActive || location.pathname.startsWith('/profile') ? 'active' : ''}`
           }
-          aria-label="Purchases"
+          aria-label="Profile"
         >
           <svg
             className="mobile-tab-bar-icon"
@@ -214,39 +186,22 @@ export function MobileTabBar() {
             fill="none"
             aria-hidden="true"
           >
+            <circle
+              cx="12"
+              cy="8"
+              r="4"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
             <path
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              d="M4 20c0-4 4-6 8-6s8 2 8 6"
               stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
-              strokeLinejoin="round"
             />
           </svg>
-          <span className="mobile-tab-bar-label">Purchases</span>
+          <span className="mobile-tab-bar-label">Profile</span>
         </NavLink>
-
-        {/* More Tab */}
-        <button
-          className={`mobile-tab-bar-item ${isMoreMenuActive || isMoreMenuOpen ? 'active' : ''}`}
-          onClick={handleMoreClick}
-          aria-expanded={isMoreMenuOpen}
-          aria-haspopup="menu"
-          aria-label="More options"
-        >
-          <svg
-            className="mobile-tab-bar-icon"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="5" r="1.5" fill="currentColor" />
-            <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-            <circle cx="12" cy="19" r="1.5" fill="currentColor" />
-          </svg>
-          <span className="mobile-tab-bar-label">More</span>
-        </button>
       </nav>
     </>
   );
