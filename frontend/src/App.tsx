@@ -18,6 +18,7 @@ const OrganizedSettings = lazy(() => import('./pages/OrganizedSettings').then(m 
 const APIKeys = lazy(() => import('./pages/APIKeys').then(m => ({ default: m.APIKeys })));
 const SkeletonDemo = lazy(() => import('./pages/SkeletonDemo').then(m => ({ default: m.SkeletonDemo })));
 const SidebarDemo = lazy(() => import('./pages/SidebarDemo').then(m => ({ default: m.SidebarDemo })));
+const ToastDemo = lazy(() => import('./pages/ToastDemo').then(m => ({ default: m.ToastDemo })));
 
 // Store pages
 const Stores = lazy(() => import('./pages/Stores').then(m => ({ default: m.Stores })));
@@ -47,6 +48,9 @@ const Budgets = lazy(() => import('./pages/Budgets').then(m => ({ default: m.Bud
 const BudgetDetail = lazy(() => import('./pages/BudgetDetail').then(m => ({ default: m.BudgetDetail })));
 const BudgetForm = lazy(() => import('./components/BudgetForm').then(m => ({ default: m.BudgetForm })));
 const BudgetGoals = lazy(() => import('./pages/BudgetGoals').then(m => ({ default: m.BudgetGoals })));
+
+// Bills pages
+const Bills = lazy(() => import('./pages/Bills').then(m => ({ default: m.Bills })));
 
 // Financial pages
 const FinancialConnections = lazy(() => import('./pages/FinancialConnections').then(m => ({ default: m.FinancialConnections })));
@@ -97,6 +101,7 @@ function App() {
         <Route path="/api-keys" element={<Suspense fallback={<PageLoadingSpinner />}><APIKeys /></Suspense>} />
         <Route path="/skeleton-demo" element={<Suspense fallback={<PageLoadingSpinner />}><SkeletonDemo /></Suspense>} />
         <Route path="/sidebar-demo" element={<Suspense fallback={<PageLoadingSpinner />}><SidebarDemo /></Suspense>} />
+        <Route path="/toast-demo" element={<Suspense fallback={<PageLoadingSpinner />}><ToastDemo /></Suspense>} />
         <Route path="/stores" element={<Suspense fallback={<PageLoadingSpinner />}><Stores /></Suspense>} />
         <Route path="/stores/new" element={<Suspense fallback={<PageLoadingSpinner />}><StoreForm /></Suspense>} />
         <Route path="/stores/:id" element={<Suspense fallback={<PageLoadingSpinner />}><StoreDetail /></Suspense>} />
@@ -119,6 +124,7 @@ function App() {
         <Route path="/budgets/:id" element={<Suspense fallback={<PageLoadingSpinner />}><BudgetDetail /></Suspense>} />
         <Route path="/budgets/:id/edit" element={<Suspense fallback={<PageLoadingSpinner />}><BudgetForm /></Suspense>} />
         <Route path="/budgets/:id/goals" element={<Suspense fallback={<PageLoadingSpinner />}><BudgetGoals /></Suspense>} />
+        <Route path="/bills" element={<Suspense fallback={<PageLoadingSpinner />}><Bills /></Suspense>} />
         <Route path="/connections" element={<Suspense fallback={<PageLoadingSpinner />}><FinancialConnections /></Suspense>} />
         <Route path="/financial-accounts" element={<Suspense fallback={<PageLoadingSpinner />}><FinancialAccounts /></Suspense>} />
         <Route path="/bank-transactions" element={<Suspense fallback={<PageLoadingSpinner />}><BankTransactions /></Suspense>} />

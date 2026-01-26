@@ -49,17 +49,25 @@ export {
   type TooltipPosition,
   type TooltipVariant,
 } from './Tooltip';
+// DEPRECATED: Context-based toast exports - use store-based toast instead
+// Kept for backwards compatibility only
 export {
   ToastProvider,
   useToast,
   type ToastProviderProps,
   type ToastVariant,
   type ToastOptions,
-  type ToastAction,
-  type Toast,
+  type ToastAction as ContextToastAction,
+  type Toast as ContextToast,
   type ToastContextValue,
   type UseToastReturn,
 } from './Toast';
+
+// RECOMMENDED: Store-based toast system
+// Usage: import { toast, ToastContainer } from '../components/ui';
+// toast.success('Success!'); toast.error('Error!'); toast.warning('Warning!'); toast.info('Info!');
+export { toast, useToastStore, type Toast, type ToastType, type ToastAction } from '../../stores/toast';
+export { ToastContainer } from '../Toast';
 export {
   SlideOutPanel,
   type SlideOutPanelProps,

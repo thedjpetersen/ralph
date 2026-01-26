@@ -48,6 +48,12 @@ const BudgetIcon = () => (
   </svg>
 );
 
+const BillsIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <path d="M4 2h12v16l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5-2 1.5V2zm3 4h6M7 9h6M7 12h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 const FinancialIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
     <path d="M4 17V8m4 9V3m4 14v-6m4 6V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -108,6 +114,7 @@ const navSections: NavSection[] = [
     label: 'Financial',
     items: [
       { label: 'Budget', path: '/budgets', icon: <BudgetIcon /> },
+      { label: 'Bills', path: '/bills', icon: <BillsIcon /> },
       { label: 'Accounts', path: '/financial-accounts', icon: <FinancialIcon /> },
       { label: 'Connections', path: '/connections', icon: <FinancialIcon /> },
     ],
