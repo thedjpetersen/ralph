@@ -1,23 +1,11 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, lazy, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
 import { MobileTabBar } from './MobileTabBar';
 import { ToastContainer } from '../Toast';
 import { KeyboardShortcutsHelp } from '../ui/KeyboardShortcutsHelp';
 import { ScreenReaderAnnouncer } from '../ScreenReaderAnnouncer';
-import { AIRewriteToolbar } from '../AIRewriteToolbar';
-import { GhostRewritePreview } from '../GhostRewritePreview';
-import { AIToneToolbar } from '../AIToneToolbar';
-import { GhostTonePreview } from '../GhostTonePreview';
-import { CommentHighlightOverlay } from '../CommentHighlightOverlay';
-import { DocumentExportDialog } from '../DocumentExportDialog';
-import { FormattingToolbar } from '../FormattingToolbar';
-import { FindReplaceDialog } from '../FindReplaceDialog';
-import { ParagraphFocusOverlay } from '../ParagraphFocusOverlay';
-import { TypewriterScrollManager } from '../TypewriterScrollManager';
-import { OnboardingTour } from '../OnboardingTour';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useFindReplaceStore } from '../../stores/findReplace';
 import { useParagraphFocusStore } from '../../stores/paragraphFocus';
@@ -26,6 +14,20 @@ import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
 import { useOnboarding } from '../../stores/onboarding';
 import './AppShell.css';
+
+// Lazy-load heavy feature components to reduce initial bundle size
+// These components use framer-motion and are not needed on initial render
+const AIRewriteToolbar = lazy(() => import('../AIRewriteToolbar').then(m => ({ default: m.AIRewriteToolbar })));
+const GhostRewritePreview = lazy(() => import('../GhostRewritePreview').then(m => ({ default: m.GhostRewritePreview })));
+const AIToneToolbar = lazy(() => import('../AIToneToolbar').then(m => ({ default: m.AIToneToolbar })));
+const GhostTonePreview = lazy(() => import('../GhostTonePreview').then(m => ({ default: m.GhostTonePreview })));
+const CommentHighlightOverlay = lazy(() => import('../CommentHighlightOverlay').then(m => ({ default: m.CommentHighlightOverlay })));
+const DocumentExportDialog = lazy(() => import('../DocumentExportDialog').then(m => ({ default: m.DocumentExportDialog })));
+const FormattingToolbar = lazy(() => import('../FormattingToolbar').then(m => ({ default: m.FormattingToolbar })));
+const FindReplaceDialog = lazy(() => import('../FindReplaceDialog').then(m => ({ default: m.FindReplaceDialog })));
+const ParagraphFocusOverlay = lazy(() => import('../ParagraphFocusOverlay').then(m => ({ default: m.ParagraphFocusOverlay })));
+const TypewriterScrollManager = lazy(() => import('../TypewriterScrollManager').then(m => ({ default: m.TypewriterScrollManager })));
+const OnboardingTour = lazy(() => import('../OnboardingTour').then(m => ({ default: m.OnboardingTour })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -208,9 +210,7 @@ export function AppShell({ children }: AppShellProps) {
           role="main"
           aria-label="Main content"
         >
-          <AnimatePresence mode="wait">
-            {children || <Outlet key={location.pathname} />}
-          </AnimatePresence>
+          {children || <Outlet key={location.pathname} />}
         </main>
       </div>
 
@@ -224,17 +224,21 @@ export function AppShell({ children }: AppShellProps) {
         onClose={() => setIsShortcutsHelpOpen(false)}
       />
       <ScreenReaderAnnouncer />
-      <GhostRewritePreview />
-      <AIRewriteToolbar />
-      <GhostTonePreview />
-      <AIToneToolbar />
-      <CommentHighlightOverlay />
-      <DocumentExportDialog />
-      <FormattingToolbar />
-      <FindReplaceDialog />
-      <ParagraphFocusOverlay />
-      <TypewriterScrollManager />
-      <OnboardingTour />
+
+      {/* Lazy-loaded feature overlays - loaded asynchronously to reduce initial bundle */}
+      <Suspense fallback={null}>
+        <GhostRewritePreview />
+        <AIRewriteToolbar />
+        <GhostTonePreview />
+        <AIToneToolbar />
+        <CommentHighlightOverlay />
+        <DocumentExportDialog />
+        <FormattingToolbar />
+        <FindReplaceDialog />
+        <ParagraphFocusOverlay />
+        <TypewriterScrollManager />
+        <OnboardingTour />
+      </Suspense>
     </div>
   );
 }

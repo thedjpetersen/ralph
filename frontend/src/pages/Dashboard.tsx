@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useBudgetsStore, type BudgetDetail } from '../stores/budgets';
 import { useAccountStore } from '../stores/account';
@@ -8,18 +8,29 @@ import { useFinancialStore } from '../stores/financial';
 import { PageTransition } from '../components/PageTransition';
 import { announce } from '../stores/announcer';
 import type { StatsData } from '../components/dashboard';
+// Eagerly load lightweight components for fast initial paint
 import {
   BudgetSummaryCard,
-  SpendingByCategory,
-  BudgetTrend,
   RecentTransactions,
   RecentReceipts,
   AccountBalances,
   QuickActions,
-  NetWorthChart,
   StatsCards,
 } from '../components/dashboard';
+// Lazy-load chart components (heavy recharts dependency) to improve FCP and TTI
+const SpendingByCategory = lazy(() => import('../components/dashboard/SpendingByCategory').then(m => ({ default: m.SpendingByCategory })));
+const BudgetTrend = lazy(() => import('../components/dashboard/BudgetTrend').then(m => ({ default: m.BudgetTrend })));
+const NetWorthChart = lazy(() => import('../components/dashboard/NetWorthChart').then(m => ({ default: m.NetWorthChart })));
 import './Dashboard.css';
+
+// Chart loading fallback for smooth UX
+function ChartLoadingFallback() {
+  return (
+    <div className="chart-loading-skeleton">
+      <div className="skeleton-chart" />
+    </div>
+  );
+}
 
 // Generate mock spending by category data from budget allocations
 function generateCategorySpending(budget: BudgetDetail | null) {
@@ -359,33 +370,40 @@ export function Dashboard() {
             />
           </div>
 
+          {/* Lazy-loaded chart components for improved initial load time */}
           <div className="dashboard-widget widget-category">
-            <SpendingByCategory
-              data={categorySpending}
-              currency={currentBudget?.currency}
-              isLoading={budgetsLoading && !currentBudget}
-              title="Budget Allocations"
-            />
+            <Suspense fallback={<ChartLoadingFallback />}>
+              <SpendingByCategory
+                data={categorySpending}
+                currency={currentBudget?.currency}
+                isLoading={budgetsLoading && !currentBudget}
+                title="Budget Allocations"
+              />
+            </Suspense>
           </div>
 
           <div className="dashboard-widget widget-networth">
-            <NetWorthChart
-              data={netWorthData}
-              currency={currentBudget?.currency || 'USD'}
-              isLoading={financialLoading}
-              title="Net Worth Trend"
-            />
+            <Suspense fallback={<ChartLoadingFallback />}>
+              <NetWorthChart
+                data={netWorthData}
+                currency={currentBudget?.currency || 'USD'}
+                isLoading={financialLoading}
+                title="Net Worth Trend"
+              />
+            </Suspense>
           </div>
 
           <div className="dashboard-widget widget-trend">
-            <BudgetTrend
-              data={trendData}
-              currency={currentBudget?.currency}
-              isLoading={budgetsLoading && !currentBudget}
-              title="Spending Trend"
-              showBudgetLine={true}
-              budgetAmount={currentBudget?.total_amount}
-            />
+            <Suspense fallback={<ChartLoadingFallback />}>
+              <BudgetTrend
+                data={trendData}
+                currency={currentBudget?.currency}
+                isLoading={budgetsLoading && !currentBudget}
+                title="Spending Trend"
+                showBudgetLine={true}
+                budgetAmount={currentBudget?.total_amount}
+              />
+            </Suspense>
           </div>
         </div>
 

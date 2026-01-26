@@ -304,6 +304,46 @@
   }
 }
 
+/* Chart loading skeleton for lazy-loaded chart components */
+.chart-loading-skeleton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background-color: #2a2a2a;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.chart-loading-skeleton .skeleton-chart {
+  width: 100%;
+  height: 180px;
+  background: linear-gradient(90deg, #333 25%, #3a3a3a 50%, #333 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .chart-loading-skeleton {
+    background-color: #f5f5f5;
+  }
+
+  .chart-loading-skeleton .skeleton-chart {
+    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+  }
+}
+
 @media (prefers-color-scheme: light) {
   .dashboard-subtitle {
     color: rgba(0, 0, 0, 0.6);
