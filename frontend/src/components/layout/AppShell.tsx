@@ -49,6 +49,7 @@ const AIVocabularySuggestionPopup = lazy(() => import('../AIVocabularySuggestion
 const AIReadabilityPanel = lazy(() => import('../AIReadabilityPanel').then(m => ({ default: m.AIReadabilityPanel })));
 const FocusModeIndicator = lazy(() => import('../FocusModeIndicator').then(m => ({ default: m.FocusModeIndicator })));
 const TableOfContentsSidebar = lazy(() => import('../TableOfContentsSidebar').then(m => ({ default: m.TableOfContentsSidebar })));
+const LinkPopover = lazy(() => import('../LinkPopover').then(m => ({ default: m.LinkPopover })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -398,6 +399,7 @@ export function AppShell({ children }: AppShellProps) {
         <AIReadabilityPanel />
         <FocusModeIndicator />
         <TableOfContentsSidebar />
+        <LinkPopover />
       </Suspense>
     </div>
   );

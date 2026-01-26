@@ -112,6 +112,27 @@
   word-wrap: break-word;
 }
 
+/* Link styling */
+.markdown-preview-link {
+  color: var(--color-accent, #646cff);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent-light, rgba(100, 108, 255, 0.3));
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  border-radius: 2px;
+}
+
+.markdown-preview-link:hover {
+  color: var(--color-accent-hover, #535bf2);
+  text-decoration-color: currentColor;
+}
+
+.markdown-preview-link:focus-visible {
+  outline: 2px solid var(--color-accent, #646cff);
+  outline-offset: 2px;
+}
+
 /* =========================
    Prism.js Syntax Highlighting Theme (Light)
    ========================= */

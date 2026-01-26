@@ -16,11 +16,11 @@ import './BlockDragDemo.css';
 
 const SAMPLE_CONTENT = `# Block Drag Demo
 
-This demo showcases **block-level drag-and-drop** functionality for reordering content.
+This demo showcases **block-level drag-and-drop** functionality for reordering content. Check out [the documentation](https://example.com/docs) for more details.
 
 ## How It Works
 
-Hover over any block to reveal the drag handle on the left side. Then drag the block to a new position.
+Hover over any block to reveal the drag handle on the left side. Then drag the block to a new position. See our [getting started guide](https://example.com/getting-started) for more information.
 
 ### Key Features
 

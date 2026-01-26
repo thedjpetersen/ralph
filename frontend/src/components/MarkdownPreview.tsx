@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from 'react';
+import { useMemo, useCallback, useState, type MouseEvent } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-typescript';
@@ -27,6 +27,7 @@ import 'prismjs/components/prism-graphql';
 import 'prismjs/components/prism-diff';
 import { parseCodeBlocks, normalizeLanguage, SUPPORTED_LANGUAGES } from '../stores/codeBlock';
 import { toast } from '../stores/toast';
+import { useLinkEditStore } from '../stores/linkEdit';
 import './MarkdownPreview.css';
 
 interface MarkdownPreviewProps {
@@ -151,9 +152,10 @@ function escapeHtml(text: string): string {
 }
 
 interface ParsedContent {
-  type: 'text' | 'code' | 'inline-code';
+  type: 'text' | 'code' | 'inline-code' | 'link';
   content: string;
   language?: string;
+  url?: string;
 }
 
 function parseMarkdownContent(text: string): ParsedContent[] {
@@ -195,12 +197,13 @@ function parseMarkdownContent(text: string): ParsedContent[] {
 
 function parseInlineCode(text: string): ParsedContent[] {
   const result: ParsedContent[] = [];
-  const inlineCodeRegex = /`([^`]+)`/g;
+  // Match inline code: `code` or markdown links: [text](url)
+  const combinedRegex = /`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)/g;
   let lastIndex = 0;
   let match;
 
-  while ((match = inlineCodeRegex.exec(text)) !== null) {
-    // Add text before this inline code
+  while ((match = combinedRegex.exec(text)) !== null) {
+    // Add text before this match
     if (match.index > lastIndex) {
       result.push({
         type: 'text',
@@ -208,11 +211,20 @@ function parseInlineCode(text: string): ParsedContent[] {
       });
     }
 
-    // Add the inline code
-    result.push({
-      type: 'inline-code',
-      content: match[1],
-    });
+    if (match[1] !== undefined) {
+      // Inline code match
+      result.push({
+        type: 'inline-code',
+        content: match[1],
+      });
+    } else if (match[2] !== undefined && match[3] !== undefined) {
+      // Link match: [text](url)
+      result.push({
+        type: 'link',
+        content: match[2], // Link text
+        url: match[3],     // Link URL
+      });
+    }
 
     lastIndex = match.index + match[0].length;
   }
@@ -230,6 +242,30 @@ function parseInlineCode(text: string): ParsedContent[] {
 
 export function MarkdownPreview({ content, className = '' }: MarkdownPreviewProps) {
   const parsedContent = useMemo(() => parseMarkdownContent(content), [content]);
+  const { openPopover } = useLinkEditStore();
+
+  // Handle link click to open popover
+  const handleLinkClick = useCallback(
+    (e: MouseEvent<HTMLAnchorElement>, url: string, text: string) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const target = e.currentTarget;
+      const rect = target.getBoundingClientRect();
+
+      openPopover({
+        url,
+        text,
+        position: {
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        },
+      });
+    },
+    [openPopover]
+  );
 
   return (
     <div className={`markdown-preview ${className}`}>
@@ -243,6 +279,38 @@ export function MarkdownPreview({ content, className = '' }: MarkdownPreviewProp
             <code key={index} className="markdown-preview-inline-code">
               {item.content}
             </code>
+          );
+        }
+
+        if (item.type === 'link' && item.url) {
+          return (
+            <a
+              key={index}
+              href={item.url}
+              className="markdown-preview-link"
+              onClick={(e) => handleLinkClick(e, item.url!, item.content)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  const target = e.currentTarget;
+                  const rect = target.getBoundingClientRect();
+                  openPopover({
+                    url: item.url!,
+                    text: item.content,
+                    position: {
+                      top: rect.top,
+                      left: rect.left,
+                      width: rect.width,
+                      height: rect.height,
+                    },
+                  });
+                }
+              }}
+            >
+              {item.content}
+            </a>
           );
         }
 
