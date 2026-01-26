@@ -8,6 +8,7 @@ import { useAISummaryStore } from '../stores/aiSummary';
 import { useAIOutlineStore } from '../stores/aiOutline';
 import { useAIToneAnalyzerStore } from '../stores/aiToneAnalyzer';
 import { useAIVocabularyEnhancerStore } from '../stores/aiVocabularyEnhancer';
+import { useAIReadabilityStore } from '../stores/aiReadability';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
 import './CommandPalette.css';
@@ -61,6 +62,7 @@ function useCommands(): Command[] {
   const { openOutlineDialog } = useAIOutlineStore();
   const { openPanel: openToneAnalyzer } = useAIToneAnalyzerStore();
   const { openPanel: openVocabularyEnhancer } = useAIVocabularyEnhancerStore();
+  const { openPanel: openReadability } = useAIReadabilityStore();
   const { closePalette } = useCommandPaletteStore();
 
   return useMemo(() => {
@@ -310,6 +312,15 @@ Also want to cover communication protocols, stakeholder management, and risk ass
         keywords: ['vocabulary', 'words', 'synonyms', 'thesaurus', 'enhance', 'improve', 'writing', 'weak', 'overused'],
         action: () => { openVocabularyEnhancer(); closePalette(); },
       },
+      {
+        id: 'ai-readability-scorer',
+        label: 'Score Readability',
+        category: 'ai',
+        description: 'Analyze readability, grade level, and get suggestions for improvements',
+        shortcut: '⌥R',
+        keywords: ['readability', 'grade', 'level', 'flesch', 'kincaid', 'score', 'complexity', 'audience', 'simplify'],
+        action: () => { openReadability(); closePalette(); },
+      },
 
       // Settings
       {
@@ -355,7 +366,7 @@ Also want to cover communication protocols, stakeholder management, and risk ass
     ];
 
     return commands;
-  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, openToneAnalyzer, openVocabularyEnhancer, closePalette]);
+  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, openToneAnalyzer, openVocabularyEnhancer, openReadability, closePalette]);
 }
 
 // Highlight text component

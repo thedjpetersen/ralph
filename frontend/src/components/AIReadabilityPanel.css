@@ -1,0 +1,595 @@
+/**
+ * AI Readability Panel Styles
+ */
+
+/* CSS Variables for theming */
+.ai-readability-panel {
+  --readability-panel-bg: var(--color-surface, #ffffff);
+  --readability-panel-border: var(--color-border, #e5e7eb);
+  --readability-panel-text: var(--color-text, #1f2937);
+  --readability-panel-text-secondary: var(--color-text-secondary, #6b7280);
+  --readability-panel-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ai-readability-panel {
+    --readability-panel-bg: var(--color-surface-dark, #1f2937);
+    --readability-panel-border: var(--color-border-dark, #374151);
+    --readability-panel-text: var(--color-text-dark, #f9fafb);
+    --readability-panel-text-secondary: var(--color-text-secondary-dark, #9ca3af);
+  }
+}
+
+/* Panel container */
+.ai-readability-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 340px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: var(--readability-panel-bg);
+  border: 1px solid var(--readability-panel-border);
+  border-radius: 12px;
+  box-shadow: var(--readability-panel-shadow);
+  z-index: 1000;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Scrollbar styling */
+.ai-readability-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-readability-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ai-readability-panel::-webkit-scrollbar-thumb {
+  background: var(--readability-panel-border);
+  border-radius: 3px;
+}
+
+/* Header */
+.readability-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--readability-panel-border);
+}
+
+.readability-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.readability-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-primary, #3b82f6);
+}
+
+.readability-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--readability-panel-text);
+}
+
+.readability-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--readability-panel-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.readability-close:hover {
+  background: var(--readability-panel-border);
+  color: var(--readability-panel-text);
+}
+
+.readability-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Error state */
+.readability-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.readability-error button {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.readability-error button:hover {
+  background: #fecaca;
+}
+
+/* Empty state */
+.readability-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--readability-panel-text-secondary);
+}
+
+.readability-empty svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.readability-empty p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: var(--readability-panel-text);
+}
+
+.readability-hint {
+  font-size: 12px;
+  color: var(--readability-panel-text-secondary);
+}
+
+/* Grade Level Badge */
+.readability-grade-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--color-primary, #3b82f6) 0%, #6366f1 100%);
+  border-radius: 10px;
+  color: white;
+}
+
+.readability-grade-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.readability-grade-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.readability-grade-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.readability-grade-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.readability-grade-match {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Score Gauge */
+.readability-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.readability-gauge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.readability-gauge-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--readability-panel-text);
+}
+
+.readability-gauge-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.readability-gauge-track {
+  position: relative;
+  height: 8px;
+  background: var(--readability-panel-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.readability-gauge-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.readability-gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--readability-panel-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Stats row */
+.readability-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.readability-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 8px;
+  background: var(--readability-panel-border);
+  border-radius: 8px;
+}
+
+.readability-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--readability-panel-text);
+}
+
+.readability-stat-label {
+  font-size: 10px;
+  color: var(--readability-panel-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+/* Score Details */
+.readability-scores-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.readability-section-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--readability-panel-text);
+}
+
+.readability-section-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--readability-panel-text-secondary);
+}
+
+.readability-score-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.readability-score-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--readability-panel-border);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.readability-score-item span:first-child {
+  color: var(--readability-panel-text-secondary);
+}
+
+.readability-score-item span:last-child {
+  font-weight: 600;
+  color: var(--readability-panel-text);
+}
+
+.readability-score-item.highlight {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.readability-score-item.highlight span:last-child {
+  color: var(--color-primary, #3b82f6);
+}
+
+/* Audience Selector */
+.readability-audience-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.readability-audience-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid var(--readability-panel-border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--readability-panel-text);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.readability-audience-toggle:hover {
+  background: var(--readability-panel-border);
+}
+
+.readability-audience-toggle svg:first-child {
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary, #3b82f6);
+}
+
+.readability-chevron {
+  width: 16px;
+  height: 16px;
+  margin-left: auto;
+  color: var(--readability-panel-text-secondary);
+  transition: transform 0.2s;
+}
+
+.readability-chevron.open {
+  transform: rotate(180deg);
+}
+
+.readability-audience-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: var(--readability-panel-border);
+  border-radius: 8px;
+}
+
+.readability-audience-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--readability-panel-bg);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.readability-audience-option:hover {
+  border-color: var(--color-primary, #3b82f6);
+}
+
+.readability-audience-option.active {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.readability-audience-option-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--readability-panel-text);
+}
+
+.readability-audience-option-desc {
+  font-size: 11px;
+  color: var(--readability-panel-text-secondary);
+}
+
+/* Suggestions Section */
+.readability-suggestions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.readability-suggestion {
+  padding: 10px 12px;
+  background: var(--readability-panel-border);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-warning, #f59e0b);
+}
+
+.readability-suggestion-priority {
+  display: inline-block;
+  padding: 2px 6px;
+  margin-bottom: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--readability-panel-text-secondary);
+}
+
+.readability-suggestion-message {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--readability-panel-text);
+}
+
+/* Complex Sentences Section */
+.readability-complex-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.readability-sentences-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.readability-sentences-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.readability-sentences-list::-webkit-scrollbar-thumb {
+  background: var(--readability-panel-border);
+  border-radius: 2px;
+}
+
+.readability-sentence-card {
+  padding: 10px 12px;
+  background: var(--readability-panel-border);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.readability-sentence-card:hover {
+  border-color: var(--color-warning, #f59e0b);
+}
+
+.readability-sentence-card.selected {
+  border-color: var(--color-warning, #f59e0b);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.readability-sentence-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.readability-sentence-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(245, 158, 11, 0.2);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-warning, #f59e0b);
+}
+
+.readability-sentence-words {
+  font-size: 11px;
+  color: var(--readability-panel-text-secondary);
+}
+
+.readability-sentence-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--readability-panel-text);
+}
+
+.readability-sentence-suggestion {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--readability-panel-border);
+}
+
+.readability-sentence-suggestion svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: var(--color-info, #3b82f6);
+}
+
+.readability-sentence-suggestion span {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-info, #3b82f6);
+  font-style: italic;
+}
+
+/* Footer */
+.readability-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--readability-panel-border);
+  font-size: 11px;
+  color: var(--readability-panel-text-secondary);
+}
+
+.readability-footer kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 6px;
+  margin-right: 6px;
+  background: var(--readability-panel-bg);
+  border: 1px solid var(--readability-panel-border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  box-shadow: 0 1px 0 var(--readability-panel-border);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ai-readability-panel {
+    right: 10px;
+    left: 10px;
+    width: auto;
+    top: auto;
+    bottom: 70px;
+    max-height: 50vh;
+  }
+}

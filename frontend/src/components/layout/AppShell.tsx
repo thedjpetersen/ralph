@@ -19,6 +19,7 @@ import { useCommandPaletteStore } from '../../stores/commandPalette';
 import { useQuickSwitcherStore } from '../../stores/quickSwitcher';
 import { useAIToneAnalyzerStore } from '../../stores/aiToneAnalyzer';
 import { useAIVocabularyEnhancerStore } from '../../stores/aiVocabularyEnhancer';
+import { useAIReadabilityStore } from '../../stores/aiReadability';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -39,6 +40,7 @@ const AIOutlineDialog = lazy(() => import('../AIOutlineDialog').then(m => ({ def
 const AIToneAnalyzerPanel = lazy(() => import('../AIToneAnalyzerPanel').then(m => ({ default: m.AIToneAnalyzerPanel })));
 const AIVocabularyEnhancerPanel = lazy(() => import('../AIVocabularyEnhancerPanel').then(m => ({ default: m.AIVocabularyEnhancerPanel })));
 const AIVocabularySuggestionPopup = lazy(() => import('../AIVocabularySuggestionPopup').then(m => ({ default: m.AIVocabularySuggestionPopup })));
+const AIReadabilityPanel = lazy(() => import('../AIReadabilityPanel').then(m => ({ default: m.AIReadabilityPanel })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -56,6 +58,7 @@ export function AppShell({ children }: AppShellProps) {
   const { toggleSwitcher: toggleQuickSwitcher, closeSwitcher: closeQuickSwitcher } = useQuickSwitcherStore();
   const { togglePanel: toggleToneAnalyzer, closePanel: closeToneAnalyzer } = useAIToneAnalyzerStore();
   const { togglePanel: toggleVocabularyEnhancer, closePanel: closeVocabularyEnhancer } = useAIVocabularyEnhancerStore();
+  const { togglePanel: toggleReadability, closePanel: closeReadability } = useAIReadabilityStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -158,6 +161,7 @@ export function AppShell({ children }: AppShellProps) {
         closeQuickSwitcher();
         closeToneAnalyzer();
         closeVocabularyEnhancer();
+        closeReadability();
       },
       description: 'Close menus',
       allowInInput: true,
@@ -217,6 +221,13 @@ export function AppShell({ children }: AppShellProps) {
       altKey: true,
       action: toggleVocabularyEnhancer,
       description: 'Toggle vocabulary enhancer panel',
+      allowInInput: true,
+    },
+    {
+      key: 'r',
+      altKey: true,
+      action: toggleReadability,
+      description: 'Toggle readability scorer panel',
       allowInInput: true,
     },
   ]);
@@ -306,6 +317,7 @@ export function AppShell({ children }: AppShellProps) {
         <AIToneAnalyzerPanel />
         <AIVocabularyEnhancerPanel />
         <AIVocabularySuggestionPopup />
+        <AIReadabilityPanel />
       </Suspense>
     </div>
   );
