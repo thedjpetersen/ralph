@@ -4,6 +4,7 @@ import { useTransactionsStore, type Transaction, type TransactionStatus, type Tr
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
 import { LineItemList } from '../components/LineItemList';
+import { AICommentCard } from '../components/AICommentCard';
 import { SettingsFormSkeleton } from '../components/skeletons';
 import './TransactionDetail.css';
 
@@ -326,6 +327,22 @@ export function TransactionDetail() {
               transactionId={transaction.id}
               lineItems={lineItems}
               currency={transaction.currency}
+            />
+          </div>
+
+          <div className="detail-section">
+            <h2>AI Analysis</h2>
+            <AICommentCard
+              entityType="transaction"
+              entityId={transaction.id}
+              context={{
+                merchant_name: transaction.merchant_name,
+                amount: transaction.amount,
+                currency: transaction.currency,
+                type: transaction.type,
+                category: transaction.merchant_category,
+                transaction_date: transaction.transaction_date,
+              }}
             />
           </div>
 
