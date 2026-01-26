@@ -20,6 +20,7 @@ import { useQuickSwitcherStore } from '../../stores/quickSwitcher';
 import { useAIToneAnalyzerStore } from '../../stores/aiToneAnalyzer';
 import { useAIVocabularyEnhancerStore } from '../../stores/aiVocabularyEnhancer';
 import { useAIReadabilityStore } from '../../stores/aiReadability';
+import { useCommentNavigation } from '../../stores/commentHighlight';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -59,6 +60,7 @@ export function AppShell({ children }: AppShellProps) {
   const { togglePanel: toggleToneAnalyzer, closePanel: closeToneAnalyzer } = useAIToneAnalyzerStore();
   const { togglePanel: toggleVocabularyEnhancer, closePanel: closeVocabularyEnhancer } = useAIVocabularyEnhancerStore();
   const { togglePanel: toggleReadability, closePanel: closeReadability } = useAIReadabilityStore();
+  const { navigateToNextComment, navigateToPreviousComment } = useCommentNavigation();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -228,6 +230,34 @@ export function AppShell({ children }: AppShellProps) {
       altKey: true,
       action: toggleReadability,
       description: 'Toggle readability scorer panel',
+      allowInInput: true,
+    },
+    {
+      key: ']',
+      metaKey: true,
+      action: navigateToNextComment,
+      description: 'Go to next comment',
+      allowInInput: true,
+    },
+    {
+      key: ']',
+      ctrlKey: true,
+      action: navigateToNextComment,
+      description: 'Go to next comment',
+      allowInInput: true,
+    },
+    {
+      key: '[',
+      metaKey: true,
+      action: navigateToPreviousComment,
+      description: 'Go to previous comment',
+      allowInInput: true,
+    },
+    {
+      key: '[',
+      ctrlKey: true,
+      action: navigateToPreviousComment,
+      description: 'Go to previous comment',
       allowInInput: true,
     },
   ]);

@@ -36,6 +36,13 @@ const DEFAULT_SHORTCUTS: ShortcutGroup[] = [
     ],
   },
   {
+    title: 'Comments',
+    shortcuts: [
+      { keys: ['⌘', ']'], description: 'Go to next comment' },
+      { keys: ['⌘', '['], description: 'Go to previous comment' },
+    ],
+  },
+  {
     title: 'Menus & Dropdowns',
     shortcuts: [
       { keys: ['↓'], description: 'Open menu / move to next item' },
