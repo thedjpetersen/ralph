@@ -23,6 +23,7 @@ import { useAIReadabilityStore } from '../../stores/aiReadability';
 import { useCommentNavigation } from '../../stores/commentHighlight';
 import { useDocumentFoldersStore } from '../../stores/documentFolders';
 import { useStarredDocumentsStore } from '../../stores/starredDocuments';
+import { useTableOfContentsStore } from '../../stores/tableOfContents';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -47,6 +48,7 @@ const AIVocabularyEnhancerPanel = lazy(() => import('../AIVocabularyEnhancerPane
 const AIVocabularySuggestionPopup = lazy(() => import('../AIVocabularySuggestionPopup').then(m => ({ default: m.AIVocabularySuggestionPopup })));
 const AIReadabilityPanel = lazy(() => import('../AIReadabilityPanel').then(m => ({ default: m.AIReadabilityPanel })));
 const FocusModeIndicator = lazy(() => import('../FocusModeIndicator').then(m => ({ default: m.FocusModeIndicator })));
+const TableOfContentsSidebar = lazy(() => import('../TableOfContentsSidebar').then(m => ({ default: m.TableOfContentsSidebar })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -69,6 +71,7 @@ export function AppShell({ children }: AppShellProps) {
   const { navigateToNextComment, navigateToPreviousComment } = useCommentNavigation();
   const { selectedFolderId, folders } = useDocumentFoldersStore();
   const { toggleStar } = useStarredDocumentsStore();
+  const { togglePanel: toggleTableOfContents, closePanel: closeTableOfContents } = useTableOfContentsStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -182,6 +185,7 @@ export function AppShell({ children }: AppShellProps) {
         closeToneAnalyzer();
         closeVocabularyEnhancer();
         closeReadability();
+        closeTableOfContents();
       },
       description: 'Close menus',
       allowInInput: true,
@@ -248,6 +252,13 @@ export function AppShell({ children }: AppShellProps) {
       altKey: true,
       action: toggleReadability,
       description: 'Toggle readability scorer panel',
+      allowInInput: true,
+    },
+    {
+      key: 'i',
+      altKey: true,
+      action: toggleTableOfContents,
+      description: 'Toggle table of contents',
       allowInInput: true,
     },
     {
@@ -386,6 +397,7 @@ export function AppShell({ children }: AppShellProps) {
         <AIVocabularySuggestionPopup />
         <AIReadabilityPanel />
         <FocusModeIndicator />
+        <TableOfContentsSidebar />
       </Suspense>
     </div>
   );
