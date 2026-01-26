@@ -60,3 +60,9 @@ export {
   type ToastContextValue,
   type UseToastReturn,
 } from './Toast';
+export {
+  SlideOutPanel,
+  type SlideOutPanelProps,
+  type SlideOutPanelPosition,
+  type SlideOutPanelSize,
+} from './SlideOutPanel';
