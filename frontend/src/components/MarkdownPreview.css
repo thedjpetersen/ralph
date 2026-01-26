@@ -112,6 +112,44 @@
   word-wrap: break-word;
 }
 
+/* Highlight styling */
+.markdown-preview-highlight {
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+/* Highlight color variants */
+.markdown-preview-highlight-yellow {
+  background-color: #FEF08A;
+  color: #854d0e;
+}
+
+.markdown-preview-highlight-green {
+  background-color: #BBF7D0;
+  color: #166534;
+}
+
+.markdown-preview-highlight-blue {
+  background-color: #BFDBFE;
+  color: #1e40af;
+}
+
+.markdown-preview-highlight-purple {
+  background-color: #DDD6FE;
+  color: #5b21b6;
+}
+
+.markdown-preview-highlight-pink {
+  background-color: #FBCFE8;
+  color: #9d174d;
+}
+
+.markdown-preview-highlight-orange {
+  background-color: #FED7AA;
+  color: #9a3412;
+}
+
 /* Link styling */
 .markdown-preview-link {
   color: var(--color-accent, #646cff);
@@ -333,6 +371,37 @@
   .markdown-preview .token.inserted {
     background: rgba(34, 197, 94, 0.15);
     color: #4ade80;
+  }
+
+  /* Dark mode highlight colors - slightly muted for dark backgrounds */
+  .markdown-preview-highlight-yellow {
+    background-color: rgba(254, 240, 138, 0.3);
+    color: #fef08a;
+  }
+
+  .markdown-preview-highlight-green {
+    background-color: rgba(187, 247, 208, 0.3);
+    color: #bbf7d0;
+  }
+
+  .markdown-preview-highlight-blue {
+    background-color: rgba(191, 219, 254, 0.3);
+    color: #bfdbfe;
+  }
+
+  .markdown-preview-highlight-purple {
+    background-color: rgba(221, 214, 254, 0.3);
+    color: #ddd6fe;
+  }
+
+  .markdown-preview-highlight-pink {
+    background-color: rgba(251, 207, 232, 0.3);
+    color: #fbcfe8;
+  }
+
+  .markdown-preview-highlight-orange {
+    background-color: rgba(254, 215, 170, 0.3);
+    color: #fed7aa;
   }
 }
 

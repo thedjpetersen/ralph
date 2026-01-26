@@ -7,6 +7,8 @@ import {
   type FormatAction,
 } from '../stores/formattingToolbar';
 import { useAICustomPromptStore } from '../stores/aiCustomPrompt';
+import { useTextHighlightStore } from '../stores/textHighlight';
+import { HighlightColorPicker } from './HighlightColorPicker';
 import './FormattingToolbar.css';
 
 function useReducedMotion(): boolean {
@@ -34,6 +36,7 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
   const { isActive, toolbarPosition, selectedText, selectionStart, selectionEnd, targetElement } = useFormattingToolbar();
   const { showToolbar, hideToolbar, applyFormat, undo } = useFormattingToolbarStore();
   const { showToolbar: showAIPrompt } = useAICustomPromptStore();
+  const { openColorPicker } = useTextHighlightStore();
 
   const toolbarRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -214,9 +217,21 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
     }
   };
 
-  if (!isActive || !toolbarPosition) return null;
+  const handleHighlight = () => {
+    if (selectedText && targetElement && toolbarPosition) {
+      hideToolbar();
+      openColorPicker(selectedText, selectionStart, selectionEnd, targetElement, toolbarPosition);
+    }
+  };
+
+  if (!isActive || !toolbarPosition) {
+    // Still render the color picker even when main toolbar is hidden
+    return <HighlightColorPicker prefersReducedMotion={prefersReducedMotion} />;
+  }
 
   return (
+    <>
+    <HighlightColorPicker prefersReducedMotion={prefersReducedMotion} />
     <AnimatePresence>
       <motion.div
         ref={toolbarRef}
@@ -245,6 +260,17 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
               <span className="formatting-toolbar-btn-icon">{action.icon}</span>
             </button>
           ))}
+          <button
+            type="button"
+            className="formatting-toolbar-btn formatting-toolbar-btn-highlight"
+            onClick={handleHighlight}
+            title="Highlight"
+            aria-label="Highlight text with color"
+          >
+            <svg className="formatting-toolbar-highlight-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+            </svg>
+          </button>
         </div>
         <div className="formatting-toolbar-divider" aria-hidden="true" />
         <button
@@ -278,6 +304,7 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
         </button>
       </motion.div>
     </AnimatePresence>
+    </>
   );
 }
 

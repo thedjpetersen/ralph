@@ -28,6 +28,7 @@ import 'prismjs/components/prism-diff';
 import { parseCodeBlocks, normalizeLanguage, SUPPORTED_LANGUAGES } from '../stores/codeBlock';
 import { toast } from '../stores/toast';
 import { useLinkEditStore } from '../stores/linkEdit';
+import { HIGHLIGHT_COLORS, type HighlightColorId } from '../stores/textHighlight';
 import './MarkdownPreview.css';
 
 interface MarkdownPreviewProps {
@@ -152,10 +153,11 @@ function escapeHtml(text: string): string {
 }
 
 interface ParsedContent {
-  type: 'text' | 'code' | 'inline-code' | 'link';
+  type: 'text' | 'code' | 'inline-code' | 'link' | 'highlight';
   content: string;
   language?: string;
   url?: string;
+  highlightColor?: HighlightColorId;
 }
 
 function parseMarkdownContent(text: string): ParsedContent[] {
@@ -197,8 +199,8 @@ function parseMarkdownContent(text: string): ParsedContent[] {
 
 function parseInlineCode(text: string): ParsedContent[] {
   const result: ParsedContent[] = [];
-  // Match inline code: `code` or markdown links: [text](url)
-  const combinedRegex = /`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)/g;
+  // Match inline code: `code`, markdown links: [text](url), or highlights: ==color:text==
+  const combinedRegex = /`([^`]+)`|\[([^\]]+)\]\(([^)]+)\)|==(\w+):([^=]+)==/g;
   let lastIndex = 0;
   let match;
 
@@ -224,6 +226,23 @@ function parseInlineCode(text: string): ParsedContent[] {
         content: match[2], // Link text
         url: match[3],     // Link URL
       });
+    } else if (match[4] !== undefined && match[5] !== undefined) {
+      // Highlight match: ==color:text==
+      const colorId = match[4] as HighlightColorId;
+      const validColor = HIGHLIGHT_COLORS.find((c) => c.id === colorId);
+      if (validColor) {
+        result.push({
+          type: 'highlight',
+          content: match[5], // Highlighted text
+          highlightColor: colorId,
+        });
+      } else {
+        // Invalid color, treat as plain text
+        result.push({
+          type: 'text',
+          content: match[0],
+        });
+      }
     }
 
     lastIndex = match.index + match[0].length;
@@ -311,6 +330,22 @@ export function MarkdownPreview({ content, className = '' }: MarkdownPreviewProp
             >
               {item.content}
             </a>
+          );
+        }
+
+        if (item.type === 'highlight' && item.highlightColor) {
+          const colorConfig = HIGHLIGHT_COLORS.find((c) => c.id === item.highlightColor);
+          return (
+            <mark
+              key={index}
+              className={`markdown-preview-highlight markdown-preview-highlight-${item.highlightColor}`}
+              style={{
+                backgroundColor: colorConfig?.hex,
+                color: colorConfig?.textColor,
+              }}
+            >
+              {item.content}
+            </mark>
           );
         }
 

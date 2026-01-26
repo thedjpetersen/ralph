@@ -108,6 +108,22 @@
   font-size: 0.75rem;
 }
 
+/* Highlight button styling */
+.formatting-toolbar-btn-highlight {
+  background: linear-gradient(135deg, rgba(254, 240, 138, 0.3) 0%, transparent 100%);
+}
+
+.formatting-toolbar-btn-highlight:hover {
+  background: linear-gradient(135deg, rgba(254, 240, 138, 0.5) 0%, rgba(254, 240, 138, 0.2) 100%);
+  color: var(--color-yellow-600, #ca8a04);
+}
+
+.formatting-toolbar-highlight-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--color-yellow-500, #eab308);
+}
+
 /* AI button styling */
 .formatting-toolbar-btn-ai {
   background: linear-gradient(135deg, var(--color-purple-50, #faf5ff) 0%, transparent 100%);
@@ -228,6 +244,19 @@
 
   .formatting-toolbar-ai-icon {
     color: var(--color-purple-400, #c084fc);
+  }
+
+  .formatting-toolbar-btn-highlight {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, transparent 100%);
+  }
+
+  .formatting-toolbar-btn-highlight:hover {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(234, 179, 8, 0.1) 100%);
+    color: var(--color-yellow-400, #facc15);
+  }
+
+  .formatting-toolbar-highlight-icon {
+    color: var(--color-yellow-400, #facc15);
   }
 }
 
