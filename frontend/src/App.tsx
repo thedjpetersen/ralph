@@ -85,6 +85,7 @@ const EmailSettings = lazy(() => import('./pages/EmailSettings').then(m => ({ de
 
 // Admin pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const QueueManagement = lazy(() => import('./pages/admin/QueueManagement').then(m => ({ default: m.QueueManagement })));
 
 // Error pages
 const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
@@ -160,6 +161,7 @@ function App() {
 
         {/* Admin routes - protected by RequireRole inside component */}
         <Route path="/admin" element={<Suspense fallback={<PageLoadingSpinner />}><AdminDashboard /></Suspense>} />
+        <Route path="/admin/queue" element={<Suspense fallback={<PageLoadingSpinner />}><QueueManagement /></Suspense>} />
 
         {/* Catch-all route for 404 */}
         <Route path="*" element={<Suspense fallback={<PageLoadingSpinner />}><NotFound /></Suspense>} />
