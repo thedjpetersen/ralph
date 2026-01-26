@@ -14,6 +14,7 @@ import { GhostTonePreview } from './GhostTonePreview';
 import { CommentHighlightOverlay } from './CommentHighlightOverlay';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { MobileTabBar } from './layout/MobileTabBar';
+import { OptimisticSyncIndicator } from './OptimisticSyncIndicator';
 import './Layout.css';
 
 export function Layout() {
@@ -582,6 +583,7 @@ export function Layout() {
       <AIToneToolbar />
       <CommentHighlightOverlay />
       <MobileTabBar />
+      <OptimisticSyncIndicator position="bottom-right" />
     </div>
   );
 }

@@ -1,0 +1,167 @@
+/* Optimistic Sync Indicator - Shows during server communication */
+
+.optimistic-sync-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--surface-secondary, #f3f4f6);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Fixed positioning variants */
+.optimistic-sync-indicator.top-right {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+}
+
+.optimistic-sync-indicator.bottom-right {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+}
+
+.optimistic-sync-indicator.top-left {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+}
+
+.optimistic-sync-indicator.bottom-left {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+}
+
+.optimistic-sync-indicator.inline {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Content wrapper */
+.sync-indicator-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sync-indicator-content.syncing {
+  color: var(--primary-color, #3b82f6);
+}
+
+.sync-indicator-content.error {
+  color: var(--error-color, #ef4444);
+  background: var(--error-surface, #fef2f2);
+  border-color: var(--error-border, #fecaca);
+}
+
+/* Spinner animation */
+.sync-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+
+.sync-spinner svg {
+  width: 14px;
+  height: 14px;
+  animation: spin 1s linear infinite;
+}
+
+.sync-spinner.no-animation svg {
+  animation: none;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error icon */
+.sync-error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+
+.sync-error-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Label */
+.sync-label {
+  white-space: nowrap;
+}
+
+/* Minimal dot indicator */
+.optimistic-sync-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary-color, #3b82f6);
+}
+
+.optimistic-sync-dot.syncing {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.optimistic-sync-dot.error {
+  background: var(--error-color, #ef4444);
+}
+
+.optimistic-sync-dot.no-animation {
+  animation: none;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .optimistic-sync-indicator {
+    background: var(--surface-secondary-dark, #374151);
+    border-color: var(--border-color-dark, #4b5563);
+    color: var(--text-secondary-dark, #9ca3af);
+  }
+
+  .sync-indicator-content.error {
+    background: var(--error-surface-dark, #450a0a);
+    border-color: var(--error-border-dark, #7f1d1d);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .sync-spinner svg {
+    animation: none;
+  }
+
+  .optimistic-sync-dot.syncing {
+    animation: none;
+  }
+}

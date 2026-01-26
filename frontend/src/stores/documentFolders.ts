@@ -5,6 +5,8 @@ import {
   type CreateDocumentFolderRequest,
   type UpdateDocumentFolderRequest,
 } from '../api/client';
+import { executeOptimisticMutation, generateMutationId } from './optimistic';
+import { toast } from './toast';
 
 export interface FolderTreeNode extends DocumentFolder {
   children: FolderTreeNode[];
@@ -35,12 +37,12 @@ interface DocumentFoldersState {
   setDraggedDocumentId: (documentId: string | null) => void;
   setDropTargetFolderId: (folderId: string | null) => void;
 
-  // API actions
+  // API actions (with optimistic updates)
   fetchFolders: (accountId: string) => Promise<void>;
-  createFolder: (accountId: string, data: CreateDocumentFolderRequest) => Promise<DocumentFolder>;
-  updateFolder: (accountId: string, folderId: string, data: UpdateDocumentFolderRequest) => Promise<DocumentFolder>;
-  deleteFolder: (accountId: string, folderId: string) => Promise<void>;
-  moveDocumentToFolder: (accountId: string, documentId: string, folderId: string | null) => Promise<void>;
+  createFolder: (accountId: string, data: CreateDocumentFolderRequest) => Promise<DocumentFolder | null>;
+  updateFolder: (accountId: string, folderId: string, data: UpdateDocumentFolderRequest) => Promise<DocumentFolder | null>;
+  deleteFolder: (accountId: string, folderId: string) => Promise<boolean>;
+  moveDocumentToFolder: (accountId: string, documentId: string, folderId: string | null) => Promise<boolean>;
   moveFolderToParent: (accountId: string, folderId: string, parentId: string | null) => Promise<DocumentFolder | null>;
 }
 
@@ -127,6 +129,11 @@ function isDescendant(folders: DocumentFolder[], folderId: string, potentialAnce
   return isDescendant(folders, folder.parent_id, potentialAncestorId);
 }
 
+// Helper to generate optimistic folder ID
+function generateOptimisticFolderId(): string {
+  return `optimistic-folder-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
 export const useDocumentFoldersStore = create<DocumentFoldersState>()((set, get) => ({
   // Initial state
   folders: [],
@@ -195,7 +202,7 @@ export const useDocumentFoldersStore = create<DocumentFoldersState>()((set, get)
     set({ dropTargetFolderId: folderId });
   },
 
-  // Fetch all folders
+  // Fetch all folders (no optimistic update needed for reads)
   fetchFolders: async (accountId) => {
     set({ isLoading: true, error: null });
     try {
@@ -217,158 +224,273 @@ export const useDocumentFoldersStore = create<DocumentFoldersState>()((set, get)
     }
   },
 
-  // Create a new folder
+  // Create a new folder with optimistic update
   createFolder: async (accountId, data) => {
-    set({ isLoading: true, error: null });
-    try {
-      // Check max depth before creating
-      if (data.parent_id) {
-        const { folders } = get();
-        const parentDepth = getFolderDepth(folders, data.parent_id);
-        if (parentDepth >= 2) {
-          throw new Error('Cannot create folder: maximum nesting depth (3 levels) reached');
+    const { folders } = get();
+
+    // Check max depth before creating
+    if (data.parent_id) {
+      const parentDepth = getFolderDepth(folders, data.parent_id);
+      if (parentDepth >= 2) {
+        toast.error('Cannot create folder: maximum nesting depth (3 levels) reached');
+        return null;
+      }
+    }
+
+    // Create optimistic folder
+    const optimisticId = generateOptimisticFolderId();
+    const parentFolder = data.parent_id ? folders.find(f => f.id === data.parent_id) : null;
+    const siblingFolders = folders.filter(f => f.parent_id === (data.parent_id || null));
+
+    const optimisticFolder: DocumentFolder = {
+      id: optimisticId,
+      account_id: accountId,
+      name: data.name,
+      parent_id: data.parent_id || null,
+      level: parentFolder ? parentFolder.level + 1 : 0,
+      position: siblingFolders.length,
+      document_count: 0,
+      is_expanded: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // Apply optimistic update immediately
+    const optimisticFolders = [...folders, optimisticFolder];
+    const optimisticTree = buildFolderTree(optimisticFolders);
+    set({ folders: optimisticFolders, folderTree: optimisticTree, error: null });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('folder-create'),
+      type: 'folder:create',
+      optimisticData: optimisticFolder,
+      previousData: folders,
+      mutationFn: () => documentFoldersApi.create(accountId, data),
+      onSuccess: (newFolder) => {
+        // Replace optimistic folder with real one from server
+        set((state) => {
+          const updatedFolders = state.folders
+            .filter(f => f.id !== optimisticId)
+            .concat(newFolder);
+          const folderTree = buildFolderTree(updatedFolders);
+          return { folders: updatedFolders, folderTree };
+        });
+      },
+      onRollback: () => {
+        // Restore previous state
+        set(() => {
+          const folderTree = buildFolderTree(folders);
+          return { folders, folderTree };
+        });
+      },
+      errorMessage: 'Failed to create folder',
+    });
+
+    return result;
+  },
+
+  // Update a folder with optimistic update
+  updateFolder: async (accountId, folderId, data) => {
+    const { folders } = get();
+    const existingFolder = folders.find(f => f.id === folderId);
+
+    if (!existingFolder) {
+      toast.error('Folder not found');
+      return null;
+    }
+
+    // Create optimistic updated folder
+    const optimisticFolder: DocumentFolder = {
+      ...existingFolder,
+      ...data,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Apply optimistic update immediately
+    const optimisticFolders = folders.map(f => f.id === folderId ? optimisticFolder : f);
+    const optimisticTree = buildFolderTree(optimisticFolders);
+    set({ folders: optimisticFolders, folderTree: optimisticTree, error: null });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('folder-update'),
+      type: 'folder:update',
+      optimisticData: optimisticFolder,
+      previousData: existingFolder,
+      mutationFn: () => documentFoldersApi.update(accountId, folderId, data),
+      onSuccess: (updatedFolder) => {
+        // Apply server response
+        set((state) => {
+          const updatedFolders = state.folders.map(f => f.id === folderId ? updatedFolder : f);
+          const folderTree = buildFolderTree(updatedFolders);
+          return { folders: updatedFolders, folderTree };
+        });
+      },
+      onRollback: () => {
+        // Restore previous state
+        set((state) => {
+          const restoredFolders = state.folders.map(f => f.id === folderId ? existingFolder : f);
+          const folderTree = buildFolderTree(restoredFolders);
+          return { folders: restoredFolders, folderTree };
+        });
+      },
+      errorMessage: 'Failed to update folder',
+    });
+
+    return result;
+  },
+
+  // Delete a folder with optimistic update
+  deleteFolder: async (accountId, folderId) => {
+    const { folders, expandedFolderIds, selectedFolderId } = get();
+
+    // Calculate all folders to remove (folder and descendants)
+    const idsToRemove = new Set<string>([folderId]);
+    let foundMore = true;
+    while (foundMore) {
+      foundMore = false;
+      for (const f of folders) {
+        if (f.parent_id && idsToRemove.has(f.parent_id) && !idsToRemove.has(f.id)) {
+          idsToRemove.add(f.id);
+          foundMore = true;
         }
       }
-
-      const newFolder = await documentFoldersApi.create(accountId, data);
-      set((state) => {
-        const folders = [...state.folders, newFolder];
-        const folderTree = buildFolderTree(folders);
-        return { folders, folderTree, isLoading: false };
-      });
-      return newFolder;
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
     }
-  },
 
-  // Update a folder
-  updateFolder: async (accountId, folderId, data) => {
-    set({ isLoading: true, error: null });
-    try {
-      const updatedFolder = await documentFoldersApi.update(accountId, folderId, data);
-      set((state) => {
-        const folders = state.folders.map((f) =>
-          f.id === folderId ? updatedFolder : f
-        );
-        const folderTree = buildFolderTree(folders);
-        return { folders, folderTree, isLoading: false };
-      });
-      return updatedFolder;
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
+    // Apply optimistic delete immediately
+    const optimisticFolders = folders.filter(f => !idsToRemove.has(f.id));
+    const optimisticTree = buildFolderTree(optimisticFolders);
+    const optimisticExpandedIds = new Set(expandedFolderIds);
+    for (const id of idsToRemove) {
+      optimisticExpandedIds.delete(id);
     }
-  },
+    const optimisticSelectedId = idsToRemove.has(selectedFolderId || '') ? null : selectedFolderId;
 
-  // Delete a folder
-  deleteFolder: async (accountId, folderId) => {
-    set({ isLoading: true, error: null });
-    try {
-      await documentFoldersApi.delete(accountId, folderId);
-      set((state) => {
-        // Remove folder and all descendants
-        const idsToRemove = new Set<string>([folderId]);
-        let foundMore = true;
-        while (foundMore) {
-          foundMore = false;
-          for (const f of state.folders) {
-            if (f.parent_id && idsToRemove.has(f.parent_id) && !idsToRemove.has(f.id)) {
-              idsToRemove.add(f.id);
-              foundMore = true;
-            }
-          }
-        }
-        const folders = state.folders.filter((f) => !idsToRemove.has(f.id));
+    set({
+      folders: optimisticFolders,
+      folderTree: optimisticTree,
+      expandedFolderIds: optimisticExpandedIds,
+      selectedFolderId: optimisticSelectedId,
+      error: null,
+    });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('folder-delete'),
+      type: 'folder:delete',
+      optimisticData: null,
+      previousData: { folders, expandedFolderIds, selectedFolderId },
+      mutationFn: () => documentFoldersApi.delete(accountId, folderId),
+      onRollback: () => {
+        // Restore previous state
         const folderTree = buildFolderTree(folders);
-        const expandedFolderIds = new Set(state.expandedFolderIds);
-        for (const id of idsToRemove) {
-          expandedFolderIds.delete(id);
-        }
-        return {
+        set({
           folders,
           folderTree,
           expandedFolderIds,
-          selectedFolderId: idsToRemove.has(state.selectedFolderId || '') ? null : state.selectedFolderId,
-          isLoading: false,
-        };
-      });
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
-    }
+          selectedFolderId,
+        });
+      },
+      errorMessage: 'Failed to delete folder',
+    });
+
+    return result !== null;
   },
 
-  // Move document to folder
+  // Move document to folder with optimistic update
   moveDocumentToFolder: async (accountId, documentId, folderId) => {
-    set({ isLoading: true, error: null });
-    try {
-      await documentFoldersApi.moveDocument(accountId, documentId, folderId);
-      // Update document counts
-      set(() => {
-        // This would ideally update document counts, but we'd need to know the previous folder
-        // For now, just clear loading state - a full refresh would be needed for accurate counts
-        return { isLoading: false };
-      });
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
-    }
+    // For document moves, we don't have full document state here,
+    // but we can show immediate feedback via the sync indicator
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('document-move'),
+      type: 'document:move',
+      optimisticData: { documentId, folderId },
+      previousData: { documentId, folderId: null },
+      mutationFn: () => documentFoldersApi.moveDocument(accountId, documentId, folderId),
+      onRollback: () => {
+        // Document state is managed elsewhere; this just shows the error toast
+      },
+      successMessage: 'Document moved',
+      errorMessage: 'Failed to move document',
+    });
+
+    return result !== null;
   },
 
-  // Move folder to new parent
+  // Move folder to new parent with optimistic update
   moveFolderToParent: async (accountId, folderId, parentId) => {
     const { folders } = get();
 
     // Validate: can't move to self
     if (folderId === parentId) {
-      set({ error: 'Cannot move folder to itself' });
+      toast.error('Cannot move folder to itself');
       return null;
     }
 
     // Validate: can't move to descendant
     if (parentId && isDescendant(folders, parentId, folderId)) {
-      set({ error: 'Cannot move folder to its own descendant' });
+      toast.error('Cannot move folder to its own descendant');
       return null;
     }
 
     // Validate: max depth
     if (wouldExceedMaxDepth(folders, folderId, parentId)) {
-      set({ error: 'Cannot move folder: would exceed maximum nesting depth (3 levels)' });
+      toast.error('Cannot move folder: would exceed maximum nesting depth (3 levels)');
       return null;
     }
 
-    set({ isLoading: true, error: null });
-    try {
-      const updatedFolder = await documentFoldersApi.update(accountId, folderId, { parent_id: parentId });
-      set((state) => {
-        const folders = state.folders.map((f) =>
-          f.id === folderId ? updatedFolder : f
-        );
-        const folderTree = buildFolderTree(folders);
-        return { folders, folderTree, isLoading: false };
-      });
-      return updatedFolder;
-    } catch (err) {
-      set({
-        error: err instanceof Error ? err.message : 'Unknown error',
-        isLoading: false,
-      });
-      throw err;
+    const existingFolder = folders.find(f => f.id === folderId);
+    if (!existingFolder) {
+      toast.error('Folder not found');
+      return null;
     }
+
+    // Calculate new level based on parent
+    const parentFolder = parentId ? folders.find(f => f.id === parentId) : null;
+    const newLevel = parentFolder ? parentFolder.level + 1 : 0;
+
+    // Create optimistic updated folder
+    const optimisticFolder: DocumentFolder = {
+      ...existingFolder,
+      parent_id: parentId,
+      level: newLevel,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Apply optimistic update immediately
+    const optimisticFolders = folders.map(f => f.id === folderId ? optimisticFolder : f);
+    const optimisticTree = buildFolderTree(optimisticFolders);
+    set({ folders: optimisticFolders, folderTree: optimisticTree, error: null });
+
+    // Execute mutation with rollback
+    const result = await executeOptimisticMutation({
+      mutationId: generateMutationId('folder-move'),
+      type: 'folder:move',
+      optimisticData: optimisticFolder,
+      previousData: existingFolder,
+      mutationFn: () => documentFoldersApi.update(accountId, folderId, { parent_id: parentId }),
+      onSuccess: (updatedFolder) => {
+        // Apply server response
+        set((state) => {
+          const updatedFolders = state.folders.map(f => f.id === folderId ? updatedFolder : f);
+          const folderTree = buildFolderTree(updatedFolders);
+          return { folders: updatedFolders, folderTree };
+        });
+      },
+      onRollback: () => {
+        // Restore previous state
+        set((state) => {
+          const restoredFolders = state.folders.map(f => f.id === folderId ? existingFolder : f);
+          const folderTree = buildFolderTree(restoredFolders);
+          return { folders: restoredFolders, folderTree };
+        });
+      },
+      successMessage: 'Folder moved',
+      errorMessage: 'Failed to move folder',
+    });
+
+    return result;
   },
 }));
 
