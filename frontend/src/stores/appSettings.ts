@@ -48,6 +48,7 @@ export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
   compactMode: false,
   showAnimations: true,
   sidebarCollapsed: false,
+  commentsPanelCollapsed: false,
 };
 
 export interface GeneralSettings {
@@ -93,6 +94,7 @@ export interface AppearanceSettings {
   compactMode: boolean;
   showAnimations: boolean;
   sidebarCollapsed: boolean;
+  commentsPanelCollapsed: boolean;
 }
 
 export interface AppSettings {

@@ -27,6 +27,7 @@ import { useDocumentFoldersStore } from '../../stores/documentFolders';
 import { useStarredDocumentsStore } from '../../stores/starredDocuments';
 import { useTableOfContentsStore } from '../../stores/tableOfContents';
 import { useWelcomeModal } from '../../stores/welcomeModal';
+import { useAppSettingsStore } from '../../stores/appSettings';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -83,8 +84,10 @@ export function AppShell({ children }: AppShellProps) {
     openModal: openShortcutsViewer,
     closeModal: closeShortcutsViewer,
   } = useKeyboardShortcutsStore();
+  const { settings, updateAppearanceSettings } = useAppSettingsStore();
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const isSidebarCollapsed = settings.appearance.sidebarCollapsed;
+  const isCommentsPanelCollapsed = settings.appearance.commentsPanelCollapsed;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const [hasTriggeredTour, setHasTriggeredTour] = useState(false);
@@ -134,10 +137,28 @@ export function AppShell({ children }: AppShellProps) {
     }
   }, [location.pathname]);
 
-  // Handle sidebar toggle
+  // Handle sidebar toggle (persisted to localStorage via store)
   const handleSidebarToggle = useCallback(() => {
-    setIsSidebarCollapsed((prev) => !prev);
-  }, []);
+    updateAppearanceSettings({ sidebarCollapsed: !isSidebarCollapsed });
+  }, [isSidebarCollapsed, updateAppearanceSettings]);
+
+  // Handle comments panel toggle (persisted to localStorage via store)
+  // Exported for components that need individual panel control
+  const _handleCommentsPanelToggle = useCallback(() => {
+    updateAppearanceSettings({ commentsPanelCollapsed: !isCommentsPanelCollapsed });
+  }, [isCommentsPanelCollapsed, updateAppearanceSettings]);
+  // Silence the unused variable warning - this is available for future component use
+  void _handleCommentsPanelToggle;
+
+  // Toggle both panels at once with Cmd+\
+  const handleTogglePanels = useCallback(() => {
+    // If either is expanded, collapse both. If both collapsed, expand both.
+    const shouldCollapse = !isSidebarCollapsed || !isCommentsPanelCollapsed;
+    updateAppearanceSettings({
+      sidebarCollapsed: shouldCollapse,
+      commentsPanelCollapsed: shouldCollapse,
+    });
+  }, [isSidebarCollapsed, isCommentsPanelCollapsed, updateAppearanceSettings]);
 
   // Handle mobile menu toggle
   const handleMobileMenuToggle = useCallback(() => {
@@ -245,6 +266,20 @@ export function AppShell({ children }: AppShellProps) {
       key: '[',
       action: handleSidebarToggle,
       description: 'Toggle sidebar',
+    },
+    {
+      key: '\\',
+      metaKey: true,
+      action: handleTogglePanels,
+      description: 'Toggle all panels',
+      allowInInput: true,
+    },
+    {
+      key: '\\',
+      ctrlKey: true,
+      action: handleTogglePanels,
+      description: 'Toggle all panels',
+      allowInInput: true,
     },
     {
       key: 'f',

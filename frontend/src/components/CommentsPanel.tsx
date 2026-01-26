@@ -65,6 +65,10 @@ interface CommentsPanelProps {
   className?: string;
   /** Optional title for the panel */
   title?: string;
+  /** Whether the panel is collapsed */
+  isCollapsed?: boolean;
+  /** Callback when collapse state changes */
+  onToggleCollapse?: () => void;
 }
 
 const SORT_OPTIONS: { value: CommentSortOrder; label: string; icon: string }[] = [
@@ -75,10 +79,32 @@ const SORT_OPTIONS: { value: CommentSortOrder; label: string; icon: string }[] =
   { value: 'type', label: 'Type', icon: '◇' },
 ];
 
+// Collapse toggle icon
+const CollapseIcon = ({ isCollapsed }: { isCollapsed: boolean }) => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    className={`comments-collapse-icon ${isCollapsed ? 'collapsed' : ''}`}
+    aria-hidden="true"
+  >
+    <path
+      d={isCollapsed ? "M6 4l4 4-4 4" : "M10 4l-4 4 4 4"}
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export function CommentsPanel({
   targetElementId,
   className = '',
   title = 'Comments',
+  isCollapsed = false,
+  onToggleCollapse,
 }: CommentsPanelProps) {
   const { commentRanges, focusedCommentId, searchFilters } = useCommentHighlight();
   const { getSortedComments, highlightFromComment, clearHighlight, focusComment } = useCommentHighlightStore();
@@ -236,10 +262,46 @@ export function CommentsPanel({
   // Get current sort option label
   const currentSortOption = SORT_OPTIONS.find(opt => opt.value === sortOrder);
 
+  // Collapsed state - show minimal UI
+  if (isCollapsed) {
+    return (
+      <div className={`comments-panel comments-panel-collapsed ${className}`}>
+        {onToggleCollapse && (
+          <button
+            className="comments-collapse-toggle comments-collapse-toggle-collapsed"
+            onClick={onToggleCollapse}
+            aria-label="Expand comments panel"
+            title="Expand comments panel (Cmd+\)"
+          >
+            <CollapseIcon isCollapsed={isCollapsed} />
+          </button>
+        )}
+        <div className="comments-panel-collapsed-content">
+          <svg className="comments-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          {commentRanges.size > 0 && (
+            <span className="comments-badge-collapsed">{commentRanges.size}</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Don't render if no comments
   if (commentRanges.size === 0) {
     return (
       <div className={`comments-panel comments-panel-empty ${className}`}>
+        {onToggleCollapse && (
+          <button
+            className="comments-collapse-toggle"
+            onClick={onToggleCollapse}
+            aria-label="Collapse comments panel"
+            title="Collapse comments panel (Cmd+\)"
+          >
+            <CollapseIcon isCollapsed={isCollapsed} />
+          </button>
+        )}
         <div className="comments-panel-header">
           <div className="comments-panel-title">
             <svg className="comments-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -266,6 +328,17 @@ export function CommentsPanel({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
     >
+      {/* Collapse toggle button on edge */}
+      {onToggleCollapse && (
+        <button
+          className="comments-collapse-toggle"
+          onClick={onToggleCollapse}
+          aria-label="Collapse comments panel"
+          title="Collapse comments panel (Cmd+\)"
+        >
+          <CollapseIcon isCollapsed={isCollapsed} />
+        </button>
+      )}
       {/* Header with sort dropdown */}
       <div className="comments-panel-header">
         <div className="comments-panel-title">
