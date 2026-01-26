@@ -147,6 +147,11 @@ export const KEYBOARD_SHORTCUTS: ShortcutCategory[] = [
         description: 'Redo',
       },
       {
+        id: 'history',
+        keys: { mac: ['⌘', 'Shift', 'H'], windows: ['Ctrl', 'Shift', 'H'] },
+        description: 'Show edit history',
+      },
+      {
         id: 'select-all',
         keys: { mac: ['⌘', 'A'], windows: ['Ctrl', 'A'] },
         description: 'Select all',
