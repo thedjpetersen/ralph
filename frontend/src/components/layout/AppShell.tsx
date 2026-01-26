@@ -16,9 +16,11 @@ import { DocumentExportDialog } from '../DocumentExportDialog';
 import { FormattingToolbar } from '../FormattingToolbar';
 import { FindReplaceDialog } from '../FindReplaceDialog';
 import { ParagraphFocusOverlay } from '../ParagraphFocusOverlay';
+import { TypewriterScrollManager } from '../TypewriterScrollManager';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useFindReplaceStore } from '../../stores/findReplace';
 import { useParagraphFocusStore } from '../../stores/paragraphFocus';
+import { useTypewriterScrollStore } from '../../stores/typewriterScroll';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
 import './AppShell.css';
@@ -33,6 +35,7 @@ export function AppShell({ children }: AppShellProps) {
   const { fetchUser } = useUserStore();
   const { openDialog: openFindReplace, closeDialog: closeFindReplace } = useFindReplaceStore();
   const { toggle: toggleParagraphFocus } = useParagraphFocusStore();
+  const { toggle: toggleTypewriterScroll } = useTypewriterScrollStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -129,6 +132,14 @@ export function AppShell({ children }: AppShellProps) {
       description: 'Toggle paragraph focus mode',
       allowInInput: true,
     },
+    {
+      key: 't',
+      metaKey: true,
+      shiftKey: true,
+      action: toggleTypewriterScroll,
+      description: 'Toggle typewriter scroll mode',
+      allowInInput: true,
+    },
   ]);
 
   return (
@@ -206,6 +217,7 @@ export function AppShell({ children }: AppShellProps) {
       <FormattingToolbar />
       <FindReplaceDialog />
       <ParagraphFocusOverlay />
+      <TypewriterScrollManager />
     </div>
   );
 }

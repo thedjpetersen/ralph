@@ -9,6 +9,7 @@ import {
 import { useAISuggestionStore, useAISuggestion } from '../stores/aiSuggestions';
 import { useSmartTypographyStore } from '../stores/smartTypography';
 import { useParagraphFocusStore } from '../stores/paragraphFocus';
+import { useTypewriterScrollStore } from '../stores/typewriterScroll';
 import './GhostTextTextarea.css';
 
 export interface GhostTextTextareaProps
@@ -51,28 +52,36 @@ export function GhostTextTextarea({
     useAISuggestionStore();
   const smartTypography = useSmartTypographyStore();
   const { setTargetElement: setParagraphFocusTarget } = useParagraphFocusStore();
+  const { setTargetElement: setTypewriterScrollTarget } = useTypewriterScrollStore();
 
-  // Register textarea with paragraph focus store when mounted/focused
+  // Register textarea with paragraph focus and typewriter scroll stores when mounted/focused
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
     const handleFocus = () => {
       setParagraphFocusTarget(textarea);
+      setTypewriterScrollTarget(textarea);
     };
 
     const handleBlur = () => {
       // Only clear if this textarea was the target
-      const currentTarget = useParagraphFocusStore.getState().targetElement;
-      if (currentTarget === textarea) {
+      const currentParagraphTarget = useParagraphFocusStore.getState().targetElement;
+      const currentTypewriterTarget = useTypewriterScrollStore.getState().targetElement;
+
+      if (currentParagraphTarget === textarea || currentTypewriterTarget === textarea) {
         // Don't clear immediately - allow time for focus to transfer
         setTimeout(() => {
           const stillFocused = document.activeElement === textarea;
           if (!stillFocused) {
-            const newTarget = useParagraphFocusStore.getState().targetElement;
-            if (newTarget === textarea) {
+            const newParagraphTarget = useParagraphFocusStore.getState().targetElement;
+            const newTypewriterTarget = useTypewriterScrollStore.getState().targetElement;
+            if (newParagraphTarget === textarea) {
               // Keep the target if no new one was set
               // This allows the overlay to persist when clicking elsewhere
+            }
+            if (newTypewriterTarget === textarea) {
+              // Keep the target if no new one was set
             }
           }
         }, 100);
@@ -85,13 +94,14 @@ export function GhostTextTextarea({
     // Set as target if already focused
     if (document.activeElement === textarea) {
       setParagraphFocusTarget(textarea);
+      setTypewriterScrollTarget(textarea);
     }
 
     return () => {
       textarea.removeEventListener('focus', handleFocus);
       textarea.removeEventListener('blur', handleBlur);
     };
-  }, [setParagraphFocusTarget]);
+  }, [setParagraphFocusTarget, setTypewriterScrollTarget]);
 
   // Debounced fetch suggestion
   const debouncedFetchSuggestion = useCallback(
