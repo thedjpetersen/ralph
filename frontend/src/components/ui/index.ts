@@ -10,6 +10,7 @@ export {
   TableRow,
   TableHeader,
   TableCell,
+  Pagination,
   type TableProps,
   type TableHeadProps,
   type TableBodyProps,
@@ -17,4 +18,5 @@ export {
   type TableRowProps,
   type TableHeaderProps,
   type TableCellProps,
+  type PaginationProps,
 } from './Table';

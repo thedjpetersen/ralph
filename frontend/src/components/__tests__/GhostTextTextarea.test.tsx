@@ -469,4 +469,163 @@ describe('GhostTextTextarea', () => {
       expect(onChange).toHaveBeenCalledWith('Hello, ');
     });
   });
+
+  describe('Continue writing (Cmd+Shift+Enter)', () => {
+    it('triggers continue writing with Cmd+Shift+Enter', async () => {
+      const onChange = vi.fn();
+      render(
+        <GhostTextTextarea fieldId="test-notes" value="This is my document." onChange={onChange} />
+      );
+      const textarea = screen.getByRole('textbox');
+
+      // Trigger continue writing
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true, shiftKey: true });
+
+      // Should show loading indicator
+      await act(async () => {
+        vi.advanceTimersByTime(100);
+      });
+      const dots = document.querySelectorAll('.ghost-text-dot');
+      expect(dots).toHaveLength(3);
+
+      // Wait for suggestion to complete
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // Should have a suggestion now
+      const suggestion = useAISuggestionStore.getState().suggestions.get('test-notes');
+      expect(suggestion).toBeDefined();
+      expect(suggestion?.text).toBeTruthy();
+      expect(suggestion?.isLoading).toBe(false);
+    });
+
+    it('triggers continue writing with Ctrl+Shift+Enter', async () => {
+      const onChange = vi.fn();
+      render(
+        <GhostTextTextarea fieldId="test-notes" value="Testing continue writing." onChange={onChange} />
+      );
+      const textarea = screen.getByRole('textbox');
+
+      // Trigger continue writing with Ctrl (for non-Mac)
+      fireEvent.keyDown(textarea, { key: 'Enter', ctrlKey: true, shiftKey: true });
+
+      // Wait for suggestion to complete
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // Should have a suggestion now
+      const suggestion = useAISuggestionStore.getState().suggestions.get('test-notes');
+      expect(suggestion).toBeDefined();
+      expect(suggestion?.text).toBeTruthy();
+    });
+
+    it('does not trigger continue writing on empty text', async () => {
+      const onChange = vi.fn();
+      render(<GhostTextTextarea fieldId="test-notes" value="" onChange={onChange} />);
+      const textarea = screen.getByRole('textbox');
+
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true, shiftKey: true });
+
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // Should not have a suggestion since text was empty
+      expect(useAISuggestionStore.getState().suggestions.has('test-notes')).toBe(false);
+    });
+
+    it('does not trigger continue writing when suggestions are disabled', async () => {
+      const onChange = vi.fn();
+      render(
+        <GhostTextTextarea
+          fieldId="test-notes"
+          value="Some text here"
+          onChange={onChange}
+          enableSuggestions={false}
+        />
+      );
+      const textarea = screen.getByRole('textbox');
+
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true, shiftKey: true });
+
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // Should not have a suggestion since suggestions are disabled
+      expect(useAISuggestionStore.getState().suggestions.has('test-notes')).toBe(false);
+    });
+
+    it('can accept continue writing suggestion with Tab', async () => {
+      const onChange = vi.fn();
+      render(
+        <GhostTextTextarea fieldId="test-notes" value="My document text" onChange={onChange} />
+      );
+      const textarea = screen.getByRole('textbox');
+
+      // Trigger continue writing
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true, shiftKey: true });
+
+      // Wait for suggestion to complete
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // Accept with Tab
+      fireEvent.keyDown(textarea, { key: 'Tab' });
+
+      // Should have called onChange with the combined text
+      expect(onChange).toHaveBeenCalled();
+      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1];
+      expect(lastCall[0]).toContain('My document text');
+    });
+
+    it('can dismiss continue writing suggestion with Escape', async () => {
+      const onChange = vi.fn();
+      render(
+        <GhostTextTextarea fieldId="test-notes" value="Document content" onChange={onChange} />
+      );
+      const textarea = screen.getByRole('textbox');
+
+      // Trigger continue writing
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true, shiftKey: true });
+
+      // Wait for suggestion to complete
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // Dismiss with Escape
+      fireEvent.keyDown(textarea, { key: 'Escape' });
+
+      // Suggestion should be dismissed
+      expect(useAISuggestionStore.getState().suggestions.has('test-notes')).toBe(false);
+    });
+
+    it('generates style-appropriate suggestions based on document context', async () => {
+      const onChange = vi.fn();
+
+      // Test with transaction-related text
+      render(
+        <GhostTextTextarea
+          fieldId="test-notes"
+          value="This transaction was for office supplies."
+          onChange={onChange}
+        />
+      );
+      const textarea = screen.getByRole('textbox');
+
+      fireEvent.keyDown(textarea, { key: 'Enter', metaKey: true, shiftKey: true });
+
+      await act(async () => {
+        vi.advanceTimersByTime(500);
+      });
+
+      const suggestion = useAISuggestionStore.getState().suggestions.get('test-notes');
+      expect(suggestion?.text).toBeTruthy();
+      // The suggestion should be contextual (though mock, it should still be a valid continuation)
+    });
+  });
 });

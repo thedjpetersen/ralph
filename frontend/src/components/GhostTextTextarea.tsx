@@ -41,7 +41,7 @@ export function GhostTextTextarea({
   const previousValueRef = useRef(value);
 
   const suggestion = useAISuggestion(fieldId);
-  const { fetchSuggestion, dismissSuggestion, acceptSuggestion, acceptPartialSuggestion } =
+  const { fetchSuggestion, fetchContinueWriting, dismissSuggestion, acceptSuggestion, acceptPartialSuggestion } =
     useAISuggestionStore();
 
   // Debounced fetch suggestion
@@ -86,7 +86,17 @@ export function GhostTextTextarea({
         if (e.defaultPrevented) return;
       }
 
-      // Only handle if we have a suggestion
+      // Cmd/Ctrl + Shift + Enter: Trigger AI continue writing
+      // This works even without an existing suggestion
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        e.preventDefault();
+        if (enableSuggestions && value.trim()) {
+          fetchContinueWriting(fieldId, value, context);
+        }
+        return;
+      }
+
+      // Only handle suggestion-related shortcuts if we have a suggestion
       if (!suggestion?.text || suggestion.isLoading) {
         return;
       }
@@ -127,6 +137,9 @@ export function GhostTextTextarea({
       dismissSuggestion,
       onChange,
       value,
+      enableSuggestions,
+      fetchContinueWriting,
+      context,
     ]
   );
 

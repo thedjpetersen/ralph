@@ -243,6 +243,140 @@ Table.Row = TableRow;
 Table.Header = TableHeader;
 Table.Cell = TableCell;
 
+// Pagination component
+export interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  pageSizeOptions?: number[];
+  onPageChange: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  showPageSizeSelector?: boolean;
+  showInfo?: boolean;
+  className?: string;
+}
+
+export function Pagination({
+  currentPage,
+  totalPages,
+  totalItems,
+  pageSize,
+  pageSizeOptions = [10, 20, 50, 100],
+  onPageChange,
+  onPageSizeChange,
+  showPageSizeSelector = true,
+  showInfo = true,
+  className = '',
+}: PaginationProps) {
+  const startItem = Math.min((currentPage - 1) * pageSize + 1, totalItems);
+  const endItem = Math.min(currentPage * pageSize, totalItems);
+
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (onPageSizeChange) {
+      onPageSizeChange(parseInt(e.target.value, 10));
+    }
+  };
+
+  const handleFirstPage = () => onPageChange(1);
+  const handlePrevPage = () => onPageChange(currentPage - 1);
+  const handleNextPage = () => onPageChange(currentPage + 1);
+  const handleLastPage = () => onPageChange(totalPages);
+
+  const isFirstPage = currentPage === 1;
+  const isLastPage = currentPage >= totalPages;
+
+  return (
+    <nav
+      className={`table-pagination ${className}`.trim()}
+      aria-label="Table pagination"
+    >
+      {showInfo && (
+        <div className="table-pagination-info" aria-live="polite">
+          Showing {startItem}-{endItem} of {totalItems} items
+        </div>
+      )}
+      <div className="table-pagination-controls">
+        {showPageSizeSelector && onPageSizeChange && (
+          <>
+            <label htmlFor="table-page-size" className="sr-only">
+              Results per page
+            </label>
+            <select
+              id="table-page-size"
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              className="table-page-size-select"
+              aria-label="Results per page"
+            >
+              {pageSizeOptions.map((size) => (
+                <option key={size} value={size}>
+                  {size} per page
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+        <div className="table-pagination-buttons" role="group" aria-label="Page navigation">
+          <button
+            onClick={handleFirstPage}
+            disabled={isFirstPage}
+            className="table-pagination-button"
+            aria-label="Go to first page"
+          >
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M15.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 010 1.414z" />
+              <path d="M9.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L5.414 10l4.293 4.293a1 1 0 010 1.414z" />
+            </svg>
+          </button>
+          <button
+            onClick={handlePrevPage}
+            disabled={isFirstPage}
+            className="table-pagination-button"
+            aria-label="Go to previous page"
+          >
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M12.707 15.707a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414l5-5a1 1 0 111.414 1.414L8.414 10l4.293 4.293a1 1 0 010 1.414z" />
+            </svg>
+          </button>
+          <span className="table-page-indicator" aria-current="page">
+            {currentPage} / {totalPages || 1}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={isLastPage}
+            className="table-pagination-button"
+            aria-label="Go to next page"
+          >
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M7.293 4.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L11.586 10 7.293 5.707a1 1 0 010-1.414z" />
+            </svg>
+          </button>
+          <button
+            onClick={handleLastPage}
+            disabled={isLastPage}
+            className="table-pagination-button"
+            aria-label="Go to last page"
+          >
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M4.293 4.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
+              <path d="M10.293 4.293a1 1 0 011.414 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414-1.414L14.586 10l-4.293-4.293a1 1 0 010-1.414z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+Table.Head = TableHead;
+Table.Body = TableBody;
+Table.Foot = TableFoot;
+Table.Row = TableRow;
+Table.Header = TableHeader;
+Table.Cell = TableCell;
+Table.Pagination = Pagination;
+
 Table.displayName = 'Table';
 TableHead.displayName = 'TableHead';
 TableBody.displayName = 'TableBody';
@@ -250,3 +384,4 @@ TableFoot.displayName = 'TableFoot';
 TableRow.displayName = 'TableRow';
 TableHeader.displayName = 'TableHeader';
 TableCell.displayName = 'TableCell';
+Pagination.displayName = 'Pagination';

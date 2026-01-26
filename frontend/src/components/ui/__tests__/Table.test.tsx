@@ -8,6 +8,7 @@ import {
   TableRow,
   TableHeader,
   TableCell,
+  Pagination,
 } from '../Table';
 
 describe('Table', () => {
@@ -702,6 +703,213 @@ describe('Table', () => {
         </Table>
       );
       expect(screen.getByRole('table')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('Pagination', () => {
+  const defaultProps = {
+    currentPage: 1,
+    totalPages: 10,
+    totalItems: 100,
+    pageSize: 10,
+    onPageChange: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('Basic Rendering', () => {
+    it('renders pagination navigation', () => {
+      render(<Pagination {...defaultProps} />);
+      expect(screen.getByRole('navigation', { name: 'Table pagination' })).toBeInTheDocument();
+    });
+
+    it('shows item count info by default', () => {
+      render(<Pagination {...defaultProps} />);
+      expect(screen.getByText('Showing 1-10 of 100 items')).toBeInTheDocument();
+    });
+
+    it('shows page indicator', () => {
+      render(<Pagination {...defaultProps} currentPage={5} />);
+      expect(screen.getByText('5 / 10')).toBeInTheDocument();
+    });
+
+    it('applies custom className', () => {
+      render(<Pagination {...defaultProps} className="custom-pagination" />);
+      expect(screen.getByRole('navigation')).toHaveClass('custom-pagination');
+    });
+  });
+
+  describe('Navigation Buttons', () => {
+    it('renders all navigation buttons', () => {
+      render(<Pagination {...defaultProps} />);
+      expect(screen.getByRole('button', { name: 'Go to first page' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Go to previous page' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Go to next page' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Go to last page' })).toBeInTheDocument();
+    });
+
+    it('disables first and previous buttons on first page', () => {
+      render(<Pagination {...defaultProps} currentPage={1} />);
+      expect(screen.getByRole('button', { name: 'Go to first page' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to previous page' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to next page' })).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to last page' })).not.toBeDisabled();
+    });
+
+    it('disables next and last buttons on last page', () => {
+      render(<Pagination {...defaultProps} currentPage={10} />);
+      expect(screen.getByRole('button', { name: 'Go to first page' })).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to previous page' })).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to next page' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to last page' })).toBeDisabled();
+    });
+
+    it('calls onPageChange with correct page when clicking buttons', () => {
+      const onPageChange = vi.fn();
+      render(<Pagination {...defaultProps} currentPage={5} onPageChange={onPageChange} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Go to first page' }));
+      expect(onPageChange).toHaveBeenCalledWith(1);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Go to previous page' }));
+      expect(onPageChange).toHaveBeenCalledWith(4);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Go to next page' }));
+      expect(onPageChange).toHaveBeenCalledWith(6);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Go to last page' }));
+      expect(onPageChange).toHaveBeenCalledWith(10);
+    });
+  });
+
+  describe('Page Size Selector', () => {
+    it('renders page size selector by default', () => {
+      const onPageSizeChange = vi.fn();
+      render(<Pagination {...defaultProps} onPageSizeChange={onPageSizeChange} />);
+      expect(screen.getByRole('combobox', { name: 'Results per page' })).toBeInTheDocument();
+    });
+
+    it('does not render page size selector when showPageSizeSelector is false', () => {
+      render(<Pagination {...defaultProps} showPageSizeSelector={false} />);
+      expect(screen.queryByRole('combobox', { name: 'Results per page' })).not.toBeInTheDocument();
+    });
+
+    it('does not render page size selector when onPageSizeChange is not provided', () => {
+      render(<Pagination {...defaultProps} />);
+      expect(screen.queryByRole('combobox', { name: 'Results per page' })).not.toBeInTheDocument();
+    });
+
+    it('renders default page size options', () => {
+      const onPageSizeChange = vi.fn();
+      render(<Pagination {...defaultProps} onPageSizeChange={onPageSizeChange} />);
+      const select = screen.getByRole('combobox', { name: 'Results per page' });
+      expect(select).toHaveValue('10');
+      expect(screen.getByRole('option', { name: '10 per page' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: '20 per page' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: '50 per page' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: '100 per page' })).toBeInTheDocument();
+    });
+
+    it('renders custom page size options', () => {
+      const onPageSizeChange = vi.fn();
+      render(
+        <Pagination
+          {...defaultProps}
+          pageSizeOptions={[5, 15, 25]}
+          onPageSizeChange={onPageSizeChange}
+        />
+      );
+      expect(screen.getByRole('option', { name: '5 per page' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: '15 per page' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: '25 per page' })).toBeInTheDocument();
+    });
+
+    it('calls onPageSizeChange when selection changes', () => {
+      const onPageSizeChange = vi.fn();
+      render(<Pagination {...defaultProps} onPageSizeChange={onPageSizeChange} />);
+      const select = screen.getByRole('combobox', { name: 'Results per page' });
+
+      fireEvent.change(select, { target: { value: '50' } });
+      expect(onPageSizeChange).toHaveBeenCalledWith(50);
+    });
+  });
+
+  describe('Info Display', () => {
+    it('hides info when showInfo is false', () => {
+      render(<Pagination {...defaultProps} showInfo={false} />);
+      expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();
+    });
+
+    it('shows correct range for middle page', () => {
+      render(<Pagination {...defaultProps} currentPage={5} />);
+      expect(screen.getByText('Showing 41-50 of 100 items')).toBeInTheDocument();
+    });
+
+    it('shows correct range for last page with fewer items', () => {
+      render(<Pagination {...defaultProps} currentPage={10} totalItems={95} />);
+      expect(screen.getByText('Showing 91-95 of 95 items')).toBeInTheDocument();
+    });
+
+    it('handles single item correctly', () => {
+      render(<Pagination {...defaultProps} totalItems={1} totalPages={1} />);
+      expect(screen.getByText('Showing 1-1 of 1 items')).toBeInTheDocument();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('handles zero total pages', () => {
+      render(<Pagination {...defaultProps} totalPages={0} totalItems={0} />);
+      expect(screen.getByText('1 / 1')).toBeInTheDocument();
+    });
+
+    it('handles single page', () => {
+      render(<Pagination {...defaultProps} totalPages={1} totalItems={5} />);
+      expect(screen.getByRole('button', { name: 'Go to first page' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to previous page' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to next page' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Go to last page' })).toBeDisabled();
+    });
+  });
+
+  describe('Table.Pagination Compound Component', () => {
+    it('can be used as Table.Pagination', () => {
+      render(
+        <Table.Pagination
+          currentPage={1}
+          totalPages={5}
+          totalItems={50}
+          pageSize={10}
+          onPageChange={vi.fn()}
+        />
+      );
+      expect(screen.getByRole('navigation', { name: 'Table pagination' })).toBeInTheDocument();
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('has proper navigation landmark', () => {
+      render(<Pagination {...defaultProps} />);
+      expect(screen.getByRole('navigation')).toHaveAttribute('aria-label', 'Table pagination');
+    });
+
+    it('has aria-live region for info', () => {
+      render(<Pagination {...defaultProps} />);
+      const info = screen.getByText(/Showing/);
+      expect(info).toHaveAttribute('aria-live', 'polite');
+    });
+
+    it('has aria-current on page indicator', () => {
+      render(<Pagination {...defaultProps} />);
+      const indicator = screen.getByText('1 / 10');
+      expect(indicator).toHaveAttribute('aria-current', 'page');
+    });
+
+    it('page navigation buttons have proper group role', () => {
+      render(<Pagination {...defaultProps} />);
+      expect(screen.getByRole('group', { name: 'Page navigation' })).toBeInTheDocument();
     });
   });
 });
