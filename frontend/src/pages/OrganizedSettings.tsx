@@ -5,6 +5,7 @@ import { Switch } from '../components/ui/Switch';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/Button';
 import { KeyboardShortcutsViewer } from '../components/ui/KeyboardShortcutsViewer';
+import { StreakSettings } from '../components/StreakSettings';
 import {
   useAppSettingsStore,
   type SettingsSection,
@@ -28,6 +29,7 @@ const SECTIONS: { id: SettingsSection; label: string; icon: string }[] = [
   { id: 'editor', label: 'Editor', icon: 'edit' },
   { id: 'ai', label: 'AI', icon: 'sparkles' },
   { id: 'appearance', label: 'Appearance', icon: 'palette' },
+  { id: 'goals', label: 'Writing Goals', icon: 'fire' },
   { id: 'account', label: 'Account', icon: 'user' },
 ];
 
@@ -71,6 +73,13 @@ function SectionIcon({ name }: { name: string }) {
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
           <circle cx="12" cy="7" r="4" />
+        </svg>
+      );
+    case 'fire':
+      return (
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 2C8.5 6 4 9 4 14a8 8 0 0 0 16 0c0-5-4.5-8-8-12z" />
+          <path d="M12 20c-2.21 0-4-1.79-4-4 0-2.5 2-4 4-6 2 2 4 3.5 4 6 0 2.21-1.79 4-4 4z" />
         </svg>
       );
     default:
@@ -1361,6 +1370,8 @@ export function OrganizedSettings() {
         return <AISection />;
       case 'appearance':
         return <AppearanceSection />;
+      case 'goals':
+        return <StreakSettings />;
       case 'account':
         return <AccountSection />;
       default:

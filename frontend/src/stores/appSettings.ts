@@ -102,7 +102,7 @@ export interface AppSettings {
   appearance: AppearanceSettings;
 }
 
-export type SettingsSection = 'general' | 'editor' | 'ai' | 'appearance' | 'account';
+export type SettingsSection = 'general' | 'editor' | 'ai' | 'appearance' | 'goals' | 'account';
 
 interface AppSettingsState {
   // Settings

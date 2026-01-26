@@ -3,6 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
 import { DocumentFolders } from './DocumentFolders';
+import { StreakCard } from '../StreakCard';
+import { StreakCalendar } from '../StreakCalendar';
 import './Sidebar.css';
 
 interface NavSection {
@@ -360,6 +362,11 @@ export function Sidebar({ isCollapsed = false, onToggleCollapse }: SidebarProps)
         )}
       </div>
 
+      {/* Writing Streak Card */}
+      <div className="sidebar-streak-section">
+        <StreakCard isCollapsed={isCollapsed} />
+      </div>
+
       {/* Navigation Sections */}
       <nav className="sidebar-nav">
         {navSections.map(section => (
@@ -504,6 +511,9 @@ export function Sidebar({ isCollapsed = false, onToggleCollapse }: SidebarProps)
           </svg>
         </button>
       )}
+
+      {/* Streak Calendar Modal */}
+      <StreakCalendar />
     </aside>
   );
 }

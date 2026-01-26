@@ -1,0 +1,330 @@
+/* Streak Calendar Modal Content */
+.streak-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Stats Summary */
+.streak-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.streak-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.streak-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.streak-stat-label {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Milestones */
+.streak-milestones {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.milestones-label {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.milestone-badges {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.milestone-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  background-color: var(--color-bg-tertiary);
+  border-radius: 6px;
+  opacity: 0.4;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.milestone-badge.earned {
+  opacity: 1;
+}
+
+.milestone-badge.earned:hover {
+  transform: scale(1.05);
+}
+
+.milestone-badge span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.milestone-badge.earned span {
+  color: var(--color-text-primary);
+}
+
+/* Calendar Navigation */
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.calendar-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.calendar-nav-btn:hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.calendar-nav-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.calendar-title {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.15s ease;
+}
+
+.calendar-title:hover {
+  color: var(--color-accent);
+}
+
+/* Calendar Grid */
+.calendar-grid {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.calendar-header-cell {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calendar-body {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background-color: var(--color-border);
+}
+
+/* Calendar Days */
+.calendar-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-height: 40px;
+  background-color: var(--color-bg-primary);
+  cursor: default;
+  transition: background-color 0.15s ease;
+}
+
+.calendar-day-number {
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  z-index: 1;
+}
+
+.calendar-day.other-month .calendar-day-number {
+  color: var(--color-text-tertiary);
+  opacity: 0.5;
+}
+
+.calendar-day.today {
+  font-weight: 600;
+}
+
+.calendar-day.today .calendar-day-number {
+  color: var(--color-accent);
+}
+
+/* Intensity levels (contribution graph style) */
+.calendar-day.intensity-none {
+  background-color: var(--color-bg-primary);
+}
+
+.calendar-day.intensity-low {
+  background-color: rgba(34, 197, 94, 0.15);
+}
+
+.calendar-day.intensity-medium {
+  background-color: rgba(34, 197, 94, 0.35);
+}
+
+.calendar-day.intensity-high {
+  background-color: rgba(34, 197, 94, 0.55);
+}
+
+.calendar-day.intensity-complete {
+  background-color: rgba(34, 197, 94, 0.75);
+}
+
+.calendar-day.intensity-complete .calendar-day-number {
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Goal met indicator */
+.calendar-day-indicator {
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  background-color: #22c55e;
+  border-radius: 50%;
+}
+
+.calendar-day.intensity-complete .calendar-day-indicator {
+  background-color: white;
+}
+
+/* Legend */
+.calendar-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+
+.legend-label {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+.legend-items {
+  display: flex;
+  gap: 2px;
+}
+
+.legend-item {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+}
+
+.legend-item.intensity-none {
+  background-color: var(--color-bg-primary);
+}
+
+.legend-item.intensity-low {
+  background-color: rgba(34, 197, 94, 0.15);
+}
+
+.legend-item.intensity-medium {
+  background-color: rgba(34, 197, 94, 0.35);
+}
+
+.legend-item.intensity-high {
+  background-color: rgba(34, 197, 94, 0.55);
+}
+
+.legend-item.intensity-complete {
+  background-color: rgba(34, 197, 94, 0.75);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .streak-stats {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .streak-stat-value {
+    font-size: 1.5rem;
+  }
+
+  .calendar-day {
+    min-height: 32px;
+  }
+
+  .calendar-day-number {
+    font-size: 0.75rem;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .calendar-day.intensity-low {
+    background-color: rgba(34, 197, 94, 0.2);
+  }
+
+  .calendar-day.intensity-medium {
+    background-color: rgba(34, 197, 94, 0.4);
+  }
+
+  .calendar-day.intensity-high {
+    background-color: rgba(34, 197, 94, 0.6);
+  }
+
+  .calendar-day.intensity-complete {
+    background-color: rgba(34, 197, 94, 0.8);
+  }
+}
