@@ -141,3 +141,62 @@
 .btn-icon-right {
   margin-left: 0.25rem;
 }
+
+/* Touch-friendly improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .btn {
+    /* Minimum touch target size of 44px */
+    min-height: 44px;
+    /* Remove hover effects for touch devices to prevent sticky states */
+    -webkit-tap-highlight-color: transparent;
+    /* Smooth transitions for touch feedback */
+    transition: transform 0.1s ease, background-color 0.15s ease;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  /* Provide visual feedback on active state */
+  .btn-primary:active:not(:disabled) {
+    background-color: var(--color-primary-dark, #2563eb);
+  }
+
+  .btn-secondary:active:not(:disabled) {
+    background-color: var(--color-secondary-dark, #4b5563);
+  }
+
+  .btn-danger:active:not(:disabled) {
+    background-color: var(--color-danger-dark, #dc2626);
+  }
+
+  .btn-ghost:active:not(:disabled) {
+    background-color: var(--color-bg-hover, #f3f4f6);
+  }
+
+  .btn-sm {
+    min-height: 36px;
+    padding: 0.5rem 1rem;
+  }
+
+  .btn-md {
+    min-height: 44px;
+    padding: 0.625rem 1.25rem;
+  }
+
+  .btn-lg {
+    min-height: 50px;
+    padding: 0.875rem 1.75rem;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .btn-sm {
+    padding: 0.5rem 0.875rem;
+  }
+
+  .btn-md {
+    padding: 0.625rem 1rem;
+  }
+}

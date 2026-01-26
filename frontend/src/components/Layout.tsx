@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, type TouchEvent as ReactTouchEvent } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useAccountStore } from '../stores/account';
@@ -17,6 +17,7 @@ export function Layout() {
   const { user, fetchUser, logout } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [accountMenuIndex, setAccountMenuIndex] = useState(-1);
   const [userMenuIndex, setUserMenuIndex] = useState(-1);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
@@ -25,6 +26,9 @@ export function Layout() {
   const accountTriggerRef = useRef<HTMLButtonElement>(null);
   const userTriggerRef = useRef<HTMLButtonElement>(null);
   const mainContentRef = useRef<HTMLElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     fetchAccounts();
@@ -48,10 +52,47 @@ export function Layout() {
         setIsDropdownOpen(false);
         setAccountMenuIndex(-1);
       }
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        !(event.target as Element)?.closest('.mobile-menu-trigger')
+      ) {
+        setIsMobileMenuOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Close mobile menu on escape key
+  const handleMobileMenuKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      setIsMobileMenuOpen(false);
+    }
+  }, []);
+
+  // Handle swipe gestures for mobile menu
+  const handleTouchStart = useCallback((e: ReactTouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: ReactTouchEvent) => {
+    if (touchStartY.current === null || touchStartX.current === null) return;
+
+    const touchEndY = e.changedTouches[0].clientY;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffY = touchStartY.current - touchEndY;
+    const diffX = Math.abs(touchStartX.current - touchEndX);
+
+    // Swipe up to close (if vertical swipe > 50px and mostly vertical)
+    if (diffY > 50 && diffY > diffX) {
+      setIsMobileMenuOpen(false);
+    }
+
+    touchStartY.current = null;
+    touchStartX.current = null;
   }, []);
 
   // Keyboard navigation for account dropdown
@@ -212,6 +253,7 @@ export function Layout() {
       action: () => {
         setIsDropdownOpen(false);
         setIsUserMenuOpen(false);
+        setIsMobileMenuOpen(false);
         setAccountMenuIndex(-1);
         setUserMenuIndex(-1);
       },
@@ -234,10 +276,25 @@ export function Layout() {
 
       <header className="layout-header" role="banner">
         <div className="layout-header-content">
+          {/* Mobile hamburger menu button */}
+          <button
+            className="mobile-menu-trigger"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            <span className={`hamburger-icon ${isMobileMenuOpen ? 'open' : ''}`} aria-hidden="true">
+              <span className="hamburger-line"></span>
+              <span className="hamburger-line"></span>
+              <span className="hamburger-line"></span>
+            </span>
+          </button>
+
           <Link to="/" className="layout-logo" aria-label="ClockZen home">
             ClockZen
           </Link>
-          <nav className="layout-nav" role="navigation" aria-label="Main navigation">
+          <nav className="layout-nav desktop-nav" role="navigation" aria-label="Main navigation">
             <Link to="/accounts" className="nav-link">
               Accounts
             </Link>
@@ -422,6 +479,77 @@ export function Layout() {
             </div>
           </div>
         </div>
+
+        {/* Mobile navigation drawer */}
+        {isMobileMenuOpen && (
+          <div
+            id="mobile-menu"
+            className="mobile-menu"
+            ref={mobileMenuRef}
+            role="navigation"
+            aria-label="Mobile navigation"
+            onKeyDown={handleMobileMenuKeyDown}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="mobile-menu-swipe-indicator" aria-hidden="true" />
+            <nav className="mobile-nav">
+              <Link to="/accounts" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                <svg className="mobile-nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M10 2L3 7v11h5v-6h4v6h5V7l-7-5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Accounts
+              </Link>
+              <Link to="/receipts" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                <svg className="mobile-nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M4 3h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zm2 4h8m-8 3h8m-8 3h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Receipts
+              </Link>
+              <Link to="/transactions" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                <svg className="mobile-nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M3 10h14M3 5h14M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Transactions
+              </Link>
+              <Link to="/reports" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                <svg className="mobile-nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M4 17V8m4 9V3m4 14v-6m4 6V7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Reports
+              </Link>
+            </nav>
+            <div className="mobile-menu-divider" aria-hidden="true" />
+            <div className="mobile-menu-section">
+              <span className="mobile-menu-section-title">Account</span>
+              {currentAccount && (
+                <span className="mobile-current-account">{currentAccount.name}</span>
+              )}
+            </div>
+            <div className="mobile-menu-divider" aria-hidden="true" />
+            <nav className="mobile-nav mobile-nav-secondary">
+              <Link to="/profile" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                Profile
+              </Link>
+              <Link to="/settings" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                Settings
+              </Link>
+              <Link to="/api-keys" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>
+                API Keys
+              </Link>
+              <button
+                className="mobile-nav-link mobile-logout-button"
+                onClick={() => {
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                Log Out
+              </button>
+            </nav>
+          </div>
+        )}
+        {isMobileMenuOpen && <div className="mobile-menu-overlay" onClick={() => setIsMobileMenuOpen(false)} aria-hidden="true" />}
       </header>
       <main
         id="main-content"

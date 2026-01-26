@@ -109,3 +109,53 @@
 .input-with-right-icon {
   padding-right: 2.5rem;
 }
+
+/* Touch-friendly improvements for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .input {
+    /* Minimum touch target height */
+    min-height: 44px;
+    /* Prevent zoom on iOS Safari */
+    font-size: 16px;
+    /* Remove tap highlight */
+    -webkit-tap-highlight-color: transparent;
+    /* Smooth focus transition */
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .input:focus {
+    /* Enhanced focus ring for touch devices */
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  }
+
+  .input-sm {
+    min-height: 40px;
+    font-size: 16px;
+  }
+
+  .input-md {
+    min-height: 44px;
+  }
+
+  .input-lg {
+    min-height: 50px;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .input {
+    /* Prevent auto-zoom on iOS when focusing inputs */
+    font-size: 16px;
+  }
+
+  .input-sm,
+  .input-md,
+  .input-lg {
+    font-size: 16px;
+  }
+
+  .input-label {
+    font-size: 0.9375rem;
+  }
+}

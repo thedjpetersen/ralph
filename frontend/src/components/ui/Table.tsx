@@ -1,4 +1,4 @@
-import { type ReactNode, type HTMLAttributes, type ThHTMLAttributes, type TdHTMLAttributes } from 'react';
+import { type ReactNode, type HTMLAttributes, type ThHTMLAttributes, type TdHTMLAttributes, useRef, useEffect, useState, useCallback } from 'react';
 import './Table.css';
 
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {
@@ -18,6 +18,39 @@ export function Table({
   className = '',
   ...props
 }: TableProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollIndicators = useCallback(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = wrapper;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+
+    // Initial check
+    updateScrollIndicators();
+
+    // Listen for scroll events
+    wrapper.addEventListener('scroll', updateScrollIndicators);
+
+    // Listen for resize events
+    const resizeObserver = new ResizeObserver(updateScrollIndicators);
+    resizeObserver.observe(wrapper);
+
+    return () => {
+      wrapper.removeEventListener('scroll', updateScrollIndicators);
+      resizeObserver.disconnect();
+    };
+  }, [updateScrollIndicators]);
+
   const classes = [
     'table',
     striped && 'table-striped',
@@ -29,8 +62,22 @@ export function Table({
     .filter(Boolean)
     .join(' ');
 
+  const wrapperClasses = [
+    'table-wrapper',
+    canScrollLeft && 'can-scroll-left',
+    canScrollRight && 'can-scroll-right',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <div className="table-wrapper" role="region" aria-label="Data table" tabIndex={0}>
+    <div
+      ref={wrapperRef}
+      className={wrapperClasses}
+      role="region"
+      aria-label="Data table"
+      tabIndex={0}
+    >
       <table className={classes} {...props}>
         {children}
       </table>

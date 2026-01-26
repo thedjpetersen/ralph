@@ -1,5 +1,14 @@
 import '@testing-library/jest-dom'
 
+// Mock ResizeObserver for table scroll indicators
+class ResizeObserverMock {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+
+vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+
 // Mock localStorage for zustand persist middleware
 const localStorageMock = {
   getItem: vi.fn(),

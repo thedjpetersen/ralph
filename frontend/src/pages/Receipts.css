@@ -14,6 +14,30 @@
   gap: 1rem;
 }
 
+.upload-receipts-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #646cff;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.upload-receipts-button:hover {
+  background-color: #747bff;
+}
+
+.upload-receipts-button:active {
+  transform: scale(0.98);
+}
+
 .receipts-header h1 {
   margin: 0 0 0.5rem;
   font-size: 2rem;
@@ -185,6 +209,64 @@
   border: 1px solid #333;
   border-radius: 12px;
   overflow: hidden;
+  position: relative;
+}
+
+/* Mobile horizontal scroll wrapper */
+.receipts-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+
+.receipts-scroll-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.receipts-scroll-wrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.receipts-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.receipts-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Scroll indicators for receipts list */
+.receipts-list::before,
+.receipts-list::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.receipts-list::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.2), transparent);
+}
+
+.receipts-list::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.2), transparent);
+}
+
+.receipts-list.can-scroll-left::before {
+  opacity: 1;
+}
+
+.receipts-list.can-scroll-right::after {
+  opacity: 1;
 }
 
 .receipts-table-header {
@@ -406,13 +488,30 @@
 }
 
 @media (max-width: 768px) {
+  /* Use card-style layout on mobile instead of table */
   .receipts-table-header {
+    display: none;
+  }
+
+  .receipts-scroll-wrapper {
+    overflow-x: visible;
+  }
+
+  .receipts-list::before,
+  .receipts-list::after {
     display: none;
   }
 
   .receipt-row {
     flex-wrap: wrap;
     gap: 0.5rem;
+    /* Touch-friendly row height */
+    min-height: 60px;
+    padding: 0.75rem 1rem;
+  }
+
+  .receipt-row:active {
+    background-color: rgba(100, 108, 255, 0.1);
   }
 
   .col-date {
@@ -454,6 +553,108 @@
 
   .pagination-buttons {
     justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .pagination-button {
+    /* Touch-friendly minimum size */
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.5rem 1rem;
+  }
+
+  .filter-select,
+  .date-input,
+  .search-input {
+    /* Touch-friendly minimum size */
+    min-height: 44px;
+    /* Prevent zoom on iOS */
+    font-size: 16px;
+  }
+
+  .clear-filters-button {
+    min-height: 44px;
+  }
+
+  .receipts-filters {
+    padding: 1rem;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .date-filter {
+    width: 100%;
+  }
+
+  .date-input {
+    width: 100%;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .store-filter {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .upload-receipts-button {
+    /* Mobile: icon only */
+    padding: 0.75rem;
+    border-radius: 50%;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .upload-button-text {
+    display: none;
+  }
+
+  .receipts-header-row {
+    align-items: center;
+  }
+
+  .receipts-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Tablet size - enable horizontal scrolling */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .receipts-scroll-wrapper {
+    min-width: 100%;
+  }
+
+  .receipts-table-header,
+  .receipt-row {
+    min-width: 600px;
+  }
+}
+
+/* Touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .receipt-row {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pagination-button,
+  .filter-select,
+  .date-input,
+  .search-input,
+  .clear-filters-button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .pagination-button:active:not(:disabled) {
+    transform: scale(0.98);
   }
 }
 

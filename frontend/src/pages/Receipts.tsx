@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useReceiptsStore, type ReceiptStatus, type ReceiptSourceType } from '../stores/receipts';
 import { useAccountStore } from '../stores/account';
 import { storesApi, type Store } from '../api/client';
@@ -27,6 +27,7 @@ const SOURCE_OPTIONS: { value: ReceiptSourceType | ''; label: string }[] = [
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 export function Receipts() {
+  const navigate = useNavigate();
   const { currentAccount } = useAccountStore();
   const {
     receipts,
@@ -47,6 +48,9 @@ export function Receipts() {
   const [endDate, setEndDate] = useState('');
   const [merchantFilter, setMerchantFilter] = useState('');
   const [stores, setStores] = useState<Store[]>([]);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollWrapperRef = useRef<HTMLDivElement>(null);
 
   // Load stores for filter dropdown
   useEffect(() => {
@@ -119,6 +123,16 @@ export function Receipts() {
     setPage(1);
   }, [setPage]);
 
+  // Handle scroll indicators for mobile
+  const updateScrollIndicators = useCallback(() => {
+    const wrapper = scrollWrapperRef.current;
+    if (!wrapper) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = wrapper;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+  }, []);
+
   const getStatusClass = (status: ReceiptStatus) => {
     switch (status) {
       case 'processed':
@@ -175,6 +189,24 @@ export function Receipts() {
         r.file_name?.toLowerCase().includes(merchantFilter.toLowerCase())
       )
     : receipts;
+
+  // Update scroll indicators when filtered receipts change
+  useEffect(() => {
+    const wrapper = scrollWrapperRef.current;
+    if (!wrapper) return;
+
+    // Initial check
+    updateScrollIndicators();
+
+    wrapper.addEventListener('scroll', updateScrollIndicators);
+    const resizeObserver = new ResizeObserver(updateScrollIndicators);
+    resizeObserver.observe(wrapper);
+
+    return () => {
+      wrapper.removeEventListener('scroll', updateScrollIndicators);
+      resizeObserver.disconnect();
+    };
+  }, [updateScrollIndicators, filteredReceipts]);
 
   const hasActiveFilters = statusFilter || sourceFilter || storeFilter || startDate || endDate || merchantFilter;
   const totalPages = Math.ceil(total / pageSize);
@@ -237,6 +269,17 @@ export function Receipts() {
               <h1>Receipts</h1>
               <p className="receipts-subtitle">View and manage receipts</p>
             </div>
+            <button
+              className="upload-receipts-button"
+              onClick={() => navigate('/receipts/upload')}
+              aria-label="Upload new receipt"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M10 4v12m0-12L6 8m4-4l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3 14v2a2 2 0 002 2h10a2 2 0 002-2v-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="upload-button-text">Upload</span>
+            </button>
           </div>
         </div>
 
@@ -326,44 +369,46 @@ export function Receipts() {
           </div>
         ) : (
           <>
-            <div className="receipts-list">
-              <div className="receipts-table-header">
-                <div className="table-col col-date">Date</div>
-                <div className="table-col col-merchant">Merchant</div>
-                <div className="table-col col-source">Source</div>
-                <div className="table-col col-amount">Amount</div>
-                <div className="table-col col-status">Status</div>
+            <div className={`receipts-list ${canScrollLeft ? 'can-scroll-left' : ''} ${canScrollRight ? 'can-scroll-right' : ''}`}>
+              <div className="receipts-scroll-wrapper" ref={scrollWrapperRef}>
+                <div className="receipts-table-header">
+                  <div className="table-col col-date">Date</div>
+                  <div className="table-col col-merchant">Merchant</div>
+                  <div className="table-col col-source">Source</div>
+                  <div className="table-col col-amount">Amount</div>
+                  <div className="table-col col-status">Status</div>
+                </div>
+                {filteredReceipts.map((receipt) => (
+                  <Link
+                    key={receipt.id}
+                    to={`/receipts/${receipt.id}`}
+                    className="receipt-row"
+                  >
+                    <div className="table-col col-date">
+                      {formatDate(receipt.receipt_date || receipt.created_at)}
+                    </div>
+                    <div className="table-col col-merchant">
+                      <span className="merchant-name">
+                        {receipt.merchant_name || 'Unknown Merchant'}
+                      </span>
+                      <span className="receipt-filename">{receipt.file_name}</span>
+                    </div>
+                    <div className="table-col col-source">
+                      <span className={`receipt-source ${getSourceClass(receipt.source_type)}`}>
+                        {receipt.source_type}
+                      </span>
+                    </div>
+                    <div className="table-col col-amount">
+                      {formatAmount(receipt.total_amount, receipt.currency)}
+                    </div>
+                    <div className="table-col col-status">
+                      <span className={`receipt-status ${getStatusClass(receipt.status)}`}>
+                        {receipt.status}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
               </div>
-              {filteredReceipts.map((receipt) => (
-                <Link
-                  key={receipt.id}
-                  to={`/receipts/${receipt.id}`}
-                  className="receipt-row"
-                >
-                  <div className="table-col col-date">
-                    {formatDate(receipt.receipt_date || receipt.created_at)}
-                  </div>
-                  <div className="table-col col-merchant">
-                    <span className="merchant-name">
-                      {receipt.merchant_name || 'Unknown Merchant'}
-                    </span>
-                    <span className="receipt-filename">{receipt.file_name}</span>
-                  </div>
-                  <div className="table-col col-source">
-                    <span className={`receipt-source ${getSourceClass(receipt.source_type)}`}>
-                      {receipt.source_type}
-                    </span>
-                  </div>
-                  <div className="table-col col-amount">
-                    {formatAmount(receipt.total_amount, receipt.currency)}
-                  </div>
-                  <div className="table-col col-status">
-                    <span className={`receipt-status ${getStatusClass(receipt.status)}`}>
-                      {receipt.status}
-                    </span>
-                  </div>
-                </Link>
-              ))}
             </div>
 
             <div className="receipts-pagination">
