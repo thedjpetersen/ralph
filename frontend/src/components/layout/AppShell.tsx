@@ -34,6 +34,7 @@ const GhostTonePreview = lazy(() => import('../GhostTonePreview').then(m => ({ d
 const CommentHighlightOverlay = lazy(() => import('../CommentHighlightOverlay').then(m => ({ default: m.CommentHighlightOverlay })));
 const DocumentExportDialog = lazy(() => import('../DocumentExportDialog').then(m => ({ default: m.DocumentExportDialog })));
 const DocumentShareDialog = lazy(() => import('../DocumentShareDialog').then(m => ({ default: m.DocumentShareDialog })));
+const DocumentImportDialog = lazy(() => import('../DocumentImportDialog').then(m => ({ default: m.DocumentImportDialog })));
 const FormattingToolbar = lazy(() => import('../FormattingToolbar').then(m => ({ default: m.FormattingToolbar })));
 const FindReplaceDialog = lazy(() => import('../FindReplaceDialog').then(m => ({ default: m.FindReplaceDialog })));
 const ParagraphFocusOverlay = lazy(() => import('../ParagraphFocusOverlay').then(m => ({ default: m.ParagraphFocusOverlay })));
@@ -367,6 +368,7 @@ export function AppShell({ children }: AppShellProps) {
         <CommentHighlightOverlay />
         <DocumentExportDialog />
         <DocumentShareDialog />
+        <DocumentImportDialog />
         <FormattingToolbar />
         <FindReplaceDialog />
         <ParagraphFocusOverlay />

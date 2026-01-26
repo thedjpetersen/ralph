@@ -38,6 +38,12 @@
   padding: 0.5rem 1rem;
 }
 
+.document-folders-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .document-folders-title {
   font-size: 0.75rem;
   font-weight: 600;

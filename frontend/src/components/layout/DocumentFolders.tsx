@@ -3,6 +3,7 @@ import { useDocumentFoldersStore, type FolderTreeNode } from '../../stores/docum
 import { useAccountStore } from '../../stores/account';
 import { useDocumentExportStore } from '../../stores/documentExport';
 import { useDocumentShareStore } from '../../stores/documentShare';
+import { useDocumentImportStore } from '../../stores/documentImport';
 import { useStarredDocumentsStore, type StarredDocument } from '../../stores/starredDocuments';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import './DocumentFolders.css';
@@ -59,6 +60,13 @@ const ExportIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
     <path d="M12 8v4a1 1 0 01-1 1H3a1 1 0 01-1-1V8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M4 5l3-3 3 3M7 2v8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ImportIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M12 8v4a1 1 0 01-1 1H3a1 1 0 01-1-1V8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M10 5l-3 3-3-3M7 8V0" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -467,6 +475,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
   } = useDocumentFoldersStore();
   const { openExportDialog } = useDocumentExportStore();
   const { openShareDialog } = useDocumentShareStore();
+  const { openImportDialog } = useDocumentImportStore();
   const { starredDocuments, toggleStar, isStarred } = useStarredDocumentsStore();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -595,6 +604,10 @@ You can export this document to any of these formats using the export dialog.`;
     openShareDialog(folderId, folderName);
   }, [openShareDialog]);
 
+  const handleImport = useCallback(() => {
+    openImportDialog();
+  }, [openImportDialog]);
+
   const handleToggleStar = useCallback((folderId: string, folderName: string) => {
     toggleStar(folderId, folderName, 'folder');
   }, [toggleStar]);
@@ -676,14 +689,24 @@ You can export this document to any of these formats using the export dialog.`;
 
       <div className="document-folders-header">
         <span className="document-folders-title">Documents</span>
-        <button
-          className="document-folders-add-btn"
-          onClick={handleCreateFolder}
-          aria-label="Create new folder"
-          title="New folder"
-        >
-          <PlusIcon />
-        </button>
+        <div className="document-folders-header-actions">
+          <button
+            className="document-folders-add-btn"
+            onClick={handleImport}
+            aria-label="Import documents"
+            title="Import"
+          >
+            <ImportIcon />
+          </button>
+          <button
+            className="document-folders-add-btn"
+            onClick={handleCreateFolder}
+            aria-label="Create new folder"
+            title="New folder"
+          >
+            <PlusIcon />
+          </button>
+        </div>
       </div>
 
       {error && (
