@@ -12,6 +12,7 @@ import { BlockEditor } from '../components/BlockEditor';
 import { EditorPreferencesPanel } from '../components/EditorPreferencesPanel';
 import { Button } from '../components/ui/Button';
 import { useBlockDragStore, selectCanUndo } from '../stores/blockDrag';
+import { useDocumentPreviewUpdater } from '../stores/documentPreviews';
 import { toast } from '../stores/toast';
 import './BlockDragDemo.css';
 
@@ -118,6 +119,9 @@ export function BlockDragDemo() {
   const [showPreferences, setShowPreferences] = useState(false);
   const canUndo = useBlockDragStore(selectCanUndo);
   const { undo } = useBlockDragStore();
+
+  // Update document preview when content changes
+  useDocumentPreviewUpdater('block-drag-demo', 'Block Drag Demo', content);
 
   // Handle undo
   const handleUndo = useCallback(() => {

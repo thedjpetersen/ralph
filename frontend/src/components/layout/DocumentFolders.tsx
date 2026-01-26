@@ -5,10 +5,12 @@ import { useDocumentExportStore } from '../../stores/documentExport';
 import { useDocumentShareStore } from '../../stores/documentShare';
 import { useDocumentImportStore } from '../../stores/documentImport';
 import { useStarredDocumentsStore, type StarredDocument } from '../../stores/starredDocuments';
+import { useDocumentPreviewsStore } from '../../stores/documentPreviews';
 import { useContextMenuStore } from '../../stores/contextMenu';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ContextMenu, type ContextMenuItem } from '../ui/ContextMenu';
 import { EmptyState, DocumentIllustration } from '../ui/EmptyState';
+import { DocumentGrid, ViewToggle } from '../DocumentGrid';
 import { toast } from '../../stores/toast';
 import './DocumentFolders.css';
 
@@ -612,6 +614,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
   const { openShareDialog } = useDocumentShareStore();
   const { openImportDialog } = useDocumentImportStore();
   const { starredDocuments, toggleStar, isStarred, renameStarred } = useStarredDocumentsStore();
+  const { viewMode, setViewMode } = useDocumentPreviewsStore();
 
   const [isCreating, setIsCreating] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -923,6 +926,7 @@ You can export this document to any of these formats using the export dialog.`;
       <div className="document-folders-header">
         <span className="document-folders-title">Documents</span>
         <div className="document-folders-header-actions">
+          <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           <button
             className="document-folders-add-btn"
             onClick={handleImport}
@@ -948,71 +952,87 @@ You can export this document to any of these formats using the export dialog.`;
         </div>
       )}
 
-      <div
-        className={`document-folders-tree ${dropTargetFolderId === 'root' ? 'drop-target' : ''}`}
-        role="tree"
-        aria-label="Document folders"
-        onDragOver={handleRootDragOver}
-        onDragLeave={handleRootDragLeave}
-        onDrop={handleRootDrop}
-      >
-        {isLoading && folderTree.length === 0 ? (
-          <div className="document-folders-loading">Loading...</div>
-        ) : folderTree.length === 0 && !isCreating ? (
-          <EmptyState
-            illustration={<DocumentIllustration />}
-            title="Create your first document"
-            description="Organize your writing with folders and start creating amazing content."
-            action={{
-              label: 'New Folder',
-              onClick: handleCreateFolder,
-            }}
-            size="small"
-            className="document-folders-empty-state"
-          />
-        ) : (
-          <>
-            {folderTree.map((folder) => (
-              <FolderItem
-                key={folder.id}
-                folder={folder}
-                level={0}
-                isCollapsed={isCollapsed}
-                onCreateSubfolder={handleCreateSubfolder}
-                onRename={handleRename}
-                onDelete={handleDeleteRequest}
-                onExport={handleExport}
-                onShare={handleShare}
-                onDuplicate={handleDuplicate}
-                onOpen={handleOpen}
-                checkIsStarred={checkIsStarred}
-                onToggleStar={handleToggleStar}
-              />
-            ))}
-          </>
-        )}
+      {/* Grid View */}
+      {viewMode === 'grid' && (
+        <DocumentGrid
+          items={folderTree}
+          isLoading={isLoading}
+          checkIsStarred={checkIsStarred}
+          onOpen={handleOpen}
+          onToggleStar={handleToggleStar}
+          onContextMenu={(id, name, docCount) => handleDeleteRequest(id, name, docCount)}
+          onCreateFolder={handleCreateFolder}
+        />
+      )}
 
-        {isCreating && (
-          <div
-            className="folder-item new-folder"
-            style={{ paddingLeft: createParentId ? '28px' : '12px' }}
-          >
-            <span className="folder-icon">
-              <FolderIcon />
-            </span>
-            <input
-              ref={newFolderInputRef}
-              type="text"
-              className="folder-name-input"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              onBlur={handleSubmitNewFolder}
-              onKeyDown={handleNewFolderKeyDown}
-              placeholder="Folder name"
+      {/* List View (Tree) */}
+      {viewMode === 'list' && (
+        <div
+          className={`document-folders-tree ${dropTargetFolderId === 'root' ? 'drop-target' : ''}`}
+          role="tree"
+          aria-label="Document folders"
+          onDragOver={handleRootDragOver}
+          onDragLeave={handleRootDragLeave}
+          onDrop={handleRootDrop}
+        >
+          {isLoading && folderTree.length === 0 ? (
+            <div className="document-folders-loading">Loading...</div>
+          ) : folderTree.length === 0 && !isCreating ? (
+            <EmptyState
+              illustration={<DocumentIllustration />}
+              title="Create your first document"
+              description="Organize your writing with folders and start creating amazing content."
+              action={{
+                label: 'New Folder',
+                onClick: handleCreateFolder,
+              }}
+              size="small"
+              className="document-folders-empty-state"
             />
-          </div>
-        )}
-      </div>
+          ) : (
+            <>
+              {folderTree.map((folder) => (
+                <FolderItem
+                  key={folder.id}
+                  folder={folder}
+                  level={0}
+                  isCollapsed={isCollapsed}
+                  onCreateSubfolder={handleCreateSubfolder}
+                  onRename={handleRename}
+                  onDelete={handleDeleteRequest}
+                  onExport={handleExport}
+                  onShare={handleShare}
+                  onDuplicate={handleDuplicate}
+                  onOpen={handleOpen}
+                  checkIsStarred={checkIsStarred}
+                  onToggleStar={handleToggleStar}
+                />
+              ))}
+            </>
+          )}
+
+          {isCreating && (
+            <div
+              className="folder-item new-folder"
+              style={{ paddingLeft: createParentId ? '28px' : '12px' }}
+            >
+              <span className="folder-icon">
+                <FolderIcon />
+              </span>
+              <input
+                ref={newFolderInputRef}
+                type="text"
+                className="folder-name-input"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onBlur={handleSubmitNewFolder}
+                onKeyDown={handleNewFolderKeyDown}
+                placeholder="Folder name"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Delete folder confirmation dialog */}
       <ConfirmDialog
