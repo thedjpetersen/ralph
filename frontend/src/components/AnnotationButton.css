@@ -1,0 +1,115 @@
+/* Annotation Button Styles */
+
+.annotation-button {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-gray-400, #9ca3af);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  z-index: 5;
+}
+
+.annotation-button-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.annotation-button:hover {
+  background: var(--color-gray-100, #f3f4f6);
+  color: var(--color-gray-600, #4b5563);
+}
+
+.annotation-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-blue-500, #3b82f6);
+}
+
+.annotation-button:active {
+  background: var(--color-gray-200, #e5e7eb);
+}
+
+/* Has annotation state */
+.annotation-button-has-note {
+  color: var(--color-amber-500, #f59e0b);
+}
+
+.annotation-button-has-note:hover {
+  color: var(--color-amber-600, #d97706);
+  background: var(--color-amber-50, #fffbeb);
+}
+
+/* Always show button if block has annotation */
+.block-wrapper:hover .annotation-button-has-note,
+.annotation-button-has-note.annotation-button-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Icon styling */
+.annotation-button-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.annotation-button-icon-filled {
+  fill: currentColor;
+}
+
+/* Count badge */
+.annotation-button-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
+  text-align: center;
+  color: white;
+  background: var(--color-amber-500, #f59e0b);
+  border-radius: 7px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .annotation-button {
+    color: var(--color-gray-500, #6b7280);
+  }
+
+  .annotation-button:hover {
+    background: var(--color-gray-700, #374151);
+    color: var(--color-gray-300, #d1d5db);
+  }
+
+  .annotation-button-has-note {
+    color: var(--color-amber-400, #fbbf24);
+  }
+
+  .annotation-button-has-note:hover {
+    color: var(--color-amber-300, #fcd34d);
+    background: rgba(251, 191, 36, 0.1);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .annotation-button {
+    transition: none;
+  }
+}

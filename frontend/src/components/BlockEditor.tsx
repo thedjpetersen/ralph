@@ -2,7 +2,7 @@
  * BlockEditor Component
  *
  * Renders markdown content as draggable blocks that can be reordered.
- * Combines block parsing, drag-and-drop, and undo functionality.
+ * Combines block parsing, drag-and-drop, undo functionality, and annotations.
  */
 
 import {
@@ -10,6 +10,7 @@ import {
   useCallback,
   useEffect,
   createElement,
+  useState,
   type DragEvent,
 } from 'react';
 import { BlockWrapper } from './BlockWrapper';
@@ -24,12 +25,14 @@ import {
   type Block,
   type BlockType,
 } from '../stores/blockDrag';
+import { useBlockAnnotationsStore, useBlockAnnotations } from '../stores/blockAnnotations';
 import { useContextMenuStore } from '../stores/contextMenu';
 import { ContextMenu, type ContextMenuItem } from './ui/ContextMenu';
 import { toast } from '../stores/toast';
 import { useEditorStyles } from '../hooks/useEditorStyles';
 import { useAIParagraphReorderStore } from '../stores/aiParagraphReorder';
 import { AIParagraphReorderPanel } from './AIParagraphReorderPanel';
+import { AddAnnotationModal } from './AddAnnotationModal';
 import './BlockEditor.css';
 
 // Context menu icons
@@ -78,6 +81,10 @@ interface BlockEditorProps {
   className?: string;
   /** Whether block dragging is enabled */
   enableDrag?: boolean;
+  /** Document ID for annotations */
+  documentId?: string;
+  /** Whether annotations are enabled */
+  enableAnnotations?: boolean;
 }
 
 /**
@@ -135,9 +142,25 @@ export function BlockEditor({
   onChange,
   className = '',
   enableDrag = true,
+  documentId = 'default',
+  enableAnnotations = true,
 }: BlockEditorProps) {
   // Get editor style settings
   const { style: editorStyle } = useEditorStyles();
+
+  // Annotation state
+  const [addAnnotationModalOpen, setAddAnnotationModalOpen] = useState(false);
+  const [annotationTargetBlockId, setAnnotationTargetBlockId] = useState<string | null>(null);
+  const [annotationTargetContent, setAnnotationTargetContent] = useState<string>('');
+
+  // Get annotation state and actions
+  const { highlightedBlockId } = useBlockAnnotations();
+  const {
+    addAnnotation,
+    getAnnotationsForBlock,
+    openPanel: openAnnotationsPanel,
+    focusAnnotation,
+  } = useBlockAnnotationsStore();
 
   // Get drag state from store
   const isDragging = useBlockDragStore(selectIsDragging);
@@ -238,6 +261,42 @@ export function BlockEditor({
     openReorderPanel(content, onChange);
     closeMenu();
   }, [content, onChange, openReorderPanel, closeMenu]);
+
+  // Annotation handlers
+  const handleAddAnnotation = useCallback((blockId: string) => {
+    if (!enableAnnotations) return;
+    const block = blocks.find(b => b.id === blockId);
+    setAnnotationTargetBlockId(blockId);
+    setAnnotationTargetContent(block?.content.substring(0, 100) || '');
+    setAddAnnotationModalOpen(true);
+  }, [enableAnnotations, blocks]);
+
+  const handleViewAnnotation = useCallback((blockId: string) => {
+    if (!enableAnnotations) return;
+    // Get the first annotation for this block and focus it
+    const annotations = getAnnotationsForBlock(documentId, blockId);
+    if (annotations.length > 0) {
+      focusAnnotation(annotations[0].id);
+      openAnnotationsPanel();
+    }
+  }, [enableAnnotations, documentId, getAnnotationsForBlock, focusAnnotation, openAnnotationsPanel]);
+
+  const handleSaveAnnotation = useCallback((text: string) => {
+    if (annotationTargetBlockId) {
+      addAnnotation(documentId, annotationTargetBlockId, text);
+      toast.success('Note added');
+      openAnnotationsPanel();
+    }
+    setAddAnnotationModalOpen(false);
+    setAnnotationTargetBlockId(null);
+    setAnnotationTargetContent('');
+  }, [documentId, annotationTargetBlockId, addAnnotation, openAnnotationsPanel]);
+
+  const handleCloseAnnotationModal = useCallback(() => {
+    setAddAnnotationModalOpen(false);
+    setAnnotationTargetBlockId(null);
+    setAnnotationTargetContent('');
+  }, []);
 
   // Build context menu items
   const editorContextMenuItems: ContextMenuItem[] = useMemo(() => {
@@ -407,6 +466,9 @@ export function BlockEditor({
           dropTargetIndex === index && dropPosition === 'before';
         const showDropAfter =
           dropTargetIndex === index && dropPosition === 'after';
+        const blockAnnotations = enableAnnotations ? getAnnotationsForBlock(documentId, block.id) : [];
+        const blockHasAnnotation = blockAnnotations.length > 0;
+        const isHighlighted = highlightedBlockId === block.id;
 
         return (
           <BlockWrapper
@@ -424,6 +486,11 @@ export function BlockEditor({
             onDrop={handleDrop}
             showDropBefore={showDropBefore}
             showDropAfter={showDropAfter}
+            hasAnnotation={blockHasAnnotation}
+            annotationCount={blockAnnotations.length}
+            onAddAnnotation={enableAnnotations ? handleAddAnnotation : undefined}
+            onViewAnnotation={enableAnnotations ? handleViewAnnotation : undefined}
+            isHighlighted={isHighlighted}
           >
             {renderBlockContent(block)}
           </BlockWrapper>
@@ -441,6 +508,16 @@ export function BlockEditor({
 
       {/* AI Paragraph Reorder Panel */}
       <AIParagraphReorderPanel />
+
+      {/* Add Annotation Modal */}
+      {enableAnnotations && (
+        <AddAnnotationModal
+          isOpen={addAnnotationModalOpen}
+          onClose={handleCloseAnnotationModal}
+          onSave={handleSaveAnnotation}
+          blockPreview={annotationTargetContent}
+        />
+      )}
     </div>
   );
 }

@@ -6,15 +6,17 @@
  * Now includes enhanced undo/redo with history visualization panel.
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { PageTransition } from '../components/PageTransition';
 import { GhostTextTextarea } from '../components/GhostTextTextarea';
 import { BlockEditor } from '../components/BlockEditor';
 import { EditorPreferencesPanel } from '../components/EditorPreferencesPanel';
 import { EditorHistoryPanel } from '../components/EditorHistoryPanel';
 import { StickyDocumentHeader } from '../components/StickyDocumentHeader';
+import { AnnotationsPanel } from '../components/AnnotationsPanel';
 import { Button } from '../components/ui/Button';
-import { useBlockDragStore } from '../stores/blockDrag';
+import { useBlockDragStore, parseBlocks } from '../stores/blockDrag';
+import { useBlockAnnotations } from '../stores/blockAnnotations';
 import {
   useEditorHistoryStore,
   useEditorHistory,
@@ -148,11 +150,39 @@ const SettingsIcon = () => (
   </svg>
 );
 
+const NotesIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path
+      d="M11 2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M11 2v4h-2M5.5 7h5M5.5 10h3"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const DOCUMENT_ID = 'block-drag-demo';
+
 export function BlockDragDemo() {
   const [content, setContent] = useState(SAMPLE_CONTENT);
   const [showRawEditor, setShowRawEditor] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
+  const [showAnnotations, setShowAnnotations] = useState(false);
   const isInitialized = useRef(false);
+
+  // Annotations panel state
+  const { isPanelOpen: annotationsPanelOpen } = useBlockAnnotations();
+
+  // Parse blocks for the annotations panel
+  const blocks = useMemo(() => parseBlocks(content), [content]);
 
   // Block drag store for legacy undo (block reordering)
   const { pushUndo: pushBlockUndo } = useBlockDragStore();
@@ -314,6 +344,15 @@ export function BlockDragDemo() {
         History
       </Button>
       <Button
+        variant={annotationsPanelOpen || showAnnotations ? 'primary' : 'secondary'}
+        onClick={() => setShowAnnotations(!showAnnotations)}
+        className="notes-btn"
+        title="Toggle Notes Panel"
+      >
+        <NotesIcon />
+        Notes
+      </Button>
+      <Button
         variant="ghost"
         onClick={() => setShowPreferences(true)}
         className="preferences-btn"
@@ -360,35 +399,51 @@ export function BlockDragDemo() {
         </section>
 
         <section className="demo-editor-section">
-
-          {showRawEditor ? (
-            <div className="block-drag-demo-raw-editor">
-              <label className="demo-editor-label">Raw Markdown</label>
-              <GhostTextTextarea
-                fieldId="block-drag-raw"
-                value={content}
-                onChange={handleRawContentChange}
-                placeholder="Enter markdown content..."
-                rows={25}
-                className="raw-markdown-textarea"
-                enableSuggestions={false}
-              />
+          <div className={`demo-editor-layout ${showAnnotations ? 'with-sidebar' : ''}`}>
+            <div className="demo-editor-main">
+              {showRawEditor ? (
+                <div className="block-drag-demo-raw-editor">
+                  <label className="demo-editor-label">Raw Markdown</label>
+                  <GhostTextTextarea
+                    fieldId="block-drag-raw"
+                    value={content}
+                    onChange={handleRawContentChange}
+                    placeholder="Enter markdown content..."
+                    rows={25}
+                    className="raw-markdown-textarea"
+                    enableSuggestions={false}
+                  />
+                </div>
+              ) : (
+                <div className="block-drag-demo-block-editor">
+                  <label className="demo-editor-label">
+                    Block Editor
+                    <span className="demo-editor-hint">(Hover blocks to reveal drag handles and note icons)</span>
+                  </label>
+                  <div className="block-editor-container">
+                    <BlockEditor
+                      content={content}
+                      onChange={handleContentChange}
+                      enableDrag={true}
+                      documentId={DOCUMENT_ID}
+                      enableAnnotations={true}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="block-drag-demo-block-editor">
-              <label className="demo-editor-label">
-                Block Editor
-                <span className="demo-editor-hint">(Hover blocks to reveal drag handles)</span>
-              </label>
-              <div className="block-editor-container">
-                <BlockEditor
-                  content={content}
-                  onChange={handleContentChange}
-                  enableDrag={true}
+            {showAnnotations && (
+              <aside className="demo-editor-sidebar">
+                <AnnotationsPanel
+                  documentId={DOCUMENT_ID}
+                  documentTitle="Block Drag Demo"
+                  blocks={blocks}
+                  isCollapsed={false}
+                  onToggleCollapse={() => setShowAnnotations(false)}
                 />
-              </div>
-            </div>
-          )}
+              </aside>
+            )}
+          </div>
         </section>
 
         <section className="demo-block-types">

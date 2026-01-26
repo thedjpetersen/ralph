@@ -30,6 +30,22 @@
   background: rgba(59, 130, 246, 0.05);
 }
 
+/* Highlighted state - when annotation is focused in sidebar */
+.block-wrapper-highlighted {
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid var(--color-amber-500, #f59e0b);
+  animation: block-highlight-pulse 2s ease-out;
+}
+
+@keyframes block-highlight-pulse {
+  0% {
+    background: rgba(245, 158, 11, 0.25);
+  }
+  100% {
+    background: rgba(245, 158, 11, 0.1);
+  }
+}
+
 /* Content container */
 .block-wrapper-content {
   min-height: 1.5em;
@@ -84,6 +100,20 @@
   .block-wrapper-blockquote .block-wrapper-content {
     border-left-color: var(--color-gray-600, #4b5563);
     color: var(--color-gray-400, #9ca3af);
+  }
+
+  .block-wrapper-highlighted {
+    background: rgba(245, 158, 11, 0.15);
+    border-left-color: var(--color-amber-400, #fbbf24);
+  }
+
+  @keyframes block-highlight-pulse {
+    0% {
+      background: rgba(245, 158, 11, 0.3);
+    }
+    100% {
+      background: rgba(245, 158, 11, 0.15);
+    }
   }
 }
 

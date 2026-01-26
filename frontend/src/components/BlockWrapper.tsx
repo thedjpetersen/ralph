@@ -3,6 +3,7 @@
  *
  * Wraps a content block with drag handle and drop zone functionality.
  * Handles hover state, drag events, and drop target indicators.
+ * Includes annotation button for adding private notes to blocks.
  */
 
 import {
@@ -14,6 +15,7 @@ import {
 } from 'react';
 import { DragHandle } from './DragHandle';
 import { DropIndicator } from './DropIndicator';
+import { AnnotationButton } from './AnnotationButton';
 import type { BlockType } from '../stores/blockDrag';
 import './BlockWrapper.css';
 
@@ -46,6 +48,16 @@ interface BlockWrapperProps {
   showDropBefore: boolean;
   /** Whether the drop indicator should show after this block */
   showDropAfter: boolean;
+  /** Whether this block has annotations */
+  hasAnnotation?: boolean;
+  /** Number of annotations on this block */
+  annotationCount?: number;
+  /** Called when clicking the annotation button to add a note */
+  onAddAnnotation?: (blockId: string) => void;
+  /** Called when clicking the annotation button to view existing notes */
+  onViewAnnotation?: (blockId: string) => void;
+  /** Whether this block is highlighted (from clicking an annotation in the sidebar) */
+  isHighlighted?: boolean;
 }
 
 export function BlockWrapper({
@@ -63,6 +75,11 @@ export function BlockWrapper({
   onDrop,
   showDropBefore,
   showDropAfter,
+  hasAnnotation = false,
+  annotationCount = 0,
+  onAddAnnotation,
+  onViewAnnotation,
+  isHighlighted = false,
 }: BlockWrapperProps) {
   const [isHovered, setIsHovered] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -132,12 +149,20 @@ export function BlockWrapper({
 
   const showHandle = isHovered || isDragging;
 
+  const handleAddAnnotation = useCallback(() => {
+    onAddAnnotation?.(blockId);
+  }, [blockId, onAddAnnotation]);
+
+  const handleViewAnnotation = useCallback(() => {
+    onViewAnnotation?.(blockId);
+  }, [blockId, onViewAnnotation]);
+
   return (
     <div
       ref={wrapperRef}
       className={`block-wrapper ${isDragging ? 'block-wrapper-dragging' : ''} ${
         isAnyDragging && !isDragging ? 'block-wrapper-drag-active' : ''
-      } block-wrapper-${blockType}`}
+      } ${isHighlighted ? 'block-wrapper-highlighted' : ''} block-wrapper-${blockType}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onDragOver={handleDragOver}
@@ -159,6 +184,17 @@ export function BlockWrapper({
       <div className="block-wrapper-content">
         {children}
       </div>
+
+      {onAddAnnotation && (
+        <AnnotationButton
+          blockId={blockId}
+          isVisible={showHandle || hasAnnotation}
+          hasAnnotation={hasAnnotation}
+          annotationCount={annotationCount}
+          onAddAnnotation={handleAddAnnotation}
+          onViewAnnotation={handleViewAnnotation}
+        />
+      )}
 
       {showDropAfter && <DropIndicator position="after" />}
     </div>
