@@ -7,6 +7,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 import { useAISuggestionStore, useAISuggestion } from '../stores/aiSuggestions';
+import { useSmartTypographyStore } from '../stores/smartTypography';
 import './GhostTextTextarea.css';
 
 export interface GhostTextTextareaProps
@@ -23,6 +24,8 @@ export interface GhostTextTextareaProps
   debounceMs?: number;
   /** Whether AI suggestions are enabled (default: true) */
   enableSuggestions?: boolean;
+  /** Whether smart typography is enabled (default: true) */
+  enableSmartTypography?: boolean;
 }
 
 export function GhostTextTextarea({
@@ -32,6 +35,7 @@ export function GhostTextTextarea({
   context,
   debounceMs = 500,
   enableSuggestions = true,
+  enableSmartTypography = true,
   className = '',
   onKeyDown,
   ...props
@@ -39,10 +43,12 @@ export function GhostTextTextarea({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousValueRef = useRef(value);
+  const skipTypographyRef = useRef(false);
 
   const suggestion = useAISuggestion(fieldId);
   const { fetchSuggestion, fetchContinueWriting, dismissSuggestion, acceptSuggestion, acceptPartialSuggestion } =
     useAISuggestionStore();
+  const smartTypography = useSmartTypographyStore();
 
   // Debounced fetch suggestion
   const debouncedFetchSuggestion = useCallback(
@@ -63,7 +69,27 @@ export function GhostTextTextarea({
   // Handle value changes
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
-      const newValue = e.target.value;
+      let newValue = e.target.value;
+      const cursorPosition = e.target.selectionStart;
+
+      // Apply smart typography if enabled (and not skipped due to undo)
+      if (enableSmartTypography && smartTypography.isEnabled && !skipTypographyRef.current) {
+        const result = smartTypography.processInput(newValue, cursorPosition);
+        if (result) {
+          newValue = result.text;
+          // Update the textarea value and cursor position
+          e.target.value = newValue;
+          e.target.setSelectionRange(result.cursorPosition, result.cursorPosition);
+        } else {
+          // Update previous text even if no transformation occurred
+          smartTypography.setPreviousText(newValue);
+        }
+      } else {
+        // Update previous text tracking
+        smartTypography.setPreviousText(newValue);
+        skipTypographyRef.current = false;
+      }
+
       onChange(newValue);
 
       // Dismiss existing suggestion when typing continues
@@ -74,7 +100,7 @@ export function GhostTextTextarea({
       // Trigger new suggestion fetch
       debouncedFetchSuggestion(newValue);
     },
-    [onChange, suggestion, fieldId, dismissSuggestion, debouncedFetchSuggestion]
+    [onChange, suggestion, fieldId, dismissSuggestion, debouncedFetchSuggestion, enableSmartTypography, smartTypography]
   );
 
   // Handle keyboard shortcuts
@@ -84,6 +110,30 @@ export function GhostTextTextarea({
       if (onKeyDown) {
         onKeyDown(e);
         if (e.defaultPrevented) return;
+      }
+
+      // Cmd/Ctrl + Z: Undo typography transformation (if available)
+      if (e.key === 'z' && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
+        if (enableSmartTypography && smartTypography.canUndo()) {
+          e.preventDefault();
+          const undoEntry = smartTypography.undo();
+          if (undoEntry) {
+            // Skip typography processing for this undo
+            skipTypographyRef.current = true;
+            onChange(undoEntry.originalText);
+            // Restore cursor position after React updates
+            requestAnimationFrame(() => {
+              if (textareaRef.current) {
+                textareaRef.current.setSelectionRange(
+                  undoEntry.originalCursorPosition,
+                  undoEntry.originalCursorPosition
+                );
+              }
+            });
+          }
+          return;
+        }
+        // If no typography undo, let browser handle native undo
       }
 
       // Cmd/Ctrl + Shift + Enter: Trigger AI continue writing
@@ -138,8 +188,10 @@ export function GhostTextTextarea({
       onChange,
       value,
       enableSuggestions,
+      enableSmartTypography,
       fetchContinueWriting,
       context,
+      smartTypography,
     ]
   );
 

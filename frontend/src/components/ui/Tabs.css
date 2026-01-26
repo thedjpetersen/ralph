@@ -1,0 +1,152 @@
+/* Tabs Container */
+.tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.tabs-horizontal {
+  flex-direction: column;
+}
+
+.tabs-vertical {
+  flex-direction: row;
+}
+
+/* Tab List */
+.tab-list {
+  display: flex;
+  border-bottom: 1px solid #444;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.tabs-vertical .tab-list {
+  flex-direction: column;
+  border-bottom: none;
+  border-right: 1px solid #444;
+}
+
+/* Tab Button - Nav Link Stripe Pattern */
+.tab {
+  position: relative;
+  padding: 1rem 1.5rem;
+  background-color: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.tab:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tab:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+/* Selected Tab - Nav Link Stripe */
+.tab-selected {
+  color: #646cff;
+  background-color: rgba(100, 108, 255, 0.1);
+}
+
+/* Horizontal stripe (bottom border) */
+.tabs-horizontal .tab-selected {
+  border-bottom: 2px solid #646cff;
+  margin-bottom: -1px;
+}
+
+/* Vertical stripe (right border) */
+.tabs-vertical .tab-selected {
+  border-right: 2px solid #646cff;
+  margin-right: -1px;
+}
+
+/* Disabled Tab */
+.tab-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tab-disabled:hover {
+  background-color: transparent;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Tab Panels Container */
+.tab-panels {
+  flex: 1;
+}
+
+.tabs-vertical .tab-panels {
+  padding-left: 1rem;
+}
+
+/* Tab Panel */
+.tab-panel {
+  padding: 1.5rem 0;
+}
+
+.tab-panel[hidden] {
+  display: none;
+}
+
+.tabs-vertical .tab-panel {
+  padding: 0 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tab-list {
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    flex: 1 1 auto;
+    min-width: 50%;
+    text-align: center;
+  }
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  .tab-list {
+    border-bottom-color: #ddd;
+  }
+
+  .tabs-vertical .tab-list {
+    border-right-color: #ddd;
+  }
+
+  .tab {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .tab:hover:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .tab-selected {
+    color: #646cff;
+    background-color: rgba(100, 108, 255, 0.1);
+  }
+
+  .tab-disabled {
+    color: rgba(0, 0, 0, 0.3);
+  }
+
+  .tab-disabled:hover {
+    background-color: transparent;
+    color: rgba(0, 0, 0, 0.3);
+  }
+}

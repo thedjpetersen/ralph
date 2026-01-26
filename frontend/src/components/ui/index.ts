@@ -29,3 +29,15 @@ export {
 export { Checkbox, type CheckboxProps, type CheckboxSize } from './Checkbox';
 export { Radio, RadioGroup, type RadioProps, type RadioGroupProps, type RadioSize } from './Radio';
 export { Switch, type SwitchProps, type SwitchSize } from './Switch';
+export {
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+  type TabsProps,
+  type TabListProps,
+  type TabProps,
+  type TabPanelsProps,
+  type TabPanelProps,
+} from './Tabs';
