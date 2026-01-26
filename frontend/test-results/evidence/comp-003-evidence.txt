@@ -1,0 +1,87 @@
+=== COMP-003: Checkbox, Radio, Switch Components ===
+Evidence captured: 2026-01-25
+
+=== Validation Results ===
+
+1. TYPECHECK: ✅ PASSED
+   npm run typecheck - No errors
+
+2. BUILD: ✅ PASSED
+   npm run build - Built successfully in 3.19s
+
+3. LINT: ✅ PASSED
+   npm run lint - No warnings or errors
+
+4. TESTS: ✅ PASSED
+   All 648 tests passed (including component tests)
+
+=== Component Test Summary ===
+
+Checkbox.test.tsx: 18 tests passed
+- Rendering (checkbox, label, hint, error)
+- Sizes (sm, md, lg)
+- States (checked, disabled, aria-invalid)
+- Indeterminate state
+- Interactions (onChange, disabled)
+- Accessibility (label association, aria-describedby)
+
+Radio.test.tsx: 22 tests passed
+- Radio rendering (input, label)
+- Sizes (sm, md, lg)
+- States (checked, disabled)
+- Interactions (onChange)
+- RadioGroup rendering (options, label, error, hint)
+- RadioGroup orientation (vertical, horizontal)
+- RadioGroup controlled behavior (value, onChange)
+- RadioGroup disabled state
+- RadioGroup size inheritance
+- Accessibility (fieldset, legend, name association)
+
+Switch.test.tsx: 20 tests passed
+- Rendering (switch, label, description)
+- Sizes (sm, md, lg)
+- Label position (left, right)
+- States (checked, disabled, controlled)
+- Interactions (onChange, toggle)
+- Accessibility (role="switch", label association)
+- Keyboard interaction (space key)
+
+=== Files Created/Modified ===
+
+Created:
+- frontend/src/components/ui/Checkbox.tsx
+- frontend/src/components/ui/Checkbox.css
+- frontend/src/components/ui/Radio.tsx
+- frontend/src/components/ui/Radio.css
+- frontend/src/components/ui/Switch.tsx
+- frontend/src/components/ui/Switch.css
+- frontend/src/components/ui/__tests__/Checkbox.test.tsx
+- frontend/src/components/ui/__tests__/Radio.test.tsx
+- frontend/src/components/ui/__tests__/Switch.test.tsx
+
+Modified:
+- frontend/src/components/ui/index.ts (exports added)
+
+=== Component Features ===
+
+All components include:
+✅ Label support
+✅ Disabled states
+✅ Size variants (sm, md, lg)
+✅ Proper accessibility (ARIA attributes)
+✅ forwardRef for ref forwarding
+✅ Exported from index.ts
+
+Checkbox extras:
+- Error/hint messages
+- Indeterminate state
+
+Radio extras:
+- RadioGroup component
+- Orientation (horizontal/vertical)
+- Controlled/uncontrolled modes
+
+Switch extras:
+- Description text
+- Label position (left/right)
+- role="switch" for accessibility

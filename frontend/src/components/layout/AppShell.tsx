@@ -13,6 +13,7 @@ import { AIToneToolbar } from '../AIToneToolbar';
 import { GhostTonePreview } from '../GhostTonePreview';
 import { CommentHighlightOverlay } from '../CommentHighlightOverlay';
 import { DocumentExportDialog } from '../DocumentExportDialog';
+import { FormattingToolbar } from '../FormattingToolbar';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
@@ -165,6 +166,7 @@ export function AppShell({ children }: AppShellProps) {
       <AIToneToolbar />
       <CommentHighlightOverlay />
       <DocumentExportDialog />
+      <FormattingToolbar />
     </div>
   );
 }

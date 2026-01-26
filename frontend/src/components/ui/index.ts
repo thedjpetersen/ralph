@@ -26,3 +26,6 @@ export {
   type TableCellProps,
   type PaginationProps,
 } from './Table';
+export { Checkbox, type CheckboxProps, type CheckboxSize } from './Checkbox';
+export { Radio, RadioGroup, type RadioProps, type RadioGroupProps, type RadioSize } from './Radio';
+export { Switch, type SwitchProps, type SwitchSize } from './Switch';
