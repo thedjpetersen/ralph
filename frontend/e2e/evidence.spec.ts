@@ -514,6 +514,15 @@ test('capture UI-004 evidence - dark mode settings page', async ({ page }) => {
       version: 0,
     }));
 
+    // Dismiss onboarding tour
+    localStorage.setItem('clockzen-onboarding-storage', JSON.stringify({
+      state: {
+        hasCompletedTour: true,
+        hasDismissedTour: true,
+      },
+      version: 0,
+    }));
+
     // Set appearance settings to dark theme
     localStorage.setItem('clockzen-app-settings', JSON.stringify({
       state: {
@@ -577,6 +586,15 @@ test('capture UI-004 evidence - light mode settings page', async ({ page }) => {
           timezone: 'America/New_York',
           createdAt: new Date().toISOString(),
         },
+      },
+      version: 0,
+    }));
+
+    // Dismiss onboarding tour
+    localStorage.setItem('clockzen-onboarding-storage', JSON.stringify({
+      state: {
+        hasCompletedTour: true,
+        hasDismissedTour: true,
       },
       version: 0,
     }));
