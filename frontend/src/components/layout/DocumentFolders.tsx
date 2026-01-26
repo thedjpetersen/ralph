@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDocumentFoldersStore, type FolderTreeNode } from '../../stores/documentFolders';
 import { useAccountStore } from '../../stores/account';
 import { useDocumentExportStore } from '../../stores/documentExport';
+import { useStarredDocumentsStore, type StarredDocument } from '../../stores/starredDocuments';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import './DocumentFolders.css';
 
@@ -60,6 +61,56 @@ const ExportIcon = () => (
   </svg>
 );
 
+const StarIcon = ({ filled }: { filled?: boolean }) => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className={`star-icon ${filled ? 'star-icon-filled' : ''}`}>
+    <path
+      d="M7 1l1.854 3.854 4.146.602-3 2.927.708 4.117L7 10.5l-3.708 2-0.708-4.117-3-2.927 4.146-.602L7 1z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      fill={filled ? 'currentColor' : 'none'}
+    />
+  </svg>
+);
+
+// Starred Item component for the favorites section
+interface StarredItemProps {
+  item: StarredDocument;
+  onUnstar: (id: string, name: string) => void;
+  isCollapsed: boolean;
+}
+
+function StarredItem({ item, onUnstar, isCollapsed }: StarredItemProps) {
+  const handleUnstar = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onUnstar(item.id, item.name);
+  }, [item.id, item.name, onUnstar]);
+
+  if (isCollapsed) {
+    return null;
+  }
+
+  return (
+    <div
+      className="starred-item"
+      role="listitem"
+    >
+      <span className="folder-icon starred-item-icon">
+        {item.type === 'folder' ? <FolderIcon /> : <FolderIcon />}
+      </span>
+      <span className="starred-item-name">{item.name}</span>
+      <button
+        className="starred-item-unstar"
+        onClick={handleUnstar}
+        aria-label={`Remove ${item.name} from favorites`}
+      >
+        <StarIcon filled />
+      </button>
+    </div>
+  );
+}
+
 interface FolderItemProps {
   folder: FolderTreeNode;
   level: number;
@@ -68,6 +119,8 @@ interface FolderItemProps {
   onRename: (folderId: string, name: string) => void;
   onDelete: (folderId: string, folderName: string, documentCount: number) => void;
   onExport: (folderName: string) => void;
+  checkIsStarred?: (folderId: string) => boolean;
+  onToggleStar?: (folderId: string, folderName: string) => void;
 }
 
 function FolderItem({
@@ -78,6 +131,8 @@ function FolderItem({
   onRename,
   onDelete,
   onExport,
+  checkIsStarred,
+  onToggleStar,
 }: FolderItemProps) {
   const {
     expandedFolderIds,
@@ -105,6 +160,7 @@ function FolderItem({
   const isDragging = draggedFolderId === folder.id;
   const isDropTarget = dropTargetFolderId === folder.id;
   const canHaveChildren = level < 2; // Max 3 levels (0, 1, 2)
+  const isStarred = checkIsStarred?.(folder.id) ?? false;
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -179,6 +235,11 @@ function FolderItem({
     setShowMenu(false);
     onExport(folder.name);
   }, [folder.name, onExport]);
+
+  const handleStarClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleStar?.(folder.id, folder.name);
+  }, [folder.id, folder.name, onToggleStar]);
 
   // Drag handlers
   const handleDragStart = useCallback((e: React.DragEvent) => {
@@ -277,6 +338,16 @@ function FolderItem({
         )}
 
         <div className="folder-actions" ref={menuRef}>
+          {onToggleStar && (
+            <button
+              className={`folder-action-btn folder-star-btn ${isStarred ? 'starred' : ''}`}
+              onClick={handleStarClick}
+              aria-label={isStarred ? 'Remove from favorites' : 'Add to favorites'}
+              aria-pressed={isStarred}
+            >
+              <StarIcon filled={isStarred} />
+            </button>
+          )}
           <button
             className="folder-action-btn"
             onClick={handleMenuClick}
@@ -337,6 +408,8 @@ function FolderItem({
               onRename={onRename}
               onDelete={onDelete}
               onExport={onExport}
+              checkIsStarred={checkIsStarred}
+              onToggleStar={onToggleStar}
             />
           ))}
         </div>
@@ -367,6 +440,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
     moveDocumentToFolder,
   } = useDocumentFoldersStore();
   const { openExportDialog } = useDocumentExportStore();
+  const { starredDocuments, toggleStar, isStarred } = useStarredDocumentsStore();
 
   const [isCreating, setIsCreating] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -490,6 +564,14 @@ You can export this document to any of these formats using the export dialog.`;
     });
   }, [openExportDialog, currentAccount]);
 
+  const handleToggleStar = useCallback((folderId: string, folderName: string) => {
+    toggleStar(folderId, folderName, 'folder');
+  }, [toggleStar]);
+
+  const checkIsStarred = useCallback((folderId: string) => {
+    return isStarred(folderId);
+  }, [isStarred]);
+
   // Root drop zone for moving to root level
   const handleRootDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -535,8 +617,32 @@ You can export this document to any of these formats using the export dialog.`;
     );
   }
 
+  // Filter starred items that are folders
+  const starredFolders = starredDocuments.filter(s => s.type === 'folder');
+
   return (
     <div className="document-folders">
+      {/* Starred Section */}
+      {starredFolders.length > 0 && (
+        <div className="document-folders-starred">
+          <div className="document-folders-header">
+            <span className="document-folders-title">
+              <StarIcon filled /> Favorites
+            </span>
+          </div>
+          <div className="starred-items-list">
+            {starredFolders.map((starred) => (
+              <StarredItem
+                key={starred.id}
+                item={starred}
+                onUnstar={handleToggleStar}
+                isCollapsed={isCollapsed}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="document-folders-header">
         <span className="document-folders-title">Documents</span>
         <button
@@ -581,6 +687,8 @@ You can export this document to any of these formats using the export dialog.`;
                 onRename={handleRename}
                 onDelete={handleDeleteRequest}
                 onExport={handleExport}
+                checkIsStarred={checkIsStarred}
+                onToggleStar={handleToggleStar}
               />
             ))}
           </>

@@ -21,6 +21,8 @@ import { useAIToneAnalyzerStore } from '../../stores/aiToneAnalyzer';
 import { useAIVocabularyEnhancerStore } from '../../stores/aiVocabularyEnhancer';
 import { useAIReadabilityStore } from '../../stores/aiReadability';
 import { useCommentNavigation } from '../../stores/commentHighlight';
+import { useDocumentFoldersStore } from '../../stores/documentFolders';
+import { useStarredDocumentsStore } from '../../stores/starredDocuments';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -61,6 +63,8 @@ export function AppShell({ children }: AppShellProps) {
   const { togglePanel: toggleVocabularyEnhancer, closePanel: closeVocabularyEnhancer } = useAIVocabularyEnhancerStore();
   const { togglePanel: toggleReadability, closePanel: closeReadability } = useAIReadabilityStore();
   const { navigateToNextComment, navigateToPreviousComment } = useCommentNavigation();
+  const { selectedFolderId, folders } = useDocumentFoldersStore();
+  const { toggleStar } = useStarredDocumentsStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -117,6 +121,16 @@ export function AppShell({ children }: AppShellProps) {
     },
     []
   );
+
+  // Toggle star on current selected folder
+  const handleToggleStarCurrentFolder = useCallback(() => {
+    if (selectedFolderId) {
+      const folder = folders.find(f => f.id === selectedFolderId);
+      if (folder) {
+        toggleStar(folder.id, folder.name, 'folder');
+      }
+    }
+  }, [selectedFolderId, folders, toggleStar]);
 
   // Global keyboard shortcuts
   useKeyboardShortcuts([
@@ -258,6 +272,20 @@ export function AppShell({ children }: AppShellProps) {
       ctrlKey: true,
       action: navigateToPreviousComment,
       description: 'Go to previous comment',
+      allowInInput: true,
+    },
+    {
+      key: 'd',
+      metaKey: true,
+      action: handleToggleStarCurrentFolder,
+      description: 'Toggle star on selected folder',
+      allowInInput: true,
+    },
+    {
+      key: 'd',
+      ctrlKey: true,
+      action: handleToggleStarCurrentFolder,
+      description: 'Toggle star on selected folder',
       allowInInput: true,
     },
   ]);
