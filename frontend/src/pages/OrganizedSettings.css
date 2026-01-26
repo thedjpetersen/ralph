@@ -408,8 +408,17 @@
   border-radius: 8px;
 }
 
+.profile-avatar-editable {
+  margin-bottom: 0;
+}
+
 .avatar-container {
   flex-shrink: 0;
+  position: relative;
+}
+
+.avatar-upload {
+  cursor: pointer;
 }
 
 .avatar-image {
@@ -432,6 +441,66 @@
   color: white;
 }
 
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: white;
+}
+
+.avatar-upload:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-loading {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.avatar-input-hidden {
+  display: none;
+}
+
+.avatar-change-btn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.5rem;
+}
+
+.avatar-change-btn:hover {
+  text-decoration: underline;
+}
+
 .avatar-info {
   min-width: 0;
 }
@@ -450,6 +519,70 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Textarea for bio */
+.setting-textarea {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.625rem 1rem;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 6px;
+  color: var(--color-text-primary);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+
+.setting-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-light);
+}
+
+.setting-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Email Section */
+.email-section {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.email-current {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.email-value {
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+}
+
+.email-pending {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-warning);
+  margin-top: 0.5rem;
+}
+
+.email-pending svg {
+  flex-shrink: 0;
+}
+
+.email-change-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .account-form {

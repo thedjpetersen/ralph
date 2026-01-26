@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageTransition } from '../components/PageTransition';
 import { Switch } from '../components/ui/Switch';
@@ -18,6 +18,7 @@ import { useSmartTypographyStore } from '../stores/smartTypography';
 import { useParagraphFocusStore } from '../stores/paragraphFocus';
 import { useTypewriterScrollStore } from '../stores/typewriterScroll';
 import { useKeyboardShortcutsStore } from '../stores/keyboardShortcuts';
+import { useImageUpload } from '../hooks/useImageUpload';
 import { SettingsFormSkeleton } from '../components/skeletons';
 import './OrganizedSettings.css';
 
@@ -758,6 +759,7 @@ function AppearanceSection() {
 // Account Settings Section
 function AccountSection() {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     user,
     preferences,
@@ -765,6 +767,8 @@ function AccountSection() {
     error,
     fetchUser,
     updateUser,
+    updateAvatar,
+    requestEmailChange,
     changePassword,
     deleteAccount,
     logout,
@@ -773,11 +777,22 @@ function AccountSection() {
   // Profile form state
   const [profileData, setProfileData] = useState({
     name: '',
-    email: '',
+    bio: '',
   });
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSuccess, setProfileSuccess] = useState(false);
+
+  // Email change state
+  const [newEmail, setNewEmail] = useState('');
+  const [showEmailChangeModal, setShowEmailChangeModal] = useState(false);
+  const [isRequestingEmailChange, setIsRequestingEmailChange] = useState(false);
+  const [emailChangeError, setEmailChangeError] = useState<string | null>(null);
+  const [emailChangeSuccess, setEmailChangeSuccess] = useState(false);
+
+  // Avatar upload state
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
 
   // Password form state
   const [passwordData, setPasswordData] = useState({
@@ -796,6 +811,24 @@ function AccountSection() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  // Image upload hook
+  const { uploadImage } = useImageUpload({
+    onUploadComplete: async (imageUrl) => {
+      try {
+        await updateAvatar(imageUrl);
+        setIsUploadingAvatar(false);
+        setAvatarError(null);
+      } catch {
+        setAvatarError('Failed to save profile picture');
+        setIsUploadingAvatar(false);
+      }
+    },
+    onUploadError: (err) => {
+      setAvatarError(err);
+      setIsUploadingAvatar(false);
+    },
+  });
+
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
@@ -804,12 +837,37 @@ function AccountSection() {
     if (user) {
       setProfileData({
         name: user.name,
-        email: user.email,
+        bio: user.bio || '',
       });
+      setNewEmail(user.email);
     }
   }, [user]);
 
-  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (profileSuccess) {
+      const timer = setTimeout(() => setProfileSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [profileSuccess]);
+
+  useEffect(() => {
+    if (emailChangeSuccess) {
+      const timer = setTimeout(() => setEmailChangeSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [emailChangeSuccess]);
+
+  useEffect(() => {
+    if (passwordSuccess) {
+      const timer = setTimeout(() => setPasswordSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [passwordSuccess]);
+
+  const handleProfileInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setProfileData((prev) => ({ ...prev, [name]: value }));
     setProfileSuccess(false);
@@ -827,13 +885,65 @@ function AccountSection() {
     try {
       await updateUser({
         name: profileData.name,
-        email: profileData.email,
+        bio: profileData.bio,
       });
       setProfileSuccess(true);
     } catch {
       setProfileError('Failed to save profile');
     } finally {
       setIsSavingProfile(false);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingAvatar(true);
+    setAvatarError(null);
+    await uploadImage(file);
+
+    // Reset input so same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewEmail(e.target.value);
+    setEmailChangeError(null);
+    setEmailChangeSuccess(false);
+  };
+
+  const handleRequestEmailChange = async () => {
+    if (!newEmail || newEmail === user?.email) {
+      setEmailChangeError('Please enter a different email address');
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      setEmailChangeError('Please enter a valid email address');
+      return;
+    }
+
+    setIsRequestingEmailChange(true);
+    setEmailChangeError(null);
+    setEmailChangeSuccess(false);
+
+    try {
+      await requestEmailChange(newEmail);
+      setEmailChangeSuccess(true);
+      setShowEmailChangeModal(false);
+    } catch (err) {
+      setEmailChangeError(err instanceof Error ? err.message : 'Failed to request email change');
+    } finally {
+      setIsRequestingEmailChange(false);
     }
   };
 
@@ -921,13 +1031,13 @@ function AccountSection() {
     <div className="settings-section-content">
       <div className="section-header">
         <h2>Account</h2>
-        <p>Manage your account and security settings</p>
+        <p>Manage your profile and security settings</p>
       </div>
 
       <div className="settings-group">
-        <h3>Profile</h3>
-        <div className="profile-avatar-section">
-          <div className="avatar-container">
+        <h3>Profile Picture</h3>
+        <div className="profile-avatar-section profile-avatar-editable">
+          <div className="avatar-container avatar-upload" onClick={handleAvatarClick}>
             {user?.avatar ? (
               <img src={user.avatar} alt={user.name} className="avatar-image" />
             ) : (
@@ -935,13 +1045,45 @@ function AccountSection() {
                 {user?.name?.charAt(0)?.toUpperCase() || '?'}
               </div>
             )}
+            <div className="avatar-overlay">
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+            </div>
+            {isUploadingAvatar && (
+              <div className="avatar-loading">
+                <div className="avatar-spinner" />
+              </div>
+            )}
           </div>
           <div className="avatar-info">
             <p className="avatar-name">{user?.name || 'User'}</p>
             <p className="avatar-email">{user?.email || ''}</p>
+            <button type="button" className="avatar-change-btn" onClick={handleAvatarClick}>
+              Change photo
+            </button>
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/gif,image/webp"
+            onChange={handleAvatarChange}
+            className="avatar-input-hidden"
+          />
         </div>
+        {avatarError && <div className="form-error">{avatarError}</div>}
+      </div>
 
+      <div className="settings-group">
+        <h3>Profile Information</h3>
         <form onSubmit={handleProfileSubmit} className="account-form">
           <div className="setting-item">
             <label className="setting-label">Display Name</label>
@@ -952,18 +1094,25 @@ function AccountSection() {
               onChange={handleProfileInputChange}
               className="setting-input"
               required
+              minLength={1}
+              maxLength={100}
             />
+            <span className="setting-description">
+              Your name as it appears across the application
+            </span>
           </div>
           <div className="setting-item">
-            <label className="setting-label">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={profileData.email}
+            <label className="setting-label">Bio</label>
+            <textarea
+              name="bio"
+              value={profileData.bio}
               onChange={handleProfileInputChange}
-              className="setting-input"
-              required
+              className="setting-textarea"
+              rows={3}
+              maxLength={500}
+              placeholder="Tell us a little about yourself..."
             />
+            <span className="setting-description">{profileData.bio.length}/500 characters</span>
           </div>
           {profileError && <div className="form-error">{profileError}</div>}
           {profileSuccess && <div className="form-success">Profile saved successfully!</div>}
@@ -971,6 +1120,40 @@ function AccountSection() {
             {isSavingProfile ? 'Saving...' : 'Save Profile'}
           </Button>
         </form>
+      </div>
+
+      <div className="settings-group">
+        <h3>Email Address</h3>
+        <div className="email-section">
+          <div className="email-current">
+            <span className="setting-label">Current email</span>
+            <span className="email-value">{user?.email}</span>
+            {user?.pendingEmail && (
+              <div className="email-pending">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+                Verification sent to {user.pendingEmail}
+              </div>
+            )}
+          </div>
+          <Button variant="secondary" onClick={() => setShowEmailChangeModal(true)}>
+            Change Email
+          </Button>
+        </div>
+        {emailChangeSuccess && (
+          <div className="form-success">
+            Verification email sent! Please check your inbox.
+          </div>
+        )}
       </div>
 
       <div className="settings-group">
@@ -1041,6 +1224,55 @@ function AccountSection() {
         </div>
       </div>
 
+      {/* Email Change Modal */}
+      <Modal
+        isOpen={showEmailChangeModal}
+        onClose={() => {
+          setShowEmailChangeModal(false);
+          setNewEmail(user?.email || '');
+          setEmailChangeError(null);
+        }}
+        title="Change Email Address"
+        description="We'll send a verification link to your new email address. Your email won't change until you verify it."
+        size="sm"
+        footer={
+          <div className="modal-actions">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowEmailChangeModal(false);
+                setNewEmail(user?.email || '');
+                setEmailChangeError(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRequestEmailChange}
+              disabled={isRequestingEmailChange || newEmail === user?.email}
+            >
+              {isRequestingEmailChange ? 'Sending...' : 'Send Verification'}
+            </Button>
+          </div>
+        }
+      >
+        <div className="email-change-content">
+          <div className="setting-item">
+            <label className="setting-label">New Email Address</label>
+            <input
+              type="email"
+              value={newEmail}
+              onChange={handleEmailChange}
+              className="setting-input"
+              placeholder="Enter your new email"
+              autoComplete="email"
+            />
+          </div>
+          {emailChangeError && <div className="form-error">{emailChangeError}</div>}
+        </div>
+      </Modal>
+
+      {/* Delete Account Modal */}
       <Modal
         isOpen={showDeleteConfirm}
         onClose={() => {

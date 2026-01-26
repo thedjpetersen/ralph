@@ -5,8 +5,11 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  bio?: string;
   avatar?: string;
   createdAt: string;
+  emailVerified?: boolean;
+  pendingEmail?: string;
 }
 
 export interface UserPreferences {
@@ -41,7 +44,9 @@ interface UserState {
   // Actions
   setUser: (user: User | null) => void;
   fetchUser: () => Promise<void>;
-  updateUser: (data: Partial<Pick<User, 'name' | 'email'>>) => Promise<User>;
+  updateUser: (data: Partial<Pick<User, 'name' | 'email' | 'bio'>>) => Promise<User>;
+  updateAvatar: (avatarUrl: string) => Promise<User>;
+  requestEmailChange: (newEmail: string) => Promise<void>;
   updatePreferences: (data: Partial<UserPreferences>) => Promise<void>;
   fetchAPIKeys: () => Promise<void>;
   createAPIKey: (name: string, expiresAt?: string) => Promise<APIKey & { key: string }>;
@@ -112,6 +117,63 @@ export const useUserStore = create<UserState>()(
           const updatedUser: User = await response.json();
           set({ user: updatedUser, isLoading: false });
           return updatedUser;
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
+        }
+      },
+
+      // Update user avatar
+      updateAvatar: async (avatarUrl) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE}/user/avatar`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ avatar: avatarUrl }),
+          });
+          if (!response.ok) {
+            throw new Error('Failed to update avatar');
+          }
+          const updatedUser: User = await response.json();
+          set({ user: updatedUser, isLoading: false });
+          return updatedUser;
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
+        }
+      },
+
+      // Request email change (requires verification)
+      requestEmailChange: async (newEmail) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE}/user/email/change`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: newEmail }),
+          });
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to request email change');
+          }
+          // Update user to show pending email
+          const { user } = get();
+          if (user) {
+            set({ user: { ...user, pendingEmail: newEmail }, isLoading: false });
+          } else {
+            set({ isLoading: false });
+          }
         } catch (err) {
           set({
             error: err instanceof Error ? err.message : 'Unknown error',
