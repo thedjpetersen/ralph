@@ -10,6 +10,7 @@ import { useAIToneAnalyzerStore } from '../stores/aiToneAnalyzer';
 import { useAIVocabularyEnhancerStore } from '../stores/aiVocabularyEnhancer';
 import { useAIReadabilityStore } from '../stores/aiReadability';
 import { useAIContradictionCheckerStore } from '../stores/aiContradictionChecker';
+import { useAIFactCheckingStore } from '../stores/aiFactChecking';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
 import { EmptyState, SearchIllustration } from './ui/EmptyState';
@@ -67,6 +68,7 @@ function useCommands(): Command[] {
   const { openPanel: openVocabularyEnhancer } = useAIVocabularyEnhancerStore();
   const { openPanel: openReadability } = useAIReadabilityStore();
   const { openPanel: openContradictionChecker } = useAIContradictionCheckerStore();
+  const { openPanel: openFactChecking } = useAIFactCheckingStore();
   const { closePalette } = useCommandPaletteStore();
 
   return useMemo(() => {
@@ -334,6 +336,15 @@ Also want to cover communication protocols, stakeholder management, and risk ass
         keywords: ['contradiction', 'consistency', 'inconsistent', 'conflict', 'check', 'verify', 'validate'],
         action: () => { openContradictionChecker(); closePalette(); },
       },
+      {
+        id: 'ai-fact-checking',
+        label: 'Check Facts',
+        category: 'ai',
+        description: 'Highlight claims that may need fact-checking with verification sources',
+        shortcutKeys: { mac: ['⌥', 'K'], windows: ['Alt', 'K'] },
+        keywords: ['fact', 'check', 'verify', 'claim', 'source', 'evidence', 'accuracy', 'truth', 'reference'],
+        action: () => { openFactChecking(); closePalette(); },
+      },
 
       // Settings
       {
@@ -379,7 +390,7 @@ Also want to cover communication protocols, stakeholder management, and risk ass
     ];
 
     return commands;
-  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, openToneAnalyzer, openVocabularyEnhancer, openReadability, openContradictionChecker, closePalette]);
+  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, openToneAnalyzer, openVocabularyEnhancer, openReadability, openContradictionChecker, openFactChecking, closePalette]);
 }
 
 // Highlight text component

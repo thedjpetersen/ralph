@@ -1,0 +1,230 @@
+/**
+ * Fact Check Highlight Overlay Styles
+ *
+ * Subtle highlighting for factual claims with hover tooltips
+ */
+
+/* Main overlay - positioned over the textarea */
+.factcheck-highlight-overlay {
+  position: fixed;
+  z-index: 9996; /* Below comment highlights (9997) */
+  background: transparent;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  box-sizing: border-box;
+  pointer-events: none;
+  color: transparent;
+}
+
+/* Normal text (invisible, just for spacing) */
+.factcheck-highlight-normal {
+  color: transparent;
+}
+
+/* Highlighted claim text */
+.factcheck-highlight-claim {
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 2px;
+  border-bottom: 2px solid;
+  border-bottom-style: dotted;
+  padding: 0 1px;
+  margin: 0 -1px;
+  transition: background-color 0.15s ease, border-bottom-color 0.15s ease;
+  color: transparent;
+}
+
+.factcheck-highlight-claim:hover,
+.factcheck-highlight-claim.hovered {
+  border-bottom-style: solid;
+}
+
+.factcheck-highlight-claim:focus-visible {
+  outline: 2px solid var(--color-primary-500, #3b82f6);
+  outline-offset: 1px;
+}
+
+/* Tooltip container */
+.factcheck-tooltip {
+  position: fixed;
+  z-index: 10001;
+  width: 280px;
+  padding: 12px;
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 10px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  pointer-events: auto;
+}
+
+.factcheck-tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.factcheck-tooltip-category {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--color-text-secondary, #6b7280);
+  background: var(--color-gray-100, #f3f4f6);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.factcheck-tooltip-status {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Confidence bar */
+.factcheck-tooltip-confidence {
+  margin-bottom: 10px;
+}
+
+.factcheck-tooltip-confidence-bar {
+  height: 4px;
+  background: var(--color-gray-200, #e5e7eb);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.factcheck-tooltip-confidence-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.factcheck-tooltip-confidence-label {
+  font-size: 11px;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+/* Explanation text */
+.factcheck-tooltip-explanation {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text, #1f2937);
+}
+
+/* Sources section */
+.factcheck-tooltip-sources {
+  margin-bottom: 10px;
+}
+
+.factcheck-tooltip-sources-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--color-text-secondary, #6b7280);
+  margin-bottom: 6px;
+}
+
+.factcheck-tooltip-sources-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.factcheck-tooltip-source {
+  font-size: 10px;
+  padding: 3px 8px;
+  background: var(--color-success-50, rgba(34, 197, 94, 0.1));
+  color: var(--color-success-700, #15803d);
+  border-radius: 4px;
+}
+
+/* Dismiss button */
+.factcheck-tooltip-dismiss {
+  width: 100%;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #6b7280);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.factcheck-tooltip-dismiss:hover {
+  background: var(--color-error-50, rgba(239, 68, 68, 0.1));
+  border-color: var(--color-error, #ef4444);
+  color: var(--color-error, #ef4444);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .factcheck-tooltip {
+    background: var(--color-surface-dark, #1f2937);
+    border-color: var(--color-border-dark, #374151);
+  }
+
+  .factcheck-tooltip-category {
+    background: var(--color-gray-700, #374151);
+    color: var(--color-gray-300, #d1d5db);
+  }
+
+  .factcheck-tooltip-explanation {
+    color: var(--color-text-dark, #f9fafb);
+  }
+
+  .factcheck-tooltip-confidence-bar {
+    background: var(--color-gray-700, #374151);
+  }
+
+  .factcheck-tooltip-source {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--color-success-400, #4ade80);
+  }
+
+  .factcheck-tooltip-dismiss {
+    border-color: var(--color-border-dark, #374151);
+    color: var(--color-text-secondary-dark, #9ca3af);
+  }
+
+  .factcheck-tooltip-dismiss:hover {
+    background: rgba(239, 68, 68, 0.15);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .factcheck-highlight-claim {
+    transition: none;
+  }
+
+  .factcheck-tooltip-confidence-fill {
+    transition: none;
+  }
+
+  .factcheck-tooltip-dismiss {
+    transition: none;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .factcheck-tooltip {
+    width: 240px;
+    padding: 10px;
+  }
+
+  .factcheck-tooltip-sources-list {
+    gap: 3px;
+  }
+
+  .factcheck-tooltip-source {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+}
