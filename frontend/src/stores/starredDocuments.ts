@@ -17,6 +17,7 @@ interface StarredDocumentsState {
   isStarred: (id: string) => boolean;
   unstar: (id: string) => void;
   clearStarred: () => void;
+  renameStarred: (id: string, newName: string) => void;
 }
 
 const MAX_STARRED_DOCUMENTS = 50;
@@ -62,6 +63,15 @@ export const useStarredDocumentsStore = create<StarredDocumentsState>()(
 
       clearStarred: () => {
         set({ starredDocuments: [] });
+      },
+
+      renameStarred: (id, newName) => {
+        const { starredDocuments } = get();
+        set({
+          starredDocuments: starredDocuments.map(d =>
+            d.id === id ? { ...d, name: newName } : d
+          ),
+        });
       },
     }),
     {

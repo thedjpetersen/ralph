@@ -227,6 +227,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: text;
+  border-radius: 2px;
+  padding: 0.0625rem 0.125rem;
+  margin: -0.0625rem -0.125rem;
+  transition: background-color 0.15s;
+}
+
+.folder-name:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .folder-item.selected .folder-name {
@@ -441,6 +450,21 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: text;
+  border-radius: 2px;
+  padding: 0.0625rem 0.125rem;
+  margin: -0.0625rem -0.125rem;
+  transition: background-color 0.15s;
+}
+
+.starred-item-name:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Starred item inline rename input */
+.starred-item-input {
+  flex: 1;
+  min-width: 0;
 }
 
 .starred-item-unstar {
@@ -538,6 +562,10 @@
     color: #213547;
   }
 
+  .folder-name:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
   .folder-name-input {
     background-color: #fff;
     border-color: #646cff;
@@ -590,6 +618,10 @@
 
   .starred-item-name {
     color: #213547;
+  }
+
+  .starred-item-name:hover {
+    background-color: rgba(0, 0, 0, 0.03);
   }
 }
 

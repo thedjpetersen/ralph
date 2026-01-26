@@ -122,18 +122,74 @@ const DeleteIcon = () => (
   </svg>
 );
 
+// Document icon for starred documents
+const DocumentIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path
+      d="M4 2.5A1.5 1.5 0 015.5 1h4.172a1.5 1.5 0 011.06.44l2.828 2.828a1.5 1.5 0 01.44 1.06V13.5a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 014 13.5v-11z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      fill="none"
+    />
+    <path
+      d="M10 1v3.5a1 1 0 001 1h3.5"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      fill="none"
+    />
+  </svg>
+);
+
 // Starred Item component for the favorites section
 interface StarredItemProps {
   item: StarredDocument;
   onUnstar: (id: string, name: string) => void;
+  onRename: (id: string, newName: string) => void;
   isCollapsed: boolean;
 }
 
-function StarredItem({ item, onUnstar, isCollapsed }: StarredItemProps) {
+function StarredItem({ item, onUnstar, onRename, isCollapsed }: StarredItemProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(item.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus and select text when entering edit mode
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
   const handleUnstar = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onUnstar(item.id, item.name);
   }, [item.id, item.name, onUnstar]);
+
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditName(item.name);
+    setIsEditing(true);
+  }, [item.name]);
+
+  const handleRenameSubmit = useCallback(() => {
+    const trimmedName = editName.trim();
+    if (trimmedName && trimmedName !== item.name) {
+      onRename(item.id, trimmedName);
+    }
+    setIsEditing(false);
+  }, [editName, item.id, item.name, onRename]);
+
+  const handleRenameKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleRenameSubmit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsEditing(false);
+      setEditName(item.name);
+    }
+  }, [handleRenameSubmit, item.name]);
 
   if (isCollapsed) {
     return null;
@@ -145,9 +201,27 @@ function StarredItem({ item, onUnstar, isCollapsed }: StarredItemProps) {
       role="listitem"
     >
       <span className="folder-icon starred-item-icon">
-        {item.type === 'folder' ? <FolderIcon /> : <FolderIcon />}
+        {item.type === 'folder' ? <FolderIcon /> : <DocumentIcon />}
       </span>
-      <span className="starred-item-name">{item.name}</span>
+      {isEditing ? (
+        <input
+          ref={inputRef}
+          type="text"
+          className="folder-name-input starred-item-input"
+          value={editName}
+          onChange={(e) => setEditName(e.target.value)}
+          onBlur={handleRenameSubmit}
+          onKeyDown={handleRenameKeyDown}
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : (
+        <span
+          className="starred-item-name"
+          onDoubleClick={handleDoubleClick}
+        >
+          {item.name}
+        </span>
+      )}
       <button
         className="starred-item-unstar"
         onClick={handleUnstar}
@@ -406,7 +480,15 @@ function FolderItem({
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className="folder-name">{folder.name}</span>
+          <span
+            className="folder-name"
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              handleRenameClick();
+            }}
+          >
+            {folder.name}
+          </span>
         )}
 
         {folder.document_count > 0 && (
@@ -529,7 +611,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
   const { openExportDialog } = useDocumentExportStore();
   const { openShareDialog } = useDocumentShareStore();
   const { openImportDialog } = useDocumentImportStore();
-  const { starredDocuments, toggleStar, isStarred } = useStarredDocumentsStore();
+  const { starredDocuments, toggleStar, isStarred, renameStarred } = useStarredDocumentsStore();
 
   const [isCreating, setIsCreating] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -664,6 +746,11 @@ You can export this document to any of these formats using the export dialog.`;
   const handleToggleStar = useCallback((folderId: string, folderName: string) => {
     toggleStar(folderId, folderName, 'folder');
   }, [toggleStar]);
+
+  const handleRenameStarred = useCallback((id: string, newName: string) => {
+    renameStarred(id, newName);
+    toast.success(`Renamed to "${newName}"`);
+  }, [renameStarred]);
 
   const checkIsStarred = useCallback((folderId: string) => {
     return isStarred(folderId);
@@ -806,13 +893,13 @@ You can export this document to any of these formats using the export dialog.`;
     );
   }
 
-  // Filter starred items that are folders
-  const starredFolders = starredDocuments.filter(s => s.type === 'folder');
+  // Get all starred items (both folders and documents)
+  const starredItems = starredDocuments;
 
   return (
     <div className="document-folders">
       {/* Starred Section */}
-      {starredFolders.length > 0 && (
+      {starredItems.length > 0 && (
         <div className="document-folders-starred">
           <div className="document-folders-header">
             <span className="document-folders-title">
@@ -820,11 +907,12 @@ You can export this document to any of these formats using the export dialog.`;
             </span>
           </div>
           <div className="starred-items-list">
-            {starredFolders.map((starred) => (
+            {starredItems.map((starred) => (
               <StarredItem
                 key={starred.id}
                 item={starred}
                 onUnstar={handleToggleStar}
+                onRename={handleRenameStarred}
                 isCollapsed={isCollapsed}
               />
             ))}
