@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useReceiptsStore, type ReceiptStatus, type ReceiptSourceType, type Receipt } from '../stores/receipts';
+import { Link } from 'react-router-dom';
+import { useReceiptsStore, type ReceiptStatus, type ReceiptSourceType, type Receipt, type CreateReceiptRequest } from '../stores/receipts';
 import { useAccountStore } from '../stores/account';
 import { storesApi, type Store } from '../api/client';
 import { PageTransition } from '../components/PageTransition';
 import { AccountsListSkeleton } from '../components/skeletons';
+import { ReceiptUpload } from '../components/receipts/ReceiptUpload';
 import { announce } from '../stores/announcer';
+import { toast } from '../stores/toast';
 import './Receipts.css';
 
 const STATUS_OPTIONS: { value: ReceiptStatus | ''; label: string }[] = [
@@ -30,7 +32,6 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 type ViewMode = 'list' | 'grid';
 
 export function Receipts() {
-  const navigate = useNavigate();
   const { currentAccount } = useAccountStore();
   const {
     receipts,
@@ -43,6 +44,7 @@ export function Receipts() {
     setPageSize,
     fetchReceipts,
     deleteReceipt,
+    createReceipt,
   } = useReceiptsStore();
 
   const [statusFilter, setStatusFilter] = useState<ReceiptStatus | ''>('');
@@ -62,6 +64,10 @@ export function Receipts() {
   const [selectedReceipts, setSelectedReceipts] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Upload modal state
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [isUploadingReceipts, setIsUploadingReceipts] = useState(false);
 
   // Load stores for filter dropdown
   useEffect(() => {
@@ -133,6 +139,56 @@ export function Receipts() {
     setMerchantFilter('');
     setPage(1);
   }, [setPage]);
+
+  // Upload handler for receipt upload modal
+  const handleUploadReceipts = useCallback(async (files: File[]) => {
+    if (!currentAccount?.id) return;
+
+    setIsUploadingReceipts(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const file of files) {
+      try {
+        const receiptData: CreateReceiptRequest = {
+          source_type: 'upload',
+          file_name: file.name,
+          mime_type: file.type,
+          file_size: file.size,
+        };
+
+        await createReceipt(currentAccount.id, receiptData);
+        successCount++;
+      } catch {
+        errorCount++;
+      }
+    }
+
+    setIsUploadingReceipts(false);
+
+    // Show toast notifications
+    if (successCount > 0) {
+      toast.success(`Successfully uploaded ${successCount} receipt${successCount === 1 ? '' : 's'}`);
+      announce(`Successfully uploaded ${successCount} receipt${successCount === 1 ? '' : 's'}`);
+    }
+    if (errorCount > 0) {
+      toast.error(`Failed to upload ${errorCount} receipt${errorCount === 1 ? '' : 's'}`);
+    }
+
+    // Refresh receipt list on successful upload
+    if (successCount > 0) {
+      fetchReceipts(currentAccount.id, {
+        status: statusFilter || undefined,
+        source_type: sourceFilter || undefined,
+        store_id: storeFilter || undefined,
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+      });
+      setShowUploadModal(false);
+    }
+  }, [currentAccount?.id, createReceipt, fetchReceipts, statusFilter, sourceFilter, storeFilter, startDate, endDate, pageSize, page]);
 
   // Selection handlers
   const handleSelectReceipt = useCallback((id: string, checked: boolean, event?: React.MouseEvent) => {
@@ -358,7 +414,7 @@ export function Receipts() {
             </div>
             <button
               className="upload-receipts-button"
-              onClick={() => navigate('/receipts/upload')}
+              onClick={() => setShowUploadModal(true)}
               aria-label="Upload new receipt"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -517,6 +573,33 @@ export function Receipts() {
             </div>
           </div>
         </div>
+
+        {/* Upload modal */}
+        {showUploadModal && (
+          <div className="upload-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
+            <div className="upload-modal">
+              <div className="upload-modal-header">
+                <h3 id="upload-modal-title">Upload Receipts</h3>
+                <button
+                  onClick={() => setShowUploadModal(false)}
+                  className="upload-modal-close"
+                  aria-label="Close upload modal"
+                  disabled={isUploadingReceipts}
+                >
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div className="upload-modal-body">
+                <ReceiptUpload
+                  onUpload={handleUploadReceipts}
+                  disabled={isUploadingReceipts}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Delete confirmation modal */}
         {showDeleteConfirm && (

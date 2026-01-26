@@ -1,0 +1,45 @@
+
+> frontend@0.0.0 test
+> vitest --run --reporter=verbose src/components/__tests__/AIRewriteToolbar.test.tsx
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/thedjpetersen/code/ralph/frontend[39m
+
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mdoes not render when not active[32m 14[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mrenders toolbar when active with selected text[32m 71[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mshows all rewrite options[32m 6[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mshows loading state when rewriting[32m 4[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mshows preview when rewrite is complete[32m 4[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mshows Apply and Cancel buttons in preview mode[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mshows keyboard hints in preview mode[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mcalls requestRewrite when option is clicked[32m 19[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mhides toolbar when close button is clicked[32m 4[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mcancels preview when cancel button is clicked[32m 6[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mshows error state[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mclears error when dismiss is clicked[32m 4[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mKeyboard shortcuts[2m > [22mcloses toolbar on Escape when no preview[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mKeyboard shortcuts[2m > [22mcancels preview on Escape when preview is shown[32m 4[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mKeyboard shortcuts[2m > [22mapplies rewrite on Enter when preview is shown[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mKeyboard shortcuts[2m > [22mtriggers rewrite option with number keys 1-4[32m 10[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mUndo functionality[2m > [22madds to undo stack when applying rewrite[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mUndo functionality[2m > [22mcan undo a rewrite with Cmd+Z[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mAccessibility[2m > [22mhas proper ARIA attributes[32m 12[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mAccessibility[2m > [22mhas accessible close button[32m 2[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mAccessibility[2m > [22merror state has role alert[32m 4[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewriteToolbar[2m > [22mReduced Motion[2m > [22mrespects reduced motion preferences[32m 4[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mshowToolbar sets correct state[32m 1[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mhideToolbar resets state[32m 0[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mrequestRewrite generates preview text[32m 1[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mcancelRewrite clears preview without hiding toolbar[32m 0[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mclearError clears error state[32m 0[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mMock rewrite transformations[2m > [22mshorter removes filler words[32m 0[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mMock rewrite transformations[2m > [22mclearer simplifies complex phrases[32m 0[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mMock rewrite transformations[2m > [22mclearer fixes basic grammar issues[32m 0[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mMock rewrite transformations[2m > [22mstronger removes hedging language[32m 0[2mms[22m[39m
+ [32m✓[39m src/components/__tests__/AIRewriteToolbar.test.tsx[2m > [22mAIRewrite Store[2m > [22mMock rewrite transformations[2m > [22mstronger replaces weak words with strong alternatives[32m 0[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m32 passed[39m[22m[90m (32)[39m
+[2m   Start at [22m 18:57:33
+[2m   Duration [22m 764ms[2m (transform 59ms, setup 42ms, import 147ms, tests 194ms, environment 261ms)[22m
+

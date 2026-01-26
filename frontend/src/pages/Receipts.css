@@ -1151,3 +1151,119 @@
     background-color: rgba(100, 108, 255, 0.05);
   }
 }
+
+/* Upload Modal Styles */
+.upload-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.upload-modal {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.upload-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #333;
+}
+
+.upload-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.upload-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.upload-modal-close:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.upload-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Light theme for upload modal */
+@media (prefers-color-scheme: light) {
+  .upload-modal {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .upload-modal-header {
+    border-bottom-color: #eee;
+  }
+
+  .upload-modal-header h3 {
+    color: #213547;
+  }
+
+  .upload-modal-close {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .upload-modal-close:hover:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.87);
+  }
+}
+
+/* Mobile modal styles */
+@media (max-width: 768px) {
+  .upload-modal-overlay {
+    padding: 0;
+  }
+
+  .upload-modal {
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    border: none;
+  }
+
+  .upload-modal-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .upload-modal-body {
+    padding: 1rem;
+  }
+}
