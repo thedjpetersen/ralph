@@ -26,6 +26,10 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   commentSortOrder: 'newest',
 };
 
+export type FeedbackVerbosity = 'brief' | 'standard' | 'detailed';
+export type FeedbackType = 'inline' | 'sidebar' | 'modal';
+export type AIModel = 'gpt-4' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'default';
+
 export const DEFAULT_AI_SETTINGS: AISettings = {
   enableSuggestions: true,
   enableRewrite: true,
@@ -33,6 +37,9 @@ export const DEFAULT_AI_SETTINGS: AISettings = {
   suggestionDelay: 500, // ms
   aiProvider: 'default',
   apiKey: '',
+  feedbackVerbosity: 'standard',
+  defaultFeedbackType: 'inline',
+  aiModel: 'default',
 };
 
 export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
@@ -75,6 +82,9 @@ export interface AISettings {
   suggestionDelay: number;
   aiProvider: 'default' | 'openai' | 'anthropic' | 'custom';
   apiKey: string;
+  feedbackVerbosity: FeedbackVerbosity;
+  defaultFeedbackType: FeedbackType;
+  aiModel: AIModel;
 }
 
 export interface AppearanceSettings {

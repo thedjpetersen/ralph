@@ -1,0 +1,54 @@
+.ai-prefs-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ai-prefs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ai-prefs-section-title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+}
+
+.ai-prefs-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ai-prefs-footer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.ai-prefs-info {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border-radius: 8px;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  margin-top: 0.5rem;
+}
+
+.ai-prefs-info-icon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.ai-prefs-info-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
