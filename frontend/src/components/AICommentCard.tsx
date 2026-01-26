@@ -2,6 +2,7 @@ import { useRef, useEffect, useSyncExternalStore, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAICommentStore, useAIComment } from '../stores/aiComments';
 import { useCommentHighlightStore, useCommentHighlight, getAuthorColor, hexToRgba } from '../stores/commentHighlight';
+import { toast } from '../stores/toast';
 import './AICommentCard.css';
 
 function getReducedMotionSnapshot() {
@@ -48,8 +49,8 @@ export function AICommentCard({
   authorId,
 }: AICommentCardProps) {
   const comment = useAIComment(entityId);
-  const { generateComment, cancelStream, clearComment, error, clearError } = useAICommentStore();
-  const { registerComment, unregisterComment, highlightFromComment, clearHighlight } = useCommentHighlightStore();
+  const { generateComment, cancelStream, clearComment, error, clearError, resolveComment } = useAICommentStore();
+  const { registerComment, unregisterComment, highlightFromComment, clearHighlight, targetElements } = useCommentHighlightStore();
   const { focusedCommentId } = useCommentHighlight();
   const contentRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -143,6 +144,41 @@ export function AICommentCard({
     clearError();
     generateComment(entityType, entityId, context);
   };
+
+  // Handle accepting a suggestion - replaces text in target element
+  const handleAcceptSuggestion = useCallback(() => {
+    if (!comment?.suggestion || !targetElementId || !textRange) return;
+
+    const targetElement = targetElements.get(targetElementId);
+    if (!targetElement) return;
+
+    const { suggestedText } = comment.suggestion;
+    const currentValue = targetElement.value;
+
+    // Calculate new value by replacing the text range with the suggestion
+    const newValue =
+      currentValue.slice(0, textRange.startIndex) +
+      suggestedText +
+      currentValue.slice(textRange.endIndex);
+
+    // Update the element value
+    targetElement.value = newValue;
+
+    // Trigger input event so React state updates (enables Cmd+Z undo)
+    const event = new Event('input', { bubbles: true });
+    targetElement.dispatchEvent(event);
+
+    // Update cursor position to end of inserted text
+    const newCursorPosition = textRange.startIndex + suggestedText.length;
+    targetElement.setSelectionRange(newCursorPosition, newCursorPosition);
+    targetElement.focus();
+
+    // Auto-resolve (clear) the comment
+    resolveComment(entityId);
+
+    // Show success toast
+    toast.success('Suggestion applied');
+  }, [comment, targetElementId, textRange, targetElements, entityId, resolveComment]);
 
   // AI icon SVG
   const aiIcon = (
@@ -273,6 +309,23 @@ export function AICommentCard({
               </button>
             ) : (
               <>
+                {comment.suggestion && targetElementId && textRange && (
+                  <button
+                    type="button"
+                    className="ai-action-button ai-accept"
+                    onClick={handleAcceptSuggestion}
+                    aria-label="Accept suggestion"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="accept-icon">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Accept
+                  </button>
+                )}
                 <button
                   type="button"
                   className="ai-action-button ai-regenerate"

@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout } from './components/Layout';
+import { AppShell } from './components/layout/AppShell';
 import { Dashboard } from './pages/Dashboard';
 import { Accounts } from './pages/Accounts';
 import { AccountSettings } from './pages/AccountSettings';
@@ -51,7 +51,7 @@ import './App.css';
 function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
+      <Route element={<AppShell />}>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/accounts" element={<Accounts />} />

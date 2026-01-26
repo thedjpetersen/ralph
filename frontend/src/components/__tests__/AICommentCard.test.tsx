@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AICommentCard } from '../AICommentCard';
 import { useAICommentStore } from '../../stores/aiComments';
+import { useCommentHighlightStore } from '../../stores/commentHighlight';
+import { useToastStore } from '../../stores/toast';
 
 // Mock matchMedia for reduced motion detection
 const mockMatchMedia = (prefersReducedMotion: boolean) => {
@@ -29,6 +31,16 @@ describe('AICommentCard', () => {
       streamingText: '',
       abortController: null,
       error: null,
+    });
+    useCommentHighlightStore.setState({
+      commentRanges: new Map(),
+      activeHighlight: null,
+      focusedCommentId: null,
+      targetElements: new Map(),
+    });
+    useToastStore.setState({
+      toasts: [],
+      queue: [],
     });
     mockMatchMedia(false);
     vi.useFakeTimers();
@@ -359,6 +371,148 @@ describe('AICommentCard', () => {
       render(<AICommentCard entityType="transaction" entityId="test-123" />);
       const cursor = document.querySelector('.ai-cursor');
       expect(cursor).toHaveClass('no-animation');
+    });
+  });
+
+  describe('Accept Suggestion', () => {
+    it('shows Accept button when comment has a suggestion with target element and text range', () => {
+      // Create a mock textarea element
+      const mockTextarea = document.createElement('textarea');
+      mockTextarea.value = 'Hello world, this is some text.';
+      // "some text" starts at index 21 and ends at index 30
+
+      // Register the target element in the highlight store
+      useCommentHighlightStore.setState({
+        targetElements: new Map([['test-target', mockTextarea]]),
+        commentRanges: new Map(),
+        activeHighlight: null,
+        focusedCommentId: null,
+      });
+
+      useAICommentStore.setState({
+        comments: new Map([
+          [
+            'test-123',
+            {
+              id: 'comment-1',
+              entityType: 'transaction',
+              entityId: 'test-123',
+              text: 'Consider changing "some text" to "better text"',
+              isStreaming: false,
+              createdAt: new Date().toISOString(),
+              suggestion: {
+                originalText: 'some text',
+                suggestedText: 'better text',
+              },
+            },
+          ],
+        ]),
+        activeStreamId: null,
+        streamingText: '',
+        abortController: null,
+        error: null,
+      });
+
+      render(
+        <AICommentCard
+          entityType="transaction"
+          entityId="test-123"
+          targetElementId="test-target"
+          textRange={{ startIndex: 21, endIndex: 30 }}
+        />
+      );
+
+      expect(screen.getByLabelText('Accept suggestion')).toBeInTheDocument();
+      expect(screen.getByText('Accept')).toBeInTheDocument();
+    });
+
+    it('does not show Accept button when comment has no suggestion', () => {
+      useAICommentStore.setState({
+        comments: new Map([
+          [
+            'test-123',
+            {
+              id: 'comment-1',
+              entityType: 'transaction',
+              entityId: 'test-123',
+              text: 'Just a regular comment',
+              isStreaming: false,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        ]),
+        activeStreamId: null,
+        streamingText: '',
+        abortController: null,
+        error: null,
+      });
+
+      render(<AICommentCard entityType="transaction" entityId="test-123" />);
+
+      expect(screen.queryByText('Accept')).not.toBeInTheDocument();
+    });
+
+    it('replaces text and shows toast when Accept is clicked', () => {
+      // Create a mock textarea element
+      const mockTextarea = document.createElement('textarea');
+      mockTextarea.value = 'Hello world, this is some text.';
+      // "some text" starts at index 21 and ends at index 30
+
+      // Register the target element in the highlight store
+      useCommentHighlightStore.setState({
+        targetElements: new Map([['test-target', mockTextarea]]),
+        commentRanges: new Map(),
+        activeHighlight: null,
+        focusedCommentId: null,
+      });
+
+      useAICommentStore.setState({
+        comments: new Map([
+          [
+            'test-123',
+            {
+              id: 'comment-1',
+              entityType: 'transaction',
+              entityId: 'test-123',
+              text: 'Consider changing "some text" to "better text"',
+              isStreaming: false,
+              createdAt: new Date().toISOString(),
+              suggestion: {
+                originalText: 'some text',
+                suggestedText: 'better text',
+              },
+            },
+          ],
+        ]),
+        activeStreamId: null,
+        streamingText: '',
+        abortController: null,
+        error: null,
+      });
+
+      render(
+        <AICommentCard
+          entityType="transaction"
+          entityId="test-123"
+          targetElementId="test-target"
+          textRange={{ startIndex: 21, endIndex: 30 }}
+        />
+      );
+
+      const acceptButton = screen.getByLabelText('Accept suggestion');
+      fireEvent.click(acceptButton);
+
+      // Check that the text was replaced
+      expect(mockTextarea.value).toBe('Hello world, this is better text.');
+
+      // Check that the comment was resolved (removed)
+      expect(useAICommentStore.getState().comments.has('test-123')).toBe(false);
+
+      // Check that a success toast was shown
+      const toasts = useToastStore.getState().toasts;
+      expect(toasts.length).toBe(1);
+      expect(toasts[0].message).toBe('Suggestion applied');
+      expect(toasts[0].type).toBe('success');
     });
   });
 });

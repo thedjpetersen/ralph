@@ -1,5 +1,10 @@
 import { create } from 'zustand';
 
+export interface AICommentSuggestion {
+  originalText: string;
+  suggestedText: string;
+}
+
 export interface AIComment {
   id: string;
   entityType: 'transaction' | 'receipt' | 'budget';
@@ -7,6 +12,7 @@ export interface AIComment {
   text: string;
   isStreaming: boolean;
   createdAt: string;
+  suggestion?: AICommentSuggestion;
 }
 
 interface AICommentState {
@@ -26,6 +32,8 @@ interface AICommentState {
   cancelStream: () => void;
   clearComment: (entityId: string) => void;
   clearError: () => void;
+  setSuggestion: (entityId: string, suggestion: AICommentSuggestion) => void;
+  resolveComment: (entityId: string) => void;
 }
 
 function generateCommentId(): string {
@@ -206,6 +214,30 @@ export const useAICommentStore = create<AICommentState>()((set, get) => ({
   // Clear error
   clearError: () => {
     set({ error: null });
+  },
+
+  // Set a suggestion for a comment
+  setSuggestion: (entityId, suggestion) => {
+    set((state) => {
+      const newComments = new Map(state.comments);
+      const existingComment = newComments.get(entityId);
+      if (existingComment) {
+        newComments.set(entityId, {
+          ...existingComment,
+          suggestion,
+        });
+      }
+      return { comments: newComments };
+    });
+  },
+
+  // Resolve (clear) a comment after accepting suggestion
+  resolveComment: (entityId) => {
+    set((state) => {
+      const newComments = new Map(state.comments);
+      newComments.delete(entityId);
+      return { comments: newComments };
+    });
   },
 }));
 

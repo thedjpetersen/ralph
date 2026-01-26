@@ -1,0 +1,164 @@
+/* AppShell - Main layout wrapper */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: #0f0f0f;
+}
+
+/* Skip to main content link */
+.app-shell-skip-link {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #646cff;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+  text-decoration: none;
+  font-weight: 500;
+  z-index: 1000;
+  transition: top 0.2s ease;
+}
+
+.app-shell-skip-link:focus {
+  top: 0;
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+/* Sidebar wrapper */
+.app-shell-sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 100;
+  transition: transform 0.3s ease;
+}
+
+/* Main content wrapper */
+.app-shell-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 260px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+.app-shell-main-wrapper.sidebar-collapsed {
+  margin-left: 64px;
+}
+
+/* Main content area */
+.app-shell-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-x: hidden;
+  outline: none;
+}
+
+.app-shell-content:focus-visible {
+  outline: none;
+}
+
+/* Mobile sidebar overlay */
+.app-shell-sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  backdrop-filter: blur(2px);
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  /* Sidebar hidden by default on mobile */
+  .app-shell-sidebar-wrapper {
+    transform: translateX(-100%);
+  }
+
+  /* Show sidebar when mobile menu is open */
+  .app-shell-sidebar-wrapper.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Show overlay when mobile menu is open */
+  .app-shell-sidebar-overlay {
+    display: block;
+  }
+
+  /* Main content takes full width on mobile */
+  .app-shell-main-wrapper,
+  .app-shell-main-wrapper.sidebar-collapsed {
+    margin-left: 0;
+  }
+
+  /* Adjust content padding for mobile */
+  .app-shell-content {
+    padding: 1rem;
+    /* Add bottom padding for mobile tab bar */
+    padding-bottom: calc(64px + 1rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Tablet responsive styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .app-shell-main-wrapper {
+    margin-left: 64px;
+  }
+
+  .app-shell-main-wrapper.sidebar-collapsed {
+    margin-left: 64px;
+  }
+
+  .app-shell-content {
+    padding: 1.25rem;
+  }
+}
+
+/* Large screen adjustments */
+@media (min-width: 1440px) {
+  .app-shell-content {
+    padding: 2rem;
+    max-width: 1400px;
+  }
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  .app-shell {
+    background-color: #f5f5f5;
+  }
+
+  .app-shell-sidebar-overlay {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .app-shell-sidebar-wrapper,
+  .app-shell-main-wrapper,
+  .app-shell-skip-link {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .app-shell-sidebar-wrapper,
+  .app-shell-skip-link {
+    display: none;
+  }
+
+  .app-shell-main-wrapper,
+  .app-shell-main-wrapper.sidebar-collapsed {
+    margin-left: 0;
+  }
+}
