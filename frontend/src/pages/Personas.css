@@ -368,6 +368,20 @@
   flex-wrap: wrap;
 }
 
+.preview-persona-button {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid #9b59b6;
+  color: #9b59b6;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.preview-persona-button:hover {
+  background-color: rgba(155, 89, 182, 0.1);
+}
+
 .edit-persona-button {
   flex: 1;
   padding: 0.5rem 1rem;

@@ -8,6 +8,7 @@ import { AccountsListSkeleton } from '../components/skeletons';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { ClonePersonaDialog } from '../components/ClonePersonaDialog';
 import { CloneCommunityPersonaDialog } from '../components/CloneCommunityPersonaDialog';
+import { AuthorPreviewDialog } from '../components/AuthorPreviewDialog';
 import { useDeleteConfirmation } from '../hooks/useDeleteConfirmation';
 import { toast } from '../stores/toast';
 import './Personas.css';
@@ -48,6 +49,9 @@ export function Personas() {
   const [personaToClone, setPersonaToClone] = useState<Persona | null>(null);
   const [communityPersonaToClone, setCommunityPersonaToClone] = useState<Persona | null>(null);
   const [isCloning, setIsCloning] = useState(false);
+  const [personaToPreview, setPersonaToPreview] = useState<Persona | null>(null);
+  const [isPreviewCommunity, setIsPreviewCommunity] = useState(false);
+  const [isQuickAdding, setIsQuickAdding] = useState(false);
 
   // Delete confirmation hook
   const {
@@ -171,6 +175,39 @@ export function Personas() {
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, [setSearchQuery]);
+
+  const handlePreview = (persona: Persona, isCommunity: boolean = false) => {
+    setPersonaToPreview(persona);
+    setIsPreviewCommunity(isCommunity);
+  };
+
+  const handlePreviewClose = () => {
+    setPersonaToPreview(null);
+    setIsPreviewCommunity(false);
+    setIsQuickAdding(false);
+  };
+
+  const handleQuickAddFromPreview = async () => {
+    if (!currentAccount?.id || !personaToPreview) return;
+    setIsQuickAdding(true);
+    try {
+      const result = await cloneFromCommunity(
+        currentAccount.id,
+        personaToPreview,
+        personaToPreview.name,
+        false
+      );
+      if (result) {
+        toast.success(`${personaToPreview.name} added to your authors`);
+        fetchPersonas(currentAccount.id, { status: statusFilter || undefined });
+        handlePreviewClose();
+      }
+    } catch {
+      toast.error('Failed to add author');
+    } finally {
+      setIsQuickAdding(false);
+    }
+  };
 
   if (!currentAccount) {
     return (
@@ -347,6 +384,13 @@ export function Personas() {
                     </div>
                     <div className="persona-card-actions">
                       <button
+                        onClick={() => handlePreview(persona, false)}
+                        className="preview-persona-button"
+                        title="Preview this author's voice"
+                      >
+                        Preview
+                      </button>
+                      <button
                         onClick={() => handleEdit(persona)}
                         className="edit-persona-button"
                       >
@@ -474,6 +518,13 @@ export function Personas() {
                     </div>
                     <div className="persona-card-actions">
                       <button
+                        onClick={() => handlePreview(persona, true)}
+                        className="preview-persona-button"
+                        title="Preview this author's voice"
+                      >
+                        Preview
+                      </button>
+                      <button
                         onClick={() => handleCommunityClone(persona)}
                         className="clone-persona-button community-clone-button"
                         title="Add this author to your collection"
@@ -519,6 +570,16 @@ export function Personas() {
           onConfirm={handleCommunityCloneConfirm}
           persona={communityPersonaToClone}
           isLoading={isCloning}
+        />
+
+        {/* Author Preview Dialog */}
+        <AuthorPreviewDialog
+          isOpen={personaToPreview !== null}
+          onClose={handlePreviewClose}
+          persona={personaToPreview}
+          showQuickAdd={isPreviewCommunity}
+          onQuickAdd={handleQuickAddFromPreview}
+          isAddingAuthor={isQuickAdding}
         />
       </div>
     </PageTransition>
