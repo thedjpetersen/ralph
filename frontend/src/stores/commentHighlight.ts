@@ -34,6 +34,15 @@ export interface HighlightInfo {
   fadeStartTime: number | null;
 }
 
+/**
+ * Search and filter options for comments
+ */
+export interface CommentSearchFilters {
+  searchQuery: string;
+  selectedAuthors: string[];
+  selectedTypes: Array<'transaction' | 'receipt' | 'budget'>;
+}
+
 interface CommentHighlightState {
   // Registered comments with text ranges
   commentRanges: Map<string, CommentWithRange>;
@@ -52,6 +61,9 @@ interface CommentHighlightState {
 
   // Filter function for comments (used with filtered views)
   commentFilter: ((comment: CommentWithRange) => boolean) | null;
+
+  // Search and filter state
+  searchFilters: CommentSearchFilters;
 
   // Actions
   registerComment: (comment: CommentWithRange) => void;
@@ -80,6 +92,15 @@ interface CommentHighlightState {
 
   // Sorting
   getSortedComments: (sortOrder: CommentSortOrder) => CommentWithRange[];
+
+  // Search and filter actions
+  setSearchQuery: (query: string) => void;
+  setSelectedAuthors: (authors: string[]) => void;
+  setSelectedTypes: (types: Array<'transaction' | 'receipt' | 'budget'>) => void;
+  clearAllFilters: () => void;
+  getUniqueAuthors: () => string[];
+  getSearchFilteredComments: () => CommentWithRange[];
+  hasActiveFilters: () => boolean;
 }
 
 /**
@@ -167,6 +188,11 @@ export const useCommentHighlightStore = create<CommentHighlightState>()((set, ge
   targetElements: new Map(),
   currentNavigationIndex: -1,
   commentFilter: null,
+  searchFilters: {
+    searchQuery: '',
+    selectedAuthors: [],
+    selectedTypes: [],
+  },
 
   // Register a comment with its text range
   registerComment: (comment) => {
@@ -404,6 +430,86 @@ export const useCommentHighlightStore = create<CommentHighlightState>()((set, ge
       } : null,
     });
   },
+
+  // Search and filter actions
+  setSearchQuery: (query: string) => {
+    set((state) => ({
+      searchFilters: { ...state.searchFilters, searchQuery: query },
+      currentNavigationIndex: -1,
+    }));
+  },
+
+  setSelectedAuthors: (authors: string[]) => {
+    set((state) => ({
+      searchFilters: { ...state.searchFilters, selectedAuthors: authors },
+      currentNavigationIndex: -1,
+    }));
+  },
+
+  setSelectedTypes: (types: Array<'transaction' | 'receipt' | 'budget'>) => {
+    set((state) => ({
+      searchFilters: { ...state.searchFilters, selectedTypes: types },
+      currentNavigationIndex: -1,
+    }));
+  },
+
+  clearAllFilters: () => {
+    set({
+      searchFilters: {
+        searchQuery: '',
+        selectedAuthors: [],
+        selectedTypes: [],
+      },
+      currentNavigationIndex: -1,
+    });
+  },
+
+  getUniqueAuthors: () => {
+    const state = get();
+    const authors = new Set<string>();
+    state.commentRanges.forEach((comment) => {
+      if (comment.authorId) {
+        authors.add(comment.authorId);
+      }
+    });
+    return Array.from(authors).sort();
+  },
+
+  getSearchFilteredComments: () => {
+    const state = get();
+    const { searchQuery, selectedAuthors, selectedTypes } = state.searchFilters;
+    let comments = Array.from(state.commentRanges.values());
+
+    // Apply search query filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      comments = comments.filter((comment) =>
+        comment.text.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply author filter
+    if (selectedAuthors.length > 0) {
+      comments = comments.filter((comment) =>
+        comment.authorId && selectedAuthors.includes(comment.authorId)
+      );
+    }
+
+    // Apply type filter
+    if (selectedTypes.length > 0) {
+      comments = comments.filter((comment) =>
+        selectedTypes.includes(comment.entityType)
+      );
+    }
+
+    return comments;
+  },
+
+  hasActiveFilters: () => {
+    const state = get();
+    const { searchQuery, selectedAuthors, selectedTypes } = state.searchFilters;
+    return searchQuery.trim().length > 0 || selectedAuthors.length > 0 || selectedTypes.length > 0;
+  },
 }));
 
 // Selector hooks for performance
@@ -412,6 +518,7 @@ const selectFocusedCommentId = (state: CommentHighlightState) => state.focusedCo
 const selectCommentRanges = (state: CommentHighlightState) => state.commentRanges;
 const selectTargetElements = (state: CommentHighlightState) => state.targetElements;
 const selectCurrentNavigationIndex = (state: CommentHighlightState) => state.currentNavigationIndex;
+const selectSearchFilters = (state: CommentHighlightState) => state.searchFilters;
 
 export function useCommentHighlight() {
   const activeHighlight = useCommentHighlightStore(selectActiveHighlight);
@@ -419,6 +526,7 @@ export function useCommentHighlight() {
   const commentRanges = useCommentHighlightStore(selectCommentRanges);
   const targetElements = useCommentHighlightStore(selectTargetElements);
   const currentNavigationIndex = useCommentHighlightStore(selectCurrentNavigationIndex);
+  const searchFilters = useCommentHighlightStore(selectSearchFilters);
 
   return {
     activeHighlight,
@@ -426,6 +534,7 @@ export function useCommentHighlight() {
     commentRanges,
     targetElements,
     currentNavigationIndex,
+    searchFilters,
   };
 }
 
@@ -443,5 +552,30 @@ export function useCommentNavigation() {
     getSortedComments,
     currentNavigationIndex,
     totalComments: commentRanges.size,
+  };
+}
+
+// Hook for comment search and filter
+export function useCommentSearchFilter() {
+  const {
+    setSearchQuery,
+    setSelectedAuthors,
+    setSelectedTypes,
+    clearAllFilters,
+    getUniqueAuthors,
+    getSearchFilteredComments,
+    hasActiveFilters,
+  } = useCommentHighlightStore();
+  const searchFilters = useCommentHighlightStore(selectSearchFilters);
+
+  return {
+    searchFilters,
+    setSearchQuery,
+    setSelectedAuthors,
+    setSelectedTypes,
+    clearAllFilters,
+    getUniqueAuthors,
+    getSearchFilteredComments,
+    hasActiveFilters,
   };
 }

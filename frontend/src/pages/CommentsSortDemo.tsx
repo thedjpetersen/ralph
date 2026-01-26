@@ -102,6 +102,14 @@ export function CommentsSortDemo() {
         </section>
 
         <section className="demo-instructions">
+          <h2>Search & Filter</h2>
+          <ul>
+            <li><strong>Search:</strong> Type to search comments by text content</li>
+            <li><strong>Author Filter:</strong> Multi-select to show comments from specific authors</li>
+            <li><strong>Type Filter:</strong> Filter by entity type (transaction, receipt, budget)</li>
+            <li><strong>Clear All:</strong> Reset all filters with one click</li>
+            <li><strong>Result Count:</strong> Shows filtered count vs total comments</li>
+          </ul>
           <h2>Sorting Options</h2>
           <ul>
             <li><strong>Newest:</strong> Most recently created comments first</li>

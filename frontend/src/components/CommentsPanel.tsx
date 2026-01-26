@@ -1,7 +1,8 @@
 import { useMemo, useCallback, useSyncExternalStore } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { useCommentHighlightStore, useCommentHighlight, hexToRgba, getAuthorColor } from '../stores/commentHighlight';
+import { useCommentHighlightStore, useCommentHighlight, useCommentSearchFilter, hexToRgba, getAuthorColor } from '../stores/commentHighlight';
 import { useAppSettingsStore, type CommentSortOrder } from '../stores/appSettings';
+import { CommentSearchFilter } from './CommentSearchFilter';
 import './CommentsPanel.css';
 
 function getReducedMotionSnapshot() {
@@ -48,18 +49,43 @@ export function CommentsPanel({
   className = '',
   title = 'Comments',
 }: CommentsPanelProps) {
-  const { commentRanges, focusedCommentId } = useCommentHighlight();
+  const { commentRanges, focusedCommentId, searchFilters } = useCommentHighlight();
   const { getSortedComments, highlightFromComment, clearHighlight, focusComment } = useCommentHighlightStore();
+  const { getSearchFilteredComments, hasActiveFilters } = useCommentSearchFilter();
   const { settings, updateEditorSettings } = useAppSettingsStore();
   const prefersReducedMotion = useReducedMotion();
 
   const sortOrder = settings.editor.commentSortOrder;
+  const isFiltered = hasActiveFilters();
 
-  // Get sorted comments - using commentRanges.size to trigger re-render when comments change
+  // Get filtered then sorted comments
   const sortedComments = useMemo(() => {
+    if (isFiltered) {
+      // Apply search filters first, then sort
+      const filtered = getSearchFilteredComments();
+      return [...filtered].sort((a, b) => {
+        switch (sortOrder) {
+          case 'newest':
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          case 'oldest':
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          case 'author':
+            return (a.authorId || '').localeCompare(b.authorId || '');
+          case 'position': {
+            const aPos = a.textRange?.startIndex ?? Number.MAX_SAFE_INTEGER;
+            const bPos = b.textRange?.startIndex ?? Number.MAX_SAFE_INTEGER;
+            return aPos - bPos;
+          }
+          case 'type':
+            return a.entityType.localeCompare(b.entityType);
+          default:
+            return 0;
+        }
+      });
+    }
     return getSortedComments(sortOrder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getSortedComments, sortOrder, commentRanges.size]);
+  }, [getSortedComments, getSearchFilteredComments, sortOrder, commentRanges.size, searchFilters, isFiltered]);
 
   // Handle sort change
   const handleSortChange = useCallback((newSort: CommentSortOrder) => {
@@ -158,8 +184,23 @@ export function CommentsPanel({
         </div>
       </div>
 
+      {/* Search and Filter */}
+      <CommentSearchFilter
+        totalCount={commentRanges.size}
+        filteredCount={sortedComments.length}
+      />
+
       {/* Comments list with animations */}
       <div className="comments-list">
+        {sortedComments.length === 0 && isFiltered ? (
+          <div className="comments-filter-empty">
+            <svg className="filter-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <p>No comments match your filters</p>
+          </div>
+        ) : (
         <LayoutGroup>
           <AnimatePresence mode="popLayout">
             {sortedComments.map((comment, index) => {
@@ -220,6 +261,7 @@ export function CommentsPanel({
             })}
           </AnimatePresence>
         </LayoutGroup>
+        )}
       </div>
     </motion.div>
   );
