@@ -1,6 +1,12 @@
 export { Button, type ButtonProps, type ButtonVariant, type ButtonSize } from './Button';
 export { Input, type InputProps, type InputSize } from './Input';
 export { Select, type SelectProps, type SelectOption, type SelectSize } from './Select';
+export {
+  MultiSelect,
+  type MultiSelectProps,
+  type MultiSelectOption,
+  type MultiSelectSize,
+} from './MultiSelect';
 export { Modal, type ModalProps, type ModalSize } from './Modal';
 export {
   Table,
