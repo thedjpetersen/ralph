@@ -1,0 +1,595 @@
+/**
+ * AI Contradiction Checker Panel Styles
+ */
+
+/* CSS Variables for theming */
+.ai-contradiction-panel {
+  --contradiction-panel-bg: var(--color-surface, #ffffff);
+  --contradiction-panel-border: var(--color-border, #e5e7eb);
+  --contradiction-panel-text: var(--color-text, #1f2937);
+  --contradiction-panel-text-secondary: var(--color-text-secondary, #6b7280);
+  --contradiction-panel-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ai-contradiction-panel {
+    --contradiction-panel-bg: var(--color-surface-dark, #1f2937);
+    --contradiction-panel-border: var(--color-border-dark, #374151);
+    --contradiction-panel-text: var(--color-text-dark, #f9fafb);
+    --contradiction-panel-text-secondary: var(--color-text-secondary-dark, #9ca3af);
+  }
+}
+
+/* Panel container */
+.ai-contradiction-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 380px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: var(--contradiction-panel-bg);
+  border: 1px solid var(--contradiction-panel-border);
+  border-radius: 12px;
+  box-shadow: var(--contradiction-panel-shadow);
+  z-index: 1000;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Scrollbar styling */
+.ai-contradiction-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ai-contradiction-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ai-contradiction-panel::-webkit-scrollbar-thumb {
+  background: var(--contradiction-panel-border);
+  border-radius: 3px;
+}
+
+/* Header */
+.contradiction-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--contradiction-panel-border);
+}
+
+.contradiction-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contradiction-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-error, #ef4444);
+}
+
+.contradiction-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--contradiction-panel-text);
+}
+
+.contradiction-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--contradiction-panel-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.contradiction-close:hover {
+  background: var(--contradiction-panel-border);
+  color: var(--contradiction-panel-text);
+}
+
+.contradiction-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Error state */
+.contradiction-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.contradiction-error button {
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #dc2626;
+  cursor: pointer;
+}
+
+.contradiction-error button:hover {
+  background: #fecaca;
+}
+
+/* Empty state */
+.contradiction-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--contradiction-panel-text-secondary);
+}
+
+.contradiction-empty svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.contradiction-empty p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: var(--contradiction-panel-text);
+}
+
+.contradiction-hint {
+  font-size: 12px;
+  color: var(--contradiction-panel-text-secondary);
+}
+
+/* Consistency Score Badge */
+.contradiction-score-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  color: white;
+}
+
+.contradiction-score-badge.high {
+  background: linear-gradient(135deg, var(--color-success, #22c55e) 0%, #16a34a 100%);
+}
+
+.contradiction-score-badge.medium {
+  background: linear-gradient(135deg, var(--color-warning, #f59e0b) 0%, #d97706 100%);
+}
+
+.contradiction-score-badge.low {
+  background: linear-gradient(135deg, var(--color-error, #ef4444) 0%, #dc2626 100%);
+}
+
+.contradiction-score-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.contradiction-score-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.contradiction-score-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contradiction-score-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.contradiction-score-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Stats row */
+.contradiction-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.contradiction-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 8px;
+  background: var(--contradiction-panel-border);
+  border-radius: 8px;
+}
+
+.contradiction-stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--contradiction-panel-text);
+}
+
+.contradiction-stat-label {
+  font-size: 10px;
+  color: var(--contradiction-panel-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  text-align: center;
+}
+
+/* Success state (no contradictions) */
+.contradiction-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  text-align: center;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.contradiction-success svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  color: var(--color-success, #22c55e);
+}
+
+.contradiction-success p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-success, #22c55e);
+}
+
+.contradiction-success span {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--contradiction-panel-text-secondary);
+}
+
+/* Section title */
+.contradiction-section-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--contradiction-panel-text);
+}
+
+.contradiction-section-hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--contradiction-panel-text-secondary);
+}
+
+/* Contradictions list */
+.contradiction-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contradiction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.contradiction-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.contradiction-list::-webkit-scrollbar-thumb {
+  background: var(--contradiction-panel-border);
+  border-radius: 2px;
+}
+
+/* Contradiction Card */
+.contradiction-card {
+  padding: 12px;
+  background: var(--contradiction-panel-border);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.contradiction-card:hover {
+  border-color: var(--color-primary, #3b82f6);
+}
+
+.contradiction-card.selected {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.contradiction-card.dismissed {
+  opacity: 0.5;
+}
+
+.contradiction-card.dismissed:hover {
+  opacity: 0.8;
+}
+
+.contradiction-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.contradiction-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.contradiction-type-badge.high {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--color-error, #ef4444);
+}
+
+.contradiction-type-badge.medium {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--color-warning, #f59e0b);
+}
+
+.contradiction-type-badge.low {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--color-info, #3b82f6);
+}
+
+.contradiction-type-label {
+  font-size: 10px;
+  color: var(--contradiction-panel-text-secondary);
+}
+
+/* Statement quotes */
+.contradiction-statements {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.contradiction-statement {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--contradiction-panel-bg);
+  border-radius: 6px;
+  border-left: 3px solid var(--color-error, #ef4444);
+}
+
+.contradiction-statement:last-child {
+  border-left-color: var(--color-warning, #f59e0b);
+}
+
+.contradiction-statement-label {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--contradiction-panel-text-secondary);
+  text-transform: uppercase;
+}
+
+.contradiction-statement-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--contradiction-panel-text);
+}
+
+/* Explanation section */
+.contradiction-explanation {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.05);
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.contradiction-explanation svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: var(--color-error, #ef4444);
+}
+
+.contradiction-explanation p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--contradiction-panel-text);
+}
+
+/* Suggestion section */
+.contradiction-suggestion {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(34, 197, 94, 0.05);
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.contradiction-suggestion svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: var(--color-success, #22c55e);
+}
+
+.contradiction-suggestion p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-success, #16a34a);
+  font-style: italic;
+}
+
+/* Action buttons */
+.contradiction-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--contradiction-panel-border);
+}
+
+.contradiction-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid var(--contradiction-panel-border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--contradiction-panel-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.contradiction-action-btn:hover {
+  background: var(--contradiction-panel-border);
+  color: var(--contradiction-panel-text);
+}
+
+.contradiction-action-btn.dismiss:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--color-error, #ef4444);
+  color: var(--color-error, #ef4444);
+}
+
+.contradiction-action-btn.restore:hover {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--color-success, #22c55e);
+  color: var(--color-success, #22c55e);
+}
+
+.contradiction-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Dismissed section */
+.contradiction-dismissed-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--contradiction-panel-border);
+}
+
+.contradiction-dismissed-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid var(--contradiction-panel-border);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--contradiction-panel-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.contradiction-dismissed-toggle:hover {
+  background: var(--contradiction-panel-border);
+}
+
+.contradiction-dismissed-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s;
+}
+
+.contradiction-dismissed-toggle svg.open {
+  transform: rotate(180deg);
+}
+
+/* Footer */
+.contradiction-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--contradiction-panel-border);
+  font-size: 11px;
+  color: var(--contradiction-panel-text-secondary);
+}
+
+.contradiction-footer kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 20px;
+  padding: 0 6px;
+  margin-right: 6px;
+  background: var(--contradiction-panel-bg);
+  border: 1px solid var(--contradiction-panel-border);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  box-shadow: 0 1px 0 var(--contradiction-panel-border);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ai-contradiction-panel {
+    right: 10px;
+    left: 10px;
+    width: auto;
+    top: auto;
+    bottom: 70px;
+    max-height: 50vh;
+  }
+}

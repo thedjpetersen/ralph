@@ -23,6 +23,7 @@ import { useQuickSwitcherStore } from '../../stores/quickSwitcher';
 import { useAIToneAnalyzerStore } from '../../stores/aiToneAnalyzer';
 import { useAIVocabularyEnhancerStore } from '../../stores/aiVocabularyEnhancer';
 import { useAIReadabilityStore } from '../../stores/aiReadability';
+import { useAIContradictionCheckerStore } from '../../stores/aiContradictionChecker';
 import { useCommentNavigation } from '../../stores/commentHighlight';
 import { useDocumentFoldersStore } from '../../stores/documentFolders';
 import { useStarredDocumentsStore } from '../../stores/starredDocuments';
@@ -53,6 +54,7 @@ const AIToneAnalyzerPanel = lazy(() => import('../AIToneAnalyzerPanel').then(m =
 const AIVocabularyEnhancerPanel = lazy(() => import('../AIVocabularyEnhancerPanel').then(m => ({ default: m.AIVocabularyEnhancerPanel })));
 const AIVocabularySuggestionPopup = lazy(() => import('../AIVocabularySuggestionPopup').then(m => ({ default: m.AIVocabularySuggestionPopup })));
 const AIReadabilityPanel = lazy(() => import('../AIReadabilityPanel').then(m => ({ default: m.AIReadabilityPanel })));
+const AIContradictionCheckerPanel = lazy(() => import('../AIContradictionCheckerPanel').then(m => ({ default: m.AIContradictionCheckerPanel })));
 const FocusModeIndicator = lazy(() => import('../FocusModeIndicator').then(m => ({ default: m.FocusModeIndicator })));
 const TableOfContentsSidebar = lazy(() => import('../TableOfContentsSidebar').then(m => ({ default: m.TableOfContentsSidebar })));
 const LinkPopover = lazy(() => import('../LinkPopover').then(m => ({ default: m.LinkPopover })));
@@ -76,6 +78,7 @@ export function AppShell({ children }: AppShellProps) {
   const { togglePanel: toggleToneAnalyzer, closePanel: closeToneAnalyzer } = useAIToneAnalyzerStore();
   const { togglePanel: toggleVocabularyEnhancer, closePanel: closeVocabularyEnhancer } = useAIVocabularyEnhancerStore();
   const { togglePanel: toggleReadability, closePanel: closeReadability } = useAIReadabilityStore();
+  const { togglePanel: toggleContradictionChecker, closePanel: closeContradictionChecker } = useAIContradictionCheckerStore();
   const { navigateToNextComment, navigateToPreviousComment } = useCommentNavigation();
   const { selectedFolderId, folders } = useDocumentFoldersStore();
   const { toggleStar } = useStarredDocumentsStore();
@@ -280,6 +283,7 @@ export function AppShell({ children }: AppShellProps) {
         closeToneAnalyzer();
         closeVocabularyEnhancer();
         closeReadability();
+        closeContradictionChecker();
         closeTableOfContents();
         closeShortcutsViewer();
       },
@@ -362,6 +366,13 @@ export function AppShell({ children }: AppShellProps) {
       altKey: true,
       action: toggleReadability,
       description: 'Toggle readability scorer panel',
+      allowInInput: true,
+    },
+    {
+      key: 'c',
+      altKey: true,
+      action: toggleContradictionChecker,
+      description: 'Toggle contradiction checker panel',
       allowInInput: true,
     },
     {
@@ -513,6 +524,7 @@ export function AppShell({ children }: AppShellProps) {
         <AIVocabularyEnhancerPanel />
         <AIVocabularySuggestionPopup />
         <AIReadabilityPanel />
+        <AIContradictionCheckerPanel />
         <FocusModeIndicator />
         <TableOfContentsSidebar />
         <LinkPopover />

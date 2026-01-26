@@ -9,6 +9,7 @@ import { useAIOutlineStore } from '../stores/aiOutline';
 import { useAIToneAnalyzerStore } from '../stores/aiToneAnalyzer';
 import { useAIVocabularyEnhancerStore } from '../stores/aiVocabularyEnhancer';
 import { useAIReadabilityStore } from '../stores/aiReadability';
+import { useAIContradictionCheckerStore } from '../stores/aiContradictionChecker';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
 import { EmptyState, SearchIllustration } from './ui/EmptyState';
@@ -65,6 +66,7 @@ function useCommands(): Command[] {
   const { openPanel: openToneAnalyzer } = useAIToneAnalyzerStore();
   const { openPanel: openVocabularyEnhancer } = useAIVocabularyEnhancerStore();
   const { openPanel: openReadability } = useAIReadabilityStore();
+  const { openPanel: openContradictionChecker } = useAIContradictionCheckerStore();
   const { closePalette } = useCommandPaletteStore();
 
   return useMemo(() => {
@@ -323,6 +325,15 @@ Also want to cover communication protocols, stakeholder management, and risk ass
         keywords: ['readability', 'grade', 'level', 'flesch', 'kincaid', 'score', 'complexity', 'audience', 'simplify'],
         action: () => { openReadability(); closePalette(); },
       },
+      {
+        id: 'ai-contradiction-checker',
+        label: 'Check Consistency',
+        category: 'ai',
+        description: 'Find contradictions and inconsistencies in your document',
+        shortcutKeys: { mac: ['⌥', 'C'], windows: ['Alt', 'C'] },
+        keywords: ['contradiction', 'consistency', 'inconsistent', 'conflict', 'check', 'verify', 'validate'],
+        action: () => { openContradictionChecker(); closePalette(); },
+      },
 
       // Settings
       {
@@ -368,7 +379,7 @@ Also want to cover communication protocols, stakeholder management, and risk ass
     ];
 
     return commands;
-  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, openToneAnalyzer, openVocabularyEnhancer, openReadability, closePalette]);
+  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, openToneAnalyzer, openVocabularyEnhancer, openReadability, openContradictionChecker, closePalette]);
 }
 
 // Highlight text component
