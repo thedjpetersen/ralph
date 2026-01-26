@@ -19,6 +19,14 @@ export interface KeyboardShortcutsHelpProps {
 
 const DEFAULT_SHORTCUTS: ShortcutGroup[] = [
   {
+    title: 'Global',
+    shortcuts: [
+      { keys: ['⌘', 'K'], description: 'Open command palette' },
+      { keys: ['?'], description: 'Show this help dialog' },
+      { keys: ['H'], description: 'Go to home' },
+    ],
+  },
+  {
     title: 'Navigation',
     shortcuts: [
       { keys: ['Tab'], description: 'Move to next interactive element' },
@@ -37,16 +45,10 @@ const DEFAULT_SHORTCUTS: ShortcutGroup[] = [
     ],
   },
   {
-    title: 'Modals',
+    title: 'Modals & Dialogs',
     shortcuts: [
-      { keys: ['Escape'], description: 'Close modal' },
+      { keys: ['Escape'], description: 'Close modal or dialog' },
       { keys: ['Tab'], description: 'Navigate within modal (focus trapped)' },
-    ],
-  },
-  {
-    title: 'Accessibility',
-    shortcuts: [
-      { keys: ['?'], description: 'Show this help dialog' },
     ],
   },
 ];

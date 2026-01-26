@@ -285,14 +285,15 @@ describe('Modal', () => {
   });
 
   describe('Focus Management', () => {
-    it('focuses modal when opened', async () => {
+    it('focuses first focusable element when opened', async () => {
       render(
         <Modal isOpen={true} onClose={() => {}}>
           <p>Content</p>
         </Modal>
       );
+      // Focus should be on first focusable element (close button) for better a11y
       await waitFor(() => {
-        expect(document.activeElement).toBe(screen.getByRole('dialog'));
+        expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Close modal' }));
       });
     });
 

@@ -186,8 +186,38 @@ button:focus-visible {
 
 /* Focus visible styles for keyboard navigation */
 :focus-visible {
-  outline: 2px solid #646cff;
+  outline: 2px solid var(--color-accent, #646cff);
   outline-offset: 2px;
+}
+
+/* Ensure all interactive elements have visible focus */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="menuitemradio"]:focus-visible,
+[role="option"]:focus-visible {
+  outline: 2px solid var(--color-accent, #646cff);
+  outline-offset: 2px;
+}
+
+/* High contrast focus for better visibility */
+@media (prefers-contrast: more) {
+  :focus-visible,
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+  }
 }
 
 /* Skip link and other a11y helpers */

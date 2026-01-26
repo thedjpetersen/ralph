@@ -83,6 +83,9 @@ const Integrations = lazy(() => import('./pages/Integrations').then(m => ({ defa
 const GoogleDriveSettings = lazy(() => import('./pages/GoogleDriveSettings').then(m => ({ default: m.GoogleDriveSettings })));
 const EmailSettings = lazy(() => import('./pages/EmailSettings').then(m => ({ default: m.EmailSettings })));
 
+// Error pages
+const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
+
 function App() {
   return (
     <Routes>
@@ -151,6 +154,9 @@ function App() {
         <Route path="/integrations/google-drive/callback" element={<Suspense fallback={<PageLoadingSpinner />}><GoogleDriveSettings /></Suspense>} />
         <Route path="/integrations/email" element={<Suspense fallback={<PageLoadingSpinner />}><EmailSettings /></Suspense>} />
         <Route path="/integrations/email/callback" element={<Suspense fallback={<PageLoadingSpinner />}><EmailSettings /></Suspense>} />
+
+        {/* Catch-all route for 404 */}
+        <Route path="*" element={<Suspense fallback={<PageLoadingSpinner />}><NotFound /></Suspense>} />
       </Route>
     </Routes>
   );

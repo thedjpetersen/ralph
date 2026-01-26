@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCommandPaletteStore, type Command, type CommandCategory } from '../stores/commandPalette';
 import { useFindReplaceStore } from '../stores/findReplace';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
 import './CommandPalette.css';
 
@@ -367,6 +368,14 @@ export function CommandPalette() {
   const commands = useCommands();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Use focus trap for proper focus management
+  useFocusTrap(containerRef, {
+    isActive: isOpen,
+    onEscape: closePalette,
+    initialFocusRef: inputRef,
+    autoFocus: true,
+  });
 
   // Filter and group commands
   const { groupedCommands } = useMemo(() => {

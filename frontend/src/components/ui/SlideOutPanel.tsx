@@ -3,10 +3,10 @@ import {
   useEffect,
   useRef,
   useCallback,
-  type KeyboardEvent,
   type MouseEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import './SlideOutPanel.css';
 
 export type SlideOutPanelPosition = 'left' | 'right';
@@ -40,66 +40,14 @@ export function SlideOutPanel({
   initialFocus,
 }: SlideOutPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const previousActiveElement = useRef<HTMLElement | null>(null);
 
-  // Store previously focused element and restore on close
-  useEffect(() => {
-    if (isOpen) {
-      previousActiveElement.current = document.activeElement as HTMLElement;
-    }
-    return () => {
-      if (!isOpen && previousActiveElement.current) {
-        previousActiveElement.current.focus();
-      }
-    };
-  }, [isOpen]);
-
-  // Focus management
-  useEffect(() => {
-    if (isOpen) {
-      // Focus initial element or first focusable
-      if (initialFocus?.current) {
-        initialFocus.current.focus();
-      } else {
-        panelRef.current?.focus();
-      }
-    }
-  }, [isOpen, initialFocus]);
-
-  // Trap focus within panel
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'Escape' && closeOnEscape) {
-        e.preventDefault();
-        onClose();
-        return;
-      }
-
-      if (e.key !== 'Tab') return;
-
-      const panel = panelRef.current;
-      if (!panel) return;
-
-      const focusableElements = panel.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
-
-      if (e.shiftKey) {
-        if (document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement?.focus();
-        }
-      } else {
-        if (document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement?.focus();
-        }
-      }
-    },
-    [closeOnEscape, onClose]
-  );
+  // Use focus trap hook for proper focus management
+  useFocusTrap(panelRef, {
+    isActive: isOpen,
+    onEscape: closeOnEscape ? onClose : undefined,
+    initialFocusRef: initialFocus,
+    autoFocus: true,
+  });
 
   const handleBackdropClick = useCallback(
     (e: MouseEvent<HTMLDivElement>) => {
@@ -127,7 +75,6 @@ export function SlideOutPanel({
     <div
       className={`slideout-backdrop ${isOpen ? 'slideout-backdrop-visible' : ''}`}
       onClick={handleBackdropClick}
-      onKeyDown={handleKeyDown}
       role="presentation"
     >
       <div
