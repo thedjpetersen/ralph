@@ -51,6 +51,7 @@ describe('AIRewriteToolbar', () => {
       previewText: null,
       originalText: '',
       error: null,
+      ghostPreviewInfo: null,
       undoStack: [],
       toolbarPosition: null,
     });
@@ -356,7 +357,7 @@ describe('AIRewriteToolbar', () => {
       expect(useAIRewriteStore.getState().isActive).toBe(false);
     });
 
-    it('triggers rewrite option with number keys 1-5', async () => {
+    it('triggers rewrite option with number keys 1-4', async () => {
       const textarea = createMockTextarea('Test text');
 
       useAIRewriteStore.setState({
@@ -538,6 +539,7 @@ describe('AIRewrite Store', () => {
       previewText: null,
       originalText: '',
       error: null,
+      ghostPreviewInfo: null,
       undoStack: [],
       toolbarPosition: null,
     });
@@ -582,20 +584,21 @@ describe('AIRewrite Store', () => {
 
     useAIRewriteStore.setState({
       isActive: true,
-      selectedText: "don't do it",
+      selectedText: 'I think maybe this is good',
       selectionStart: 0,
-      selectionEnd: 11,
+      selectionEnd: 26,
       targetElement: textarea,
     });
 
     await act(async () => {
-      useAIRewriteStore.getState().requestRewrite('formal');
+      useAIRewriteStore.getState().requestRewrite('stronger');
       await vi.runAllTimersAsync();
     });
 
     const state = useAIRewriteStore.getState();
     expect(state.isLoading).toBe(false);
-    expect(state.previewText).toContain('do not');
+    // 'stronger' removes hedging and replaces weak words
+    expect(state.previewText).toBeTruthy();
   });
 
   it('cancelRewrite clears preview without hiding toolbar', () => {
@@ -643,55 +646,59 @@ describe('AIRewrite Store', () => {
       expect(preview).not.toContain('just');
     });
 
-    it('formal expands contractions', async () => {
-      useAIRewriteStore.setState({ selectedText: "can't won't don't" });
+    it('clearer simplifies complex phrases', async () => {
+      useAIRewriteStore.setState({ selectedText: 'in order to do this' });
 
       await act(async () => {
-        useAIRewriteStore.getState().requestRewrite('formal');
+        useAIRewriteStore.getState().requestRewrite('clearer');
         await vi.runAllTimersAsync();
       });
 
       const preview = useAIRewriteStore.getState().previewText;
-      expect(preview).toContain('cannot');
-      expect(preview).toContain('will not');
-      expect(preview).toContain('do not');
+      // 'clearer' replaces 'in order to' with 'to'
+      expect(preview).toContain('to do this');
+      expect(preview).not.toContain('in order to');
     });
 
-    it('casual contracts formal language', async () => {
-      useAIRewriteStore.setState({ selectedText: 'I cannot do that. Thank you.' });
-
-      await act(async () => {
-        useAIRewriteStore.getState().requestRewrite('casual');
-        await vi.runAllTimersAsync();
-      });
-
-      const preview = useAIRewriteStore.getState().previewText;
-      expect(preview).toContain("can't");
-      expect(preview).toContain('Thanks');
-    });
-
-    it('fix-grammar capitalizes first letter', async () => {
-      useAIRewriteStore.setState({ selectedText: 'hello world. how are you.' });
-
-      await act(async () => {
-        useAIRewriteStore.getState().requestRewrite('fix-grammar');
-        await vi.runAllTimersAsync();
-      });
-
-      const preview = useAIRewriteStore.getState().previewText;
-      expect(preview).toMatch(/^[A-Z]/);
-    });
-
-    it('fix-grammar fixes lowercase i', async () => {
+    it('clearer fixes basic grammar issues', async () => {
       useAIRewriteStore.setState({ selectedText: 'i went to the store' });
 
       await act(async () => {
-        useAIRewriteStore.getState().requestRewrite('fix-grammar');
+        useAIRewriteStore.getState().requestRewrite('clearer');
         await vi.runAllTimersAsync();
       });
 
       const preview = useAIRewriteStore.getState().previewText;
+      // 'clearer' capitalizes standalone 'i' to 'I'
       expect(preview).toContain('I went');
+    });
+
+    it('stronger removes hedging language', async () => {
+      useAIRewriteStore.setState({ selectedText: 'I think maybe this is good' });
+
+      await act(async () => {
+        useAIRewriteStore.getState().requestRewrite('stronger');
+        await vi.runAllTimersAsync();
+      });
+
+      const preview = useAIRewriteStore.getState().previewText;
+      // 'stronger' removes hedging words like 'I think' and 'maybe'
+      expect(preview).not.toContain('I think');
+      expect(preview).not.toContain('maybe');
+    });
+
+    it('stronger replaces weak words with strong alternatives', async () => {
+      useAIRewriteStore.setState({ selectedText: 'this is a good and important feature' });
+
+      await act(async () => {
+        useAIRewriteStore.getState().requestRewrite('stronger');
+        await vi.runAllTimersAsync();
+      });
+
+      const preview = useAIRewriteStore.getState().previewText;
+      // 'stronger' replaces 'good' with 'excellent' and 'important' with 'critical'
+      expect(preview).toContain('excellent');
+      expect(preview).toContain('critical');
     });
   });
 });

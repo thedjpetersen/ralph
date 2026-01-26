@@ -157,8 +157,8 @@ export function AIRewriteToolbar({ targetSelector }: AIRewriteToolbarProps) {
         return;
       }
 
-      // Number keys for quick option selection (1-5)
-      if (!isLoading && !previewText && e.key >= '1' && e.key <= '5') {
+      // Number keys for quick option selection (1-4)
+      if (!isLoading && !previewText && e.key >= '1' && e.key <= '4') {
         const index = parseInt(e.key) - 1;
         if (index < REWRITE_OPTIONS.length) {
           e.preventDefault();
@@ -344,7 +344,7 @@ export function AIRewriteToolbar({ targetSelector }: AIRewriteToolbarProps) {
               </button>
             ))}
             <div className="ai-rewrite-hint">
-              Select text and choose a rewrite style. Press 1-5 for quick selection.
+              Select text and choose a rewrite style. Press 1-4 for quick selection.
             </div>
           </div>
         )}

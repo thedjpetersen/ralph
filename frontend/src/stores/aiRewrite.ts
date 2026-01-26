@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type RewriteOption = 'shorter' | 'longer' | 'formal' | 'casual' | 'fix-grammar';
+export type RewriteOption = 'shorter' | 'longer' | 'clearer' | 'stronger';
 
 export interface RewriteOptionConfig {
   id: RewriteOption;
@@ -12,10 +12,17 @@ export interface RewriteOptionConfig {
 export const REWRITE_OPTIONS: RewriteOptionConfig[] = [
   { id: 'shorter', label: 'Shorter', description: 'Make the text more concise', shortcut: '1' },
   { id: 'longer', label: 'Longer', description: 'Expand with more detail', shortcut: '2' },
-  { id: 'formal', label: 'Formal', description: 'Use professional language', shortcut: '3' },
-  { id: 'casual', label: 'Casual', description: 'Make it more conversational', shortcut: '4' },
-  { id: 'fix-grammar', label: 'Fix Grammar', description: 'Correct grammar and spelling', shortcut: '5' },
+  { id: 'clearer', label: 'Clearer', description: 'Improve clarity and readability', shortcut: '3' },
+  { id: 'stronger', label: 'Stronger', description: 'Make it more impactful', shortcut: '4' },
 ];
+
+export interface GhostPreviewInfo {
+  beforeText: string;
+  originalText: string;
+  replacementText: string;
+  afterText: string;
+  targetRect: DOMRect;
+}
 
 export interface AIRewriteState {
   // Selection info
@@ -30,6 +37,9 @@ export interface AIRewriteState {
   previewText: string | null;
   originalText: string;
   error: string | null;
+
+  // Ghost preview info for inline display
+  ghostPreviewInfo: GhostPreviewInfo | null;
 
   // Undo support
   undoStack: { text: string; selectionStart: number; selectionEnd: number }[];
@@ -74,62 +84,52 @@ function getMockRewrite(text: string, option: RewriteOption): string {
       return words.join(' ') + ' This provides additional context for better understanding.';
     }
 
-    case 'formal':
-      // Make more professional
+    case 'clearer':
+      // Make text clearer and more readable
       return text
-        .replace(/\bcan't\b/gi, 'cannot')
-        .replace(/\bwon't\b/gi, 'will not')
-        .replace(/\bdon't\b/gi, 'do not')
-        .replace(/\bdoesn't\b/gi, 'does not')
-        .replace(/\bI'm\b/gi, 'I am')
-        .replace(/\bit's\b/gi, 'it is')
-        .replace(/\bthat's\b/gi, 'that is')
-        .replace(/\bthey're\b/gi, 'they are')
-        .replace(/\bwe're\b/gi, 'we are')
-        .replace(/\byou're\b/gi, 'you are')
-        .replace(/\bhey\b/gi, 'Hello')
-        .replace(/\bhi\b/gi, 'Hello')
-        .replace(/\bthanks\b/gi, 'Thank you')
-        .replace(/\bgot\b/gi, 'received')
-        .replace(/\bkinda\b/gi, 'somewhat')
-        .replace(/\b(awesome|cool|great)\b/gi, 'excellent')
-        .trim();
-
-    case 'casual':
-      // Make more conversational
-      return text
-        .replace(/\bcannot\b/gi, "can't")
-        .replace(/\bwill not\b/gi, "won't")
-        .replace(/\bdo not\b/gi, "don't")
-        .replace(/\bdoes not\b/gi, "doesn't")
-        .replace(/\bI am\b/gi, "I'm")
-        .replace(/\bit is\b/gi, "it's")
-        .replace(/\bthat is\b/gi, "that's")
-        .replace(/\bthey are\b/gi, "they're")
-        .replace(/\bwe are\b/gi, "we're")
-        .replace(/\byou are\b/gi, "you're")
-        .replace(/\bHello\b/gi, 'Hey')
-        .replace(/\bThank you\b/gi, 'Thanks')
-        .replace(/\breceived\b/gi, 'got')
-        .replace(/\bexcellent\b/gi, 'awesome')
-        .replace(/\bRegards\b/gi, 'Cheers')
-        .trim();
-
-    case 'fix-grammar':
-      // Basic grammar fixes
-      return text
-        // Capitalize first letter of sentences
+        // Fix basic grammar issues first
         .replace(/(^|[.!?]\s+)([a-z])/g, (_, before, letter) => before + letter.toUpperCase())
-        // Remove double spaces
         .replace(/\s{2,}/g, ' ')
-        // Fix common issues
         .replace(/\bi\b/g, 'I')
-        .replace(/\s+,/g, ',')
-        .replace(/\s+\./g, '.')
-        .replace(/\s+\?/g, '?')
-        .replace(/\s+!/g, '!')
-        // Ensure proper spacing after punctuation
-        .replace(/([.!?,])([A-Za-z])/g, '$1 $2')
+        // Simplify complex phrases
+        .replace(/\bin order to\b/gi, 'to')
+        .replace(/\bdue to the fact that\b/gi, 'because')
+        .replace(/\bat this point in time\b/gi, 'now')
+        .replace(/\bin the event that\b/gi, 'if')
+        .replace(/\bwith regard to\b/gi, 'about')
+        .replace(/\bprior to\b/gi, 'before')
+        .replace(/\bsubsequent to\b/gi, 'after')
+        .replace(/\bin spite of the fact that\b/gi, 'although')
+        .replace(/\bfor the purpose of\b/gi, 'to')
+        .replace(/\bas a result of\b/gi, 'because of')
+        .trim();
+
+    case 'stronger':
+      // Make text more impactful and confident
+      return text
+        // Remove hedging language
+        .replace(/\bI think\b/gi, '')
+        .replace(/\bmaybe\b/gi, '')
+        .replace(/\bperhaps\b/gi, '')
+        .replace(/\bpossibly\b/gi, '')
+        .replace(/\bI believe\b/gi, '')
+        .replace(/\bseems to\b/gi, '')
+        .replace(/\bkind of\b/gi, '')
+        .replace(/\bsort of\b/gi, '')
+        .replace(/\ba bit\b/gi, '')
+        .replace(/\bsomewhat\b/gi, '')
+        // Replace weak words with stronger alternatives
+        .replace(/\bgood\b/gi, 'excellent')
+        .replace(/\bnice\b/gi, 'outstanding')
+        .replace(/\bbad\b/gi, 'unacceptable')
+        .replace(/\bimportant\b/gi, 'critical')
+        .replace(/\bbig\b/gi, 'significant')
+        .replace(/\bhelp\b/gi, 'enable')
+        .replace(/\bget\b/gi, 'achieve')
+        .replace(/\bmake\b/gi, 'create')
+        // Clean up extra spaces from removed words
+        .replace(/\s{2,}/g, ' ')
+        .replace(/^\s+/, '')
         .trim();
 
     default:
@@ -148,6 +148,7 @@ export const useAIRewriteStore = create<AIRewriteState>()((set, get) => ({
   previewText: null,
   originalText: '',
   error: null,
+  ghostPreviewInfo: null,
   undoStack: [],
   toolbarPosition: null,
 
@@ -162,6 +163,7 @@ export const useAIRewriteStore = create<AIRewriteState>()((set, get) => ({
       previewText: null,
       originalText: selectedText,
       error: null,
+      ghostPreviewInfo: null,
     });
   },
 
@@ -174,6 +176,7 @@ export const useAIRewriteStore = create<AIRewriteState>()((set, get) => ({
       targetElement: null,
       toolbarPosition: null,
       previewText: null,
+      ghostPreviewInfo: null,
       isLoading: false,
       error: null,
     });
@@ -183,7 +186,7 @@ export const useAIRewriteStore = create<AIRewriteState>()((set, get) => ({
     const state = get();
     if (!state.selectedText || state.isLoading) return;
 
-    set({ isLoading: true, error: null, previewText: null });
+    set({ isLoading: true, error: null, previewText: null, ghostPreviewInfo: null });
 
     try {
       // Simulate API delay
@@ -191,14 +194,29 @@ export const useAIRewriteStore = create<AIRewriteState>()((set, get) => ({
 
       const rewrittenText = getMockRewrite(state.selectedText, option);
 
+      // Build ghost preview info for inline display
+      let ghostPreviewInfo: GhostPreviewInfo | null = null;
+      if (state.targetElement) {
+        const fullText = state.targetElement.value;
+        ghostPreviewInfo = {
+          beforeText: fullText.slice(0, state.selectionStart),
+          originalText: state.selectedText,
+          replacementText: rewrittenText,
+          afterText: fullText.slice(state.selectionEnd),
+          targetRect: state.targetElement.getBoundingClientRect(),
+        };
+      }
+
       set({
         previewText: rewrittenText,
+        ghostPreviewInfo,
         isLoading: false
       });
     } catch (error) {
       set({
         isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to rewrite text',
+        ghostPreviewInfo: null,
       });
     }
   },
@@ -244,6 +262,7 @@ export const useAIRewriteStore = create<AIRewriteState>()((set, get) => ({
       targetElement: null,
       toolbarPosition: null,
       previewText: null,
+      ghostPreviewInfo: null,
       isLoading: false,
     }));
   },
@@ -251,6 +270,7 @@ export const useAIRewriteStore = create<AIRewriteState>()((set, get) => ({
   cancelRewrite: () => {
     set({
       previewText: null,
+      ghostPreviewInfo: null,
       isLoading: false,
       error: null,
     });
@@ -301,6 +321,10 @@ const selectIsLoading = (state: AIRewriteState) => state.isLoading;
 const selectPreviewText = (state: AIRewriteState) => state.previewText;
 const selectError = (state: AIRewriteState) => state.error;
 const selectToolbarPosition = (state: AIRewriteState) => state.toolbarPosition;
+const selectGhostPreviewInfo = (state: AIRewriteState) => state.ghostPreviewInfo;
+const selectSelectionStart = (state: AIRewriteState) => state.selectionStart;
+const selectSelectionEnd = (state: AIRewriteState) => state.selectionEnd;
+const selectTargetElement = (state: AIRewriteState) => state.targetElement;
 
 // Combined hook using individual selectors
 export function useAIRewrite() {
@@ -310,6 +334,10 @@ export function useAIRewrite() {
   const previewText = useAIRewriteStore(selectPreviewText);
   const error = useAIRewriteStore(selectError);
   const toolbarPosition = useAIRewriteStore(selectToolbarPosition);
+  const ghostPreviewInfo = useAIRewriteStore(selectGhostPreviewInfo);
+  const selectionStart = useAIRewriteStore(selectSelectionStart);
+  const selectionEnd = useAIRewriteStore(selectSelectionEnd);
+  const targetElement = useAIRewriteStore(selectTargetElement);
 
   return {
     isActive,
@@ -318,5 +346,9 @@ export function useAIRewrite() {
     previewText,
     error,
     toolbarPosition,
+    ghostPreviewInfo,
+    selectionStart,
+    selectionEnd,
+    targetElement,
   };
 }
