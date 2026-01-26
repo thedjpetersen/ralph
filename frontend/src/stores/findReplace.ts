@@ -10,6 +10,7 @@ export interface Match {
 export interface FindReplaceState {
   // Dialog state
   isOpen: boolean;
+  showReplaceMode: boolean;
 
   // Search settings
   searchText: string;
@@ -29,7 +30,8 @@ export interface FindReplaceState {
   undoStack: { text: string; selectionStart: number; selectionEnd: number }[];
 
   // Actions
-  openDialog: (element?: HTMLTextAreaElement | HTMLInputElement | null) => void;
+  openDialog: (element?: HTMLTextAreaElement | HTMLInputElement | null, showReplace?: boolean) => void;
+  toggleReplaceMode: () => void;
   closeDialog: () => void;
   setSearchText: (text: string) => void;
   setReplaceText: (text: string) => void;
@@ -49,6 +51,7 @@ export interface FindReplaceState {
 export const useFindReplaceStore = create<FindReplaceState>()((set, get) => ({
   // Initial state
   isOpen: false,
+  showReplaceMode: false,
   searchText: '',
   replaceText: '',
   matchCase: false,
@@ -59,7 +62,7 @@ export const useFindReplaceStore = create<FindReplaceState>()((set, get) => ({
   targetElement: null,
   undoStack: [],
 
-  openDialog: (element) => {
+  openDialog: (element, showReplace = false) => {
     // If no element provided, try to find the active element
     let targetElement = element || null;
     if (!targetElement && document.activeElement) {
@@ -78,6 +81,7 @@ export const useFindReplaceStore = create<FindReplaceState>()((set, get) => ({
 
     set({
       isOpen: true,
+      showReplaceMode: showReplace,
       targetElement,
       searchText: selectedText || get().searchText,
       matches: [],
@@ -96,6 +100,10 @@ export const useFindReplaceStore = create<FindReplaceState>()((set, get) => ({
       matches: [],
       currentMatchIndex: -1,
     });
+  },
+
+  toggleReplaceMode: () => {
+    set((state) => ({ showReplaceMode: !state.showReplaceMode }));
   },
 
   setSearchText: (text) => {
@@ -384,6 +392,7 @@ export const useFindReplaceStore = create<FindReplaceState>()((set, get) => ({
 
 // Individual selectors for stable references
 const selectIsOpen = (state: FindReplaceState) => state.isOpen;
+const selectShowReplaceMode = (state: FindReplaceState) => state.showReplaceMode;
 const selectSearchText = (state: FindReplaceState) => state.searchText;
 const selectReplaceText = (state: FindReplaceState) => state.replaceText;
 const selectMatchCase = (state: FindReplaceState) => state.matchCase;
@@ -396,6 +405,7 @@ const selectTargetElement = (state: FindReplaceState) => state.targetElement;
 // Combined hook using individual selectors
 export function useFindReplace() {
   const isOpen = useFindReplaceStore(selectIsOpen);
+  const showReplaceMode = useFindReplaceStore(selectShowReplaceMode);
   const searchText = useFindReplaceStore(selectSearchText);
   const replaceText = useFindReplaceStore(selectReplaceText);
   const matchCase = useFindReplaceStore(selectMatchCase);
@@ -407,6 +417,7 @@ export function useFindReplace() {
 
   return {
     isOpen,
+    showReplaceMode,
     searchText,
     replaceText,
     matchCase,

@@ -22,6 +22,7 @@ function useReducedMotion(): boolean {
 export function FindReplaceDialog() {
   const {
     isOpen,
+    showReplaceMode,
     searchText,
     replaceText,
     matchCase,
@@ -38,6 +39,7 @@ export function FindReplaceDialog() {
     toggleMatchCase,
     toggleUseRegex,
     toggleWholeWord,
+    toggleReplaceMode,
     goToNextMatch,
     goToPreviousMatch,
     replaceCurrentMatch,
@@ -180,22 +182,37 @@ export function FindReplaceDialog() {
       >
         {/* Header */}
         <div className="find-replace-header">
-          <span className="find-replace-title">Find & Replace</span>
-          <button
-            type="button"
-            className="find-replace-close"
-            onClick={closeDialog}
-            aria-label="Close dialog"
-            title="Close (Esc)"
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
+          <span className="find-replace-title">
+            {showReplaceMode ? 'Find & Replace' : 'Find'}
+          </span>
+          <div className="find-replace-header-actions">
+            <button
+              type="button"
+              className={`find-replace-toggle-btn ${showReplaceMode ? 'active' : ''}`}
+              onClick={toggleReplaceMode}
+              aria-label={showReplaceMode ? 'Hide replace' : 'Show replace'}
+              title={showReplaceMode ? 'Hide replace (⌘⇧F)' : 'Show replace (⌘⇧F)'}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="find-replace-close"
+              onClick={closeDialog}
+              aria-label="Close dialog"
+              title="Close (Esc)"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Search row */}
@@ -250,39 +267,41 @@ export function FindReplaceDialog() {
           </div>
         </div>
 
-        {/* Replace row */}
-        <div className="find-replace-row">
-          <div className="find-replace-input-wrapper">
-            <input
-              type="text"
-              className="find-replace-input"
-              placeholder="Replace"
-              value={replaceText}
-              onChange={handleReplaceInputChange}
-              aria-label="Replace text"
-            />
+        {/* Replace row - only shown in replace mode */}
+        {showReplaceMode && (
+          <div className="find-replace-row">
+            <div className="find-replace-input-wrapper">
+              <input
+                type="text"
+                className="find-replace-input"
+                placeholder="Replace"
+                value={replaceText}
+                onChange={handleReplaceInputChange}
+                aria-label="Replace text"
+              />
+            </div>
+            <div className="find-replace-replace-buttons">
+              <button
+                type="button"
+                className="find-replace-action-btn"
+                onClick={replaceCurrentMatch}
+                disabled={matches.length === 0}
+                title="Replace current match (⌘H)"
+              >
+                Replace
+              </button>
+              <button
+                type="button"
+                className="find-replace-action-btn"
+                onClick={replaceAllMatches}
+                disabled={matches.length === 0}
+                title="Replace all matches (⌘⇧H)"
+              >
+                All
+              </button>
+            </div>
           </div>
-          <div className="find-replace-replace-buttons">
-            <button
-              type="button"
-              className="find-replace-action-btn"
-              onClick={replaceCurrentMatch}
-              disabled={matches.length === 0}
-              title="Replace current match"
-            >
-              Replace
-            </button>
-            <button
-              type="button"
-              className="find-replace-action-btn"
-              onClick={replaceAllMatches}
-              disabled={matches.length === 0}
-              title="Replace all matches"
-            >
-              All
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Options row */}
         <div className="find-replace-options">
