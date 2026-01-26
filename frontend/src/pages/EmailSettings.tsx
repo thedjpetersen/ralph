@@ -381,15 +381,20 @@ export function EmailSettings() {
           <section className="settings-section">
             <div className="section-header">
               <h2>Synced Labels</h2>
-              {labels.length > 0 && (
-                <button
-                  onClick={handleTriggerSync}
-                  className="sync-now-button"
-                  disabled={isSyncing || syncStatus?.status === 'running'}
-                >
-                  {isSyncing || syncStatus?.status === 'running' ? 'Syncing...' : 'Sync Now'}
-                </button>
-              )}
+              <div className="section-header-actions">
+                <Link to="/integrations/email/sync" className="view-sync-history-link">
+                  View Sync History
+                </Link>
+                {labels.length > 0 && (
+                  <button
+                    onClick={handleTriggerSync}
+                    className="sync-now-button"
+                    disabled={isSyncing || syncStatus?.status === 'running'}
+                  >
+                    {isSyncing || syncStatus?.status === 'running' ? 'Syncing...' : 'Sync Now'}
+                  </button>
+                )}
+              </div>
             </div>
 
             <EmailLabelSelector

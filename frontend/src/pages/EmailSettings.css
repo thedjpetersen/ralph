@@ -152,6 +152,22 @@
   font-size: 1.25rem;
 }
 
+.email-settings-page .section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.email-settings-page .view-sync-history-link {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.email-settings-page .view-sync-history-link:hover {
+  color: #646cff;
+}
+
 /* Connections Grid */
 .email-settings-page .connections-grid {
   display: grid;

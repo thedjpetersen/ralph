@@ -20,6 +20,7 @@ const SkeletonDemo = lazy(() => import('./pages/SkeletonDemo').then(m => ({ defa
 const SidebarDemo = lazy(() => import('./pages/SidebarDemo').then(m => ({ default: m.SidebarDemo })));
 const ToastDemo = lazy(() => import('./pages/ToastDemo').then(m => ({ default: m.ToastDemo })));
 const AuthorComparisonDemo = lazy(() => import('./pages/AuthorComparisonDemo').then(m => ({ default: m.AuthorComparisonDemo })));
+const TitleSuggestionsDemo = lazy(() => import('./pages/TitleSuggestionsDemo').then(m => ({ default: m.TitleSuggestionsDemo })));
 
 // Store pages
 const Stores = lazy(() => import('./pages/Stores').then(m => ({ default: m.Stores })));
@@ -84,6 +85,7 @@ const Integrations = lazy(() => import('./pages/Integrations').then(m => ({ defa
 const GoogleDriveSettings = lazy(() => import('./pages/GoogleDriveSettings').then(m => ({ default: m.GoogleDriveSettings })));
 const GoogleDriveSync = lazy(() => import('./pages/GoogleDriveSync').then(m => ({ default: m.GoogleDriveSync })));
 const EmailSettings = lazy(() => import('./pages/EmailSettings').then(m => ({ default: m.EmailSettings })));
+const EmailSync = lazy(() => import('./pages/EmailSync').then(m => ({ default: m.EmailSync })));
 
 // Admin pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
@@ -113,6 +115,7 @@ function App() {
         <Route path="/sidebar-demo" element={<Suspense fallback={<PageLoadingSpinner />}><SidebarDemo /></Suspense>} />
         <Route path="/toast-demo" element={<Suspense fallback={<PageLoadingSpinner />}><ToastDemo /></Suspense>} />
         <Route path="/author-comparison-demo" element={<Suspense fallback={<PageLoadingSpinner />}><AuthorComparisonDemo /></Suspense>} />
+        <Route path="/title-suggestions-demo" element={<Suspense fallback={<PageLoadingSpinner />}><TitleSuggestionsDemo /></Suspense>} />
         <Route path="/stores" element={<Suspense fallback={<PageLoadingSpinner />}><Stores /></Suspense>} />
         <Route path="/stores/new" element={<Suspense fallback={<PageLoadingSpinner />}><StoreForm /></Suspense>} />
         <Route path="/stores/:id" element={<Suspense fallback={<PageLoadingSpinner />}><StoreDetail /></Suspense>} />
@@ -163,6 +166,7 @@ function App() {
         <Route path="/integrations/google-drive/sync" element={<Suspense fallback={<PageLoadingSpinner />}><GoogleDriveSync /></Suspense>} />
         <Route path="/integrations/email" element={<Suspense fallback={<PageLoadingSpinner />}><EmailSettings /></Suspense>} />
         <Route path="/integrations/email/callback" element={<Suspense fallback={<PageLoadingSpinner />}><EmailSettings /></Suspense>} />
+        <Route path="/integrations/email/sync" element={<Suspense fallback={<PageLoadingSpinner />}><EmailSync /></Suspense>} />
 
         {/* Admin routes - protected by RequireRole inside component */}
         <Route path="/admin" element={<Suspense fallback={<PageLoadingSpinner />}><AdminDashboard /></Suspense>} />
