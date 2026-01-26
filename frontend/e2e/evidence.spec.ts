@@ -482,3 +482,137 @@ test('capture receipt-003 evidence - upload modal', async ({ page }) => {
 
   await page.screenshot({ path: 'test-results/evidence/receipt-003-evidence.png', fullPage: false });
 });
+
+test('capture UI-004 evidence - dark mode settings page', async ({ page }) => {
+  await page.addInitScript(() => {
+    // Set up user and account storage
+    localStorage.setItem('clockzen-user-storage', JSON.stringify({
+      state: {
+        user: {
+          id: 'user-001',
+          email: 'test@example.com',
+          name: 'Test User',
+          avatar: null,
+          createdAt: new Date().toISOString(),
+        },
+        preferences: { theme: 'dark', language: 'en', notifications: { email: true, push: false } },
+      },
+      version: 0,
+    }));
+
+    localStorage.setItem('clockzen-account-storage', JSON.stringify({
+      state: {
+        currentAccount: {
+          id: 'account-001',
+          name: 'Personal Finance',
+          email: 'test@example.com',
+          currency: 'USD',
+          timezone: 'America/New_York',
+          createdAt: new Date().toISOString(),
+        },
+      },
+      version: 0,
+    }));
+
+    // Set appearance settings to dark theme
+    localStorage.setItem('clockzen-app-settings', JSON.stringify({
+      state: {
+        settings: {
+          general: { autoSave: true, autoSaveInterval: 30, startPage: 'dashboard', confirmOnExit: true },
+          editor: { smartTypography: true, paragraphFocus: false, typewriterScroll: false, spellCheck: true, lineNumbers: false, wordWrap: true, fontSize: 16, fontFamily: 'system', tabSize: 2 },
+          ai: { enableSuggestions: true, enableRewrite: true, enableComments: true, suggestionDelay: 500, aiProvider: 'default', apiKey: '' },
+          appearance: { theme: 'dark', accentColor: 'blue', compactMode: false, showAnimations: true, sidebarCollapsed: false },
+        },
+        activeSection: 'appearance',
+      },
+      version: 0,
+    }));
+  });
+
+  await page.route('**/api/user', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockUser) });
+  });
+
+  await page.route('**/api/accounts', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAccounts) });
+  });
+
+  await page.goto('/settings');
+  await page.waitForLoadState('networkidle');
+
+  // Wait for the settings page to load
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible({ timeout: 10000 });
+
+  // Click on Appearance section
+  await page.click('button:has-text("Appearance")');
+  await page.waitForTimeout(500); // Wait for transition
+
+  await page.screenshot({ path: 'test-results/evidence/UI-004-evidence-dark.png', fullPage: true });
+});
+
+test('capture UI-004 evidence - light mode settings page', async ({ page }) => {
+  await page.addInitScript(() => {
+    // Set up user and account storage
+    localStorage.setItem('clockzen-user-storage', JSON.stringify({
+      state: {
+        user: {
+          id: 'user-001',
+          email: 'test@example.com',
+          name: 'Test User',
+          avatar: null,
+          createdAt: new Date().toISOString(),
+        },
+        preferences: { theme: 'light', language: 'en', notifications: { email: true, push: false } },
+      },
+      version: 0,
+    }));
+
+    localStorage.setItem('clockzen-account-storage', JSON.stringify({
+      state: {
+        currentAccount: {
+          id: 'account-001',
+          name: 'Personal Finance',
+          email: 'test@example.com',
+          currency: 'USD',
+          timezone: 'America/New_York',
+          createdAt: new Date().toISOString(),
+        },
+      },
+      version: 0,
+    }));
+
+    // Set appearance settings to light theme
+    localStorage.setItem('clockzen-app-settings', JSON.stringify({
+      state: {
+        settings: {
+          general: { autoSave: true, autoSaveInterval: 30, startPage: 'dashboard', confirmOnExit: true },
+          editor: { smartTypography: true, paragraphFocus: false, typewriterScroll: false, spellCheck: true, lineNumbers: false, wordWrap: true, fontSize: 16, fontFamily: 'system', tabSize: 2 },
+          ai: { enableSuggestions: true, enableRewrite: true, enableComments: true, suggestionDelay: 500, aiProvider: 'default', apiKey: '' },
+          appearance: { theme: 'light', accentColor: 'blue', compactMode: false, showAnimations: true, sidebarCollapsed: false },
+        },
+        activeSection: 'appearance',
+      },
+      version: 0,
+    }));
+  });
+
+  await page.route('**/api/user', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockUser) });
+  });
+
+  await page.route('**/api/accounts', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(mockAccounts) });
+  });
+
+  await page.goto('/settings');
+  await page.waitForLoadState('networkidle');
+
+  // Wait for the settings page to load
+  await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible({ timeout: 10000 });
+
+  // Click on Appearance section
+  await page.click('button:has-text("Appearance")');
+  await page.waitForTimeout(500); // Wait for transition
+
+  await page.screenshot({ path: 'test-results/evidence/UI-004-evidence-light.png', fullPage: true });
+});

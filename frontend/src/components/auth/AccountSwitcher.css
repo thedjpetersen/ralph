@@ -1,0 +1,134 @@
+.account-switcher-container {
+  position: relative;
+}
+
+.account-switcher-empty {
+  display: flex;
+  align-items: center;
+}
+
+.account-switcher-placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}
+
+.account-switcher-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.account-switcher-trigger:hover {
+  border-color: #646cff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.account-switcher-trigger:focus {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
+}
+
+.account-switcher-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-switcher-arrow {
+  transition: transform 0.2s;
+}
+
+.account-switcher-arrow.open {
+  transform: rotate(180deg);
+}
+
+.account-switcher-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 220px;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  z-index: 200;
+}
+
+.account-switcher-section {
+  padding: 0.5rem 0;
+}
+
+.account-switcher-section-title {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.account-switcher-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.87);
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.account-switcher-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.account-switcher-item.active {
+  background-color: rgba(100, 108, 255, 0.15);
+  color: #646cff;
+}
+
+.account-switcher-item.focused {
+  background-color: rgba(255, 255, 255, 0.15);
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+.account-switcher-item:focus {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+.account-switcher-item:focus-visible {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.account-switcher-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-switcher-check {
+  flex-shrink: 0;
+  color: #646cff;
+}
+
+.account-switcher-divider {
+  height: 1px;
+  background-color: #444;
+  margin: 0.25rem 0;
+}
