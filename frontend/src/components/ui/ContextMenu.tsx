@@ -7,7 +7,15 @@ import {
   type CSSProperties,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { getPlatform, convertLegacyShortcut, splitShortcutKeys } from '../../utils/keyboardShortcuts';
 import './ContextMenu.css';
+
+export interface ContextMenuShortcut {
+  /** Keys for Mac platform, e.g., ['⌘', 'K'] */
+  mac: string[];
+  /** Keys for Windows platform, e.g., ['Ctrl', 'K'] */
+  windows: string[];
+}
 
 export interface ContextMenuItem {
   /** Unique identifier */
@@ -20,10 +28,32 @@ export interface ContextMenuItem {
   danger?: boolean;
   /** Whether the item is disabled */
   disabled?: boolean;
-  /** Keyboard shortcut to display */
+  /** Keyboard shortcut to display (legacy string format) */
   shortcut?: string;
+  /** Platform-aware keyboard shortcut keys */
+  shortcutKeys?: ContextMenuShortcut;
   /** Click handler */
   onClick: () => void;
+}
+
+/**
+ * Get shortcut keys for a menu item, supporting both legacy and new formats
+ */
+function getMenuItemShortcutKeys(item: ContextMenuItem): string[] | null {
+  const platform = getPlatform();
+
+  // Prefer new shortcutKeys format
+  if (item.shortcutKeys) {
+    return item.shortcutKeys[platform];
+  }
+
+  // Fall back to legacy shortcut format
+  if (item.shortcut) {
+    const converted = convertLegacyShortcut(item.shortcut);
+    return splitShortcutKeys(converted);
+  }
+
+  return null;
 }
 
 export interface ContextMenuProps {
@@ -212,28 +242,33 @@ export function ContextMenu({
       >
         {header && <div className="context-menu-header">{header}</div>}
 
-        {items.map((item, index) => (
-          <button
-            key={item.id}
-            className={`context-menu-item ${item.danger ? 'context-menu-item--danger' : ''}`}
-            role="menuitem"
-            disabled={item.disabled}
-            onClick={() => handleItemClick(item)}
-            onKeyDown={e => handleKeyDown(e, index)}
-          >
-            {item.icon && (
-              <span className="context-menu-item-icon" aria-hidden="true">
-                {item.icon}
-              </span>
-            )}
-            <span className="context-menu-item-label">{item.label}</span>
-            {item.shortcut && (
-              <span className="context-menu-item-shortcut" aria-hidden="true">
-                {item.shortcut}
-              </span>
-            )}
-          </button>
-        ))}
+        {items.map((item, index) => {
+          const shortcutKeys = getMenuItemShortcutKeys(item);
+          return (
+            <button
+              key={item.id}
+              className={`context-menu-item ${item.danger ? 'context-menu-item--danger' : ''}`}
+              role="menuitem"
+              disabled={item.disabled}
+              onClick={() => handleItemClick(item)}
+              onKeyDown={e => handleKeyDown(e, index)}
+            >
+              {item.icon && (
+                <span className="context-menu-item-icon" aria-hidden="true">
+                  {item.icon}
+                </span>
+              )}
+              <span className="context-menu-item-label">{item.label}</span>
+              {shortcutKeys && (
+                <span className="context-menu-item-shortcut" aria-hidden="true">
+                  {shortcutKeys.map((key, i) => (
+                    <kbd key={i} className="context-menu-shortcut-key">{key}</kbd>
+                  ))}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
     </>
   );

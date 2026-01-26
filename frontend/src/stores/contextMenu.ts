@@ -10,6 +10,13 @@ import type { ReactNode } from 'react';
 
 export type ContextMenuType = 'document' | 'comment' | 'editor' | null;
 
+export interface ContextMenuShortcut {
+  /** Keys for Mac platform, e.g., ['⌘', 'K'] */
+  mac: string[];
+  /** Keys for Windows platform, e.g., ['Ctrl', 'K'] */
+  windows: string[];
+}
+
 export interface ContextMenuItemData {
   /** Unique identifier */
   id: string;
@@ -21,8 +28,10 @@ export interface ContextMenuItemData {
   danger?: boolean;
   /** Whether the item is disabled */
   disabled?: boolean;
-  /** Keyboard shortcut to display */
+  /** Keyboard shortcut to display (legacy string format) */
   shortcut?: string;
+  /** Platform-aware keyboard shortcut keys */
+  shortcutKeys?: ContextMenuShortcut;
   /** Click handler */
   onClick: () => void;
 }

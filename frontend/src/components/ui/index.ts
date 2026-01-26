@@ -53,6 +53,7 @@ export {
   type TooltipProps,
   type TooltipPosition,
   type TooltipVariant,
+  type TooltipShortcut,
 } from './Tooltip';
 // DEPRECATED: Context-based toast exports - use store-based toast instead
 // Kept for backwards compatibility only
@@ -107,4 +108,12 @@ export {
   ContextMenu,
   type ContextMenuProps,
   type ContextMenuItem,
+  type ContextMenuShortcut,
 } from './ContextMenu';
+export {
+  ShortcutBadge,
+  type ShortcutBadgeProps,
+  type ShortcutBadgeSize,
+  type ShortcutBadgeVariant,
+  type ShortcutKeys,
+} from './ShortcutBadge';

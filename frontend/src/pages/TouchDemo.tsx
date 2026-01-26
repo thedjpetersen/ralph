@@ -61,6 +61,7 @@ export function TouchDemo() {
     {
       id: 'edit',
       label: 'Edit',
+      shortcutKeys: { mac: ['⌘', 'E'], windows: ['Ctrl', 'E'] },
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -79,6 +80,7 @@ export function TouchDemo() {
     {
       id: 'share',
       label: 'Share',
+      shortcutKeys: { mac: ['⌘', '⇧', 'S'], windows: ['Ctrl', 'Shift', 'S'] },
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -101,6 +103,7 @@ export function TouchDemo() {
       id: 'delete',
       label: 'Delete',
       danger: true,
+      shortcutKeys: { mac: ['⌘', '⌫'], windows: ['Del'] },
       icon: (
         <svg
           viewBox="0 0 24 24"

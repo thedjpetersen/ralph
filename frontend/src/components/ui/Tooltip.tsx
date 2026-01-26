@@ -4,24 +4,36 @@ import {
   useRef,
   useEffect,
   useCallback,
+  useMemo,
   type HTMLAttributes,
   type ReactNode,
   type ReactElement,
 } from 'react';
+import { getPlatform, formatShortcutKeys } from '../../utils/keyboardShortcuts';
 import './Tooltip.css';
 
 export type TooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 export type TooltipVariant = 'default' | 'light' | 'stripe';
 
+export interface TooltipShortcut {
+  /** Keys for Mac platform, e.g., ['⌘', 'K'] */
+  mac: string[];
+  /** Keys for Windows platform, e.g., ['Ctrl', 'K'] */
+  windows: string[];
+}
+
 export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'content'> {
   content: ReactNode;
   position?: TooltipPosition;
   variant?: TooltipVariant;
+  /** Delay before showing tooltip in ms (default: 200, with shortcut: 500) */
   delay?: number;
   offset?: number;
   disabled?: boolean;
   showArrow?: boolean;
   children: ReactElement;
+  /** Optional keyboard shortcut to display */
+  shortcut?: TooltipShortcut;
 }
 
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
@@ -30,16 +42,30 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       content,
       position = 'top',
       variant = 'default',
-      delay = 200,
+      delay,
       offset = 8,
       disabled = false,
       showArrow = true,
       children,
       className = '',
+      shortcut,
       ...props
     },
     ref
   ) => {
+    // Default delay is 500ms when shortcut is present, 200ms otherwise
+    const effectiveDelay = delay ?? (shortcut ? 500 : 200);
+
+    // Get platform-specific shortcut display
+    const shortcutDisplay = useMemo(() => {
+      if (!shortcut) return null;
+      const platform = getPlatform();
+      const keys = shortcut[platform];
+      return {
+        keys,
+        formatted: formatShortcutKeys(keys, platform),
+      };
+    }, [shortcut]);
     const [isVisible, setIsVisible] = useState(false);
     const triggerRef = useRef<HTMLElement | null>(null);
     const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -50,8 +76,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       if (disabled) return;
       timeoutRef.current = setTimeout(() => {
         setIsVisible(true);
-      }, delay);
-    }, [disabled, delay]);
+      }, effectiveDelay);
+    }, [disabled, effectiveDelay]);
 
     const hideTooltip = useCallback(() => {
       if (timeoutRef.current) {
@@ -225,7 +251,16 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
             className={tooltipClasses}
             {...props}
           >
-            <span className="tooltip-content">{content}</span>
+            <span className="tooltip-content">
+              {content}
+              {shortcutDisplay && (
+                <span className="tooltip-shortcut">
+                  {shortcutDisplay.keys.map((key, index) => (
+                    <kbd key={index} className="tooltip-shortcut-key">{key}</kbd>
+                  ))}
+                </span>
+              )}
+            </span>
           </div>
         )}
       </>

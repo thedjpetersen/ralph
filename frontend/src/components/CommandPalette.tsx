@@ -12,6 +12,7 @@ import { useAIReadabilityStore } from '../stores/aiReadability';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
 import { EmptyState, SearchIllustration } from './ui/EmptyState';
+import { getPlatform, convertLegacyShortcut, splitShortcutKeys } from '../utils/keyboardShortcuts';
 import './CommandPalette.css';
 
 // Category icons
@@ -230,7 +231,7 @@ function useCommands(): Command[] {
         label: 'Find in Document',
         category: 'ai',
         description: 'Search within current document',
-        shortcut: '⌘F',
+        shortcutKeys: { mac: ['⌘', 'F'], windows: ['Ctrl', 'F'] },
         keywords: ['search', 'find', 'locate'],
         action: () => { openFindReplace(null, false); closePalette(); },
       },
@@ -239,7 +240,7 @@ function useCommands(): Command[] {
         label: 'Find and Replace',
         category: 'ai',
         description: 'Find and replace text',
-        shortcut: '⌘H',
+        shortcutKeys: { mac: ['⌘', 'H'], windows: ['Ctrl', 'H'] },
         keywords: ['search', 'replace', 'substitute'],
         action: () => { openFindReplace(null, true); closePalette(); },
       },
@@ -300,7 +301,7 @@ Also want to cover communication protocols, stakeholder management, and risk ass
         label: 'Analyze Tone',
         category: 'ai',
         description: 'Analyze the tone of selected text or document',
-        shortcut: '⌥T',
+        shortcutKeys: { mac: ['⌥', 'T'], windows: ['Alt', 'T'] },
         keywords: ['tone', 'sentiment', 'formal', 'casual', 'analyze', 'writing', 'style', 'mood'],
         action: () => { openToneAnalyzer(); closePalette(); },
       },
@@ -309,7 +310,7 @@ Also want to cover communication protocols, stakeholder management, and risk ass
         label: 'Enhance Vocabulary',
         category: 'ai',
         description: 'Find and replace weak or overused words with better alternatives',
-        shortcut: '⌥V',
+        shortcutKeys: { mac: ['⌥', 'V'], windows: ['Alt', 'V'] },
         keywords: ['vocabulary', 'words', 'synonyms', 'thesaurus', 'enhance', 'improve', 'writing', 'weak', 'overused'],
         action: () => { openVocabularyEnhancer(); closePalette(); },
       },
@@ -318,7 +319,7 @@ Also want to cover communication protocols, stakeholder management, and risk ass
         label: 'Score Readability',
         category: 'ai',
         description: 'Analyze readability, grade level, and get suggestions for improvements',
-        shortcut: '⌥R',
+        shortcutKeys: { mac: ['⌥', 'R'], windows: ['Alt', 'R'] },
         keywords: ['readability', 'grade', 'level', 'flesch', 'kincaid', 'score', 'complexity', 'audience', 'simplify'],
         action: () => { openReadability(); closePalette(); },
       },
@@ -387,6 +388,26 @@ function HighlightedText({ text, query }: { text: string; query: string }) {
   );
 }
 
+/**
+ * Get shortcut keys for a command, supporting both legacy and new formats
+ */
+function getCommandShortcutKeys(command: Command): string[] | null {
+  const platform = getPlatform();
+
+  // Prefer new shortcutKeys format
+  if (command.shortcutKeys) {
+    return command.shortcutKeys[platform];
+  }
+
+  // Fall back to legacy shortcut format
+  if (command.shortcut) {
+    const converted = convertLegacyShortcut(command.shortcut);
+    return splitShortcutKeys(converted);
+  }
+
+  return null;
+}
+
 // Command item component
 function CommandItem({
   command,
@@ -402,6 +423,9 @@ function CommandItem({
   onMouseEnter: () => void;
 }) {
   const itemRef = useRef<HTMLDivElement>(null);
+
+  // Get platform-specific shortcut keys
+  const shortcutKeys = useMemo(() => getCommandShortcutKeys(command), [command]);
 
   // Scroll into view when selected
   useEffect(() => {
@@ -432,10 +456,10 @@ function CommandItem({
           </div>
         )}
       </div>
-      {command.shortcut && (
+      {shortcutKeys && (
         <div className="command-palette-item-shortcut">
-          {command.shortcut.split('').map((char, i) => (
-            <kbd key={i}>{char}</kbd>
+          {shortcutKeys.map((key, i) => (
+            <kbd key={i}>{key}</kbd>
           ))}
         </div>
       )}

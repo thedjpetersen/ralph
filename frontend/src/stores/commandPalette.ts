@@ -3,13 +3,23 @@ import { persist } from 'zustand/middleware';
 
 export type CommandCategory = 'navigation' | 'documents' | 'ai' | 'settings' | 'actions';
 
+export interface CommandShortcut {
+  /** Keys for Mac platform, e.g., ['⌘', 'K'] */
+  mac: string[];
+  /** Keys for Windows platform, e.g., ['Ctrl', 'K'] */
+  windows: string[];
+}
+
 export interface Command {
   id: string;
   label: string;
   category: CommandCategory;
   description?: string;
   icon?: string;
+  /** Legacy string shortcut (deprecated, use shortcutKeys instead) */
   shortcut?: string;
+  /** Platform-aware shortcut keys */
+  shortcutKeys?: CommandShortcut;
   keywords?: string[];
   action: () => void;
 }

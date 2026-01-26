@@ -146,8 +146,55 @@
 
 /* Content wrapper */
 .tooltip-content {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   word-wrap: break-word;
+}
+
+/* Keyboard shortcut in tooltip */
+.tooltip-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.tooltip-shortcut-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+/* Shortcut key styling for default (dark) variant */
+.tooltip-default .tooltip-shortcut-key {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Shortcut key styling for light variant */
+.tooltip-light .tooltip-shortcut-key {
+  background-color: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--color-text-secondary, #6b7280);
+}
+
+/* Shortcut key styling for stripe variant */
+.tooltip-stripe .tooltip-shortcut-key {
+  background-color: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--color-text-secondary, #6b7280);
 }
 
 /* Stripe padding adjustments */
