@@ -12,6 +12,7 @@ import { PageTransition } from '../components/PageTransition';
 import { BudgetProgress } from '../components/BudgetProgress';
 import { AllocationForm } from '../components/AllocationForm';
 import { SettingsFormSkeleton } from '../components/skeletons';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { toast } from '../stores/toast';
 import './BudgetDetail.css';
 
@@ -548,34 +549,20 @@ export function BudgetDetail() {
           </div>
         </div>
 
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="delete-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-            <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
-              <h3>Delete Budget</h3>
-              <p>
-                Are you sure you want to delete <strong>{budget.name}</strong>?
-                This action cannot be undone.
-              </p>
-              <div className="modal-actions">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="cancel-button"
-                  disabled={isDeleting}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="confirm-delete-button"
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'Deleting...' : 'Delete Budget'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleDelete}
+          title="Delete Budget"
+          description={`Are you sure you want to delete "${budget.name}"?`}
+          confirmLabel="Delete Budget"
+          cancelLabel="Cancel"
+          variant="danger"
+          isLoading={isDeleting}
+        >
+          <p>This action cannot be undone. All budget periods, allocations, and associated data will be permanently removed.</p>
+        </ConfirmDialog>
 
         {/* Allocation Form Modal */}
         {showAllocationForm && (

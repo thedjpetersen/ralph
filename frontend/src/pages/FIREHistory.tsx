@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { toast } from '../stores/toast';
 import {
   type SavedCalculation,
@@ -247,23 +248,19 @@ export function FIREHistory() {
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h3>Clear All Calculations?</h3>
-              <p>This will permanently delete all {calculations.length} saved calculations. This action cannot be undone.</p>
-              <div className="modal-actions">
-                <button onClick={() => setShowDeleteConfirm(false)} className="cancel-button">
-                  Cancel
-                </button>
-                <button onClick={handleClearAll} className="confirm-delete-button">
-                  Delete All
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Clear All Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleClearAll}
+          title="Clear All Calculations"
+          description={`Are you sure you want to delete all ${calculations.length} saved calculations?`}
+          confirmLabel="Delete All"
+          cancelLabel="Cancel"
+          variant="danger"
+        >
+          <p>This action cannot be undone. All your FIRE calculation history will be permanently removed.</p>
+        </ConfirmDialog>
       </div>
     </PageTransition>
   );

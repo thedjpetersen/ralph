@@ -4,6 +4,8 @@ import type { APIKey } from '../stores/user';
 import { useUserStore } from '../stores/user';
 import { PageTransition } from '../components/PageTransition';
 import { SettingsFormSkeleton } from '../components/skeletons';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { useDeleteConfirmation } from '../hooks/useDeleteConfirmation';
 import './APIKeys.css';
 
 export function APIKeys() {
@@ -15,8 +17,20 @@ export function APIKeys() {
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Delete confirmation hook
+  const {
+    itemToDelete: keyToDelete,
+    isDeleting,
+    confirmDelete,
+    cancelDelete,
+    executeDelete,
+    isOpen: showDeleteConfirm,
+  } = useDeleteConfirmation<APIKey>({
+    onDelete: async (key) => {
+      await deleteAPIKey(key.id);
+    },
+  });
 
   useEffect(() => {
     fetchAPIKeys();
@@ -41,18 +55,6 @@ export function APIKeys() {
       setCreateError('Failed to create API key');
     } finally {
       setIsCreating(false);
-    }
-  };
-
-  const handleDeleteKey = async (keyId: string) => {
-    setIsDeleting(true);
-    try {
-      await deleteAPIKey(keyId);
-      setDeleteConfirm(null);
-    } catch {
-      // Error is handled by the store
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -174,38 +176,33 @@ export function APIKeys() {
                     </div>
                   </div>
                   <div className="api-key-actions">
-                    {deleteConfirm === key.id ? (
-                      <div className="delete-confirm">
-                        <span>Delete?</span>
-                        <button
-                          className="confirm-delete"
-                          onClick={() => handleDeleteKey(key.id)}
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? 'Deleting...' : 'Yes'}
-                        </button>
-                        <button
-                          className="cancel-delete"
-                          onClick={() => setDeleteConfirm(null)}
-                          disabled={isDeleting}
-                        >
-                          No
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        className="delete-key-button"
-                        onClick={() => setDeleteConfirm(key.id)}
-                      >
-                        Delete
-                      </button>
-                    )}
+                    <button
+                      className="delete-key-button"
+                      onClick={() => confirmDelete(key)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+
+        {/* Delete API Key Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          onClose={cancelDelete}
+          onConfirm={executeDelete}
+          title="Delete API Key"
+          description={`Are you sure you want to delete the API key "${keyToDelete?.name}"?`}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          variant="danger"
+          isLoading={isDeleting}
+        >
+          <p>This action cannot be undone. Any applications using this key will lose access immediately.</p>
+        </ConfirmDialog>
 
         {showCreateModal && (
           <div className="modal-overlay" onClick={handleCloseModal}>

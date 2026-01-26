@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useDocumentFoldersStore, type FolderTreeNode } from '../../stores/documentFolders';
 import { useAccountStore } from '../../stores/account';
 import { useDocumentExportStore } from '../../stores/documentExport';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import './DocumentFolders.css';
 
 // Icons
@@ -65,7 +66,7 @@ interface FolderItemProps {
   isCollapsed: boolean;
   onCreateSubfolder: (parentId: string) => void;
   onRename: (folderId: string, name: string) => void;
-  onDelete: (folderId: string) => void;
+  onDelete: (folderId: string, folderName: string, documentCount: number) => void;
   onExport: (folderName: string) => void;
 }
 
@@ -171,8 +172,8 @@ function FolderItem({
 
   const handleDeleteClick = useCallback(() => {
     setShowMenu(false);
-    onDelete(folder.id);
-  }, [folder.id, onDelete]);
+    onDelete(folder.id, folder.name, folder.document_count);
+  }, [folder.id, folder.name, folder.document_count, onDelete]);
 
   const handleExportClick = useCallback(() => {
     setShowMenu(false);
@@ -372,6 +373,11 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
   const [createParentId, setCreateParentId] = useState<string | null>(null);
   const newFolderInputRef = useRef<HTMLInputElement>(null);
 
+  // Delete confirmation dialog state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState<{ id: string; name: string; documentCount: number } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Fetch folders when account changes
   useEffect(() => {
     if (currentAccount) {
@@ -436,15 +442,29 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
     }
   }, [currentAccount, updateFolder]);
 
-  const handleDelete = useCallback(async (folderId: string) => {
-    if (!currentAccount) return;
-    // Could add confirmation dialog here
+  const handleDeleteRequest = useCallback((folderId: string, folderName: string, documentCount: number) => {
+    setFolderToDelete({ id: folderId, name: folderName, documentCount });
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!currentAccount || !folderToDelete) return;
+    setIsDeleting(true);
     try {
-      await deleteFolder(currentAccount.id, folderId);
+      await deleteFolder(currentAccount.id, folderToDelete.id);
+      setShowDeleteConfirm(false);
+      setFolderToDelete(null);
     } catch {
       // Error is handled in store
+    } finally {
+      setIsDeleting(false);
     }
-  }, [currentAccount, deleteFolder]);
+  }, [currentAccount, deleteFolder, folderToDelete]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setShowDeleteConfirm(false);
+    setFolderToDelete(null);
+  }, []);
 
   const handleExport = useCallback((folderName: string) => {
     // Open export dialog with sample document content
@@ -559,7 +579,7 @@ You can export this document to any of these formats using the export dialog.`;
                 isCollapsed={isCollapsed}
                 onCreateSubfolder={handleCreateSubfolder}
                 onRename={handleRename}
-                onDelete={handleDelete}
+                onDelete={handleDeleteRequest}
                 onExport={handleExport}
               />
             ))}
@@ -587,6 +607,29 @@ You can export this document to any of these formats using the export dialog.`;
           </div>
         )}
       </div>
+
+      {/* Delete folder confirmation dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Folder"
+        description={
+          folderToDelete
+            ? `Are you sure you want to delete "${folderToDelete.name}"? This action cannot be undone.`
+            : 'Are you sure you want to delete this folder?'
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        isLoading={isDeleting}
+      >
+        {folderToDelete && folderToDelete.documentCount > 0 && (
+          <p className="confirm-dialog-warning-text">
+            This folder contains {folderToDelete.documentCount} document{folderToDelete.documentCount !== 1 ? 's' : ''} that will also be deleted.
+          </p>
+        )}
+      </ConfirmDialog>
     </div>
   );
 }

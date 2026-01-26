@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useReceiptsStore, type Receipt, type ReceiptStatus, type ReceiptSourceType, type VLMAnalysisResult, type UpdateReceiptRequest } from '../stores/receipts';
 import { useAccountStore } from '../stores/account';
 import { useTransactionsStore, type Transaction } from '../stores/transactions';
 import { PageTransition } from '../components/PageTransition';
 import { SettingsFormSkeleton } from '../components/skeletons';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import './ReceiptDetail.css';
 
 interface EditableFields {
@@ -68,6 +69,9 @@ export function ReceiptDetail() {
     receipt_number: '',
     notes: '',
   });
+
+  // Discard changes dialog state
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   useEffect(() => {
     if (id && currentAccount?.id) {
@@ -240,7 +244,32 @@ export function ReceiptDetail() {
     }
   };
 
-  const handleCancelEdit = useCallback(() => {
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    if (!receipt) return false;
+    return (
+      editableFields.merchant_name !== (receipt.merchant_name || '') ||
+      editableFields.merchant_address !== (receipt.merchant_address || '') ||
+      editableFields.receipt_date !== (receipt.receipt_date ? receipt.receipt_date.split('T')[0] : '') ||
+      editableFields.total_amount !== (receipt.total_amount !== undefined ? String(receipt.total_amount) : '') ||
+      editableFields.tax_amount !== (receipt.tax_amount !== undefined ? String(receipt.tax_amount) : '') ||
+      editableFields.subtotal_amount !== (receipt.subtotal_amount !== undefined ? String(receipt.subtotal_amount) : '') ||
+      editableFields.payment_method !== (receipt.payment_method || '') ||
+      editableFields.receipt_number !== (receipt.receipt_number || '') ||
+      editableFields.notes !== (receipt.notes || '')
+    );
+  }, [receipt, editableFields]);
+
+  const handleCancelEditClick = useCallback(() => {
+    if (hasUnsavedChanges) {
+      setShowDiscardConfirm(true);
+    } else {
+      setIsEditing(false);
+      setSaveError(null);
+    }
+  }, [hasUnsavedChanges]);
+
+  const handleDiscardConfirm = useCallback(() => {
     if (receipt) {
       setEditableFields({
         merchant_name: receipt.merchant_name || '',
@@ -256,7 +285,12 @@ export function ReceiptDetail() {
     }
     setIsEditing(false);
     setSaveError(null);
+    setShowDiscardConfirm(false);
   }, [receipt]);
+
+  const handleDiscardCancel = useCallback(() => {
+    setShowDiscardConfirm(false);
+  }, []);
 
   // Get image URL for the receipt
   const getReceiptImageUrl = useCallback(() => {
@@ -630,7 +664,7 @@ export function ReceiptDetail() {
               ) : (
                 <div className="edit-actions">
                   <button
-                    onClick={handleCancelEdit}
+                    onClick={handleCancelEditClick}
                     className="cancel-edit-button"
                     disabled={isSaving}
                   >
@@ -910,34 +944,18 @@ export function ReceiptDetail() {
           </div>
         </div>
 
-        {showDeleteConfirm && (
-          <div className="delete-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-            <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
-              <h3>Delete Receipt</h3>
-              <p>
-                Are you sure you want to delete this receipt{' '}
-                <strong>{receipt.merchant_name || receipt.file_name}</strong>?
-                This action cannot be undone.
-              </p>
-              <div className="modal-actions">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="cancel-button"
-                  disabled={isDeleting}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="confirm-delete-button"
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'Deleting...' : 'Delete Receipt'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Delete receipt confirmation dialog */}
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirm={handleDelete}
+          title="Delete Receipt"
+          description={`Are you sure you want to delete "${receipt.merchant_name || receipt.file_name}"? This action cannot be undone.`}
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          variant="danger"
+          isLoading={isDeleting}
+        />
 
         {showLinkModal && (
           <div className="link-modal-overlay" onClick={() => setShowLinkModal(false)}>
@@ -1010,6 +1028,20 @@ export function ReceiptDetail() {
           </div>
         )}
       </div>
+
+      {/* Discard changes confirmation dialog */}
+      <ConfirmDialog
+        isOpen={showDiscardConfirm}
+        onClose={handleDiscardCancel}
+        onConfirm={handleDiscardConfirm}
+        title="Discard Changes"
+        description="You have unsaved changes. Are you sure you want to discard them?"
+        confirmLabel="Discard"
+        cancelLabel="Keep Editing"
+        variant="danger"
+      >
+        <p>Any changes you've made to this receipt will be lost.</p>
+      </ConfirmDialog>
     </PageTransition>
   );
 }

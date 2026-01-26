@@ -166,6 +166,20 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+/* Theme Toggle */
+.topnav-theme-toggle {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.topnav-theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 /* Notification Bell Placeholder */
 .topnav-notification-bell {
   position: relative;
@@ -499,5 +513,14 @@
 
   .topnav-dropdown-item svg {
     color: rgba(0, 0, 0, 0.6);
+  }
+
+  .topnav-theme-toggle {
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .topnav-theme-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #000;
   }
 }

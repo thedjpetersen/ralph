@@ -10,6 +10,11 @@ export {
 } from './MultiSelect';
 export { Modal, type ModalProps, type ModalSize } from './Modal';
 export {
+  ConfirmDialog,
+  type ConfirmDialogProps,
+  type ConfirmDialogVariant,
+} from './ConfirmDialog';
+export {
   Table,
   TableHead,
   TableBody,
@@ -83,3 +88,4 @@ export {
 export { ErrorBoundary, type ErrorBoundaryProps } from '../ErrorBoundary';
 export { Avatar, type AvatarProps, type AvatarSize, type AvatarVariant } from './Avatar';
 export { Spinner, type SpinnerProps, type SpinnerSize, type SpinnerVariant } from './Spinner';
+export { ThemeToggle, ThemeToggleButton, type ThemeToggleProps } from './ThemeToggle';

@@ -4,6 +4,8 @@ import { usePersonasStore, type Persona, type PersonaStatus } from '../stores/pe
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
 import { AccountsListSkeleton } from '../components/skeletons';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { useDeleteConfirmation } from '../hooks/useDeleteConfirmation';
 import { toast } from '../stores/toast';
 import './Personas.css';
 
@@ -26,8 +28,27 @@ export function Personas() {
   } = usePersonasStore();
 
   const [statusFilter, setStatusFilter] = useState<PersonaStatus | ''>('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<Persona | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Delete confirmation hook
+  const {
+    itemToDelete: personaToDelete,
+    isDeleting,
+    confirmDelete,
+    cancelDelete,
+    executeDelete,
+    isOpen: showDeleteConfirm,
+  } = useDeleteConfirmation<Persona>({
+    onDelete: async (persona) => {
+      if (!currentAccount?.id) return;
+      await deletePersona(currentAccount.id, persona.id);
+    },
+    onSuccess: () => {
+      toast.success('Persona deleted successfully');
+    },
+    onError: () => {
+      toast.error('Failed to delete persona');
+    },
+  });
 
   useEffect(() => {
     if (currentAccount?.id) {
@@ -65,20 +86,6 @@ export function Personas() {
       toast.success(`${persona.name} set as default persona`);
     } catch {
       toast.error('Failed to set default persona');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!showDeleteConfirm || !currentAccount?.id) return;
-    setIsDeleting(true);
-    try {
-      await deletePersona(currentAccount.id, showDeleteConfirm.id);
-      setShowDeleteConfirm(null);
-      toast.success('Persona deleted successfully');
-    } catch {
-      toast.error('Failed to delete persona');
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -227,7 +234,7 @@ export function Personas() {
                     </button>
                   )}
                   <button
-                    onClick={() => setShowDeleteConfirm(persona)}
+                    onClick={() => confirmDelete(persona)}
                     className="delete-persona-button"
                     disabled={persona.is_default}
                     title={persona.is_default ? 'Cannot delete default persona' : ''}
@@ -240,34 +247,20 @@ export function Personas() {
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="modal-overlay" onClick={() => setShowDeleteConfirm(null)}>
-            <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
-              <h3>Delete Persona</h3>
-              <p>
-                Are you sure you want to delete <strong>{showDeleteConfirm.name}</strong>?
-                This action cannot be undone.
-              </p>
-              <div className="modal-actions">
-                <button
-                  onClick={() => setShowDeleteConfirm(null)}
-                  className="cancel-button"
-                  disabled={isDeleting}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="confirm-delete-button"
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? 'Deleting...' : 'Delete Persona'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={showDeleteConfirm}
+          onClose={cancelDelete}
+          onConfirm={executeDelete}
+          title="Delete Persona"
+          description={`Are you sure you want to delete "${personaToDelete?.name}"?`}
+          confirmLabel="Delete Persona"
+          cancelLabel="Cancel"
+          variant="danger"
+          isLoading={isDeleting}
+        >
+          <p>This action cannot be undone. All data associated with this persona will be permanently removed.</p>
+        </ConfirmDialog>
       </div>
     </PageTransition>
   );

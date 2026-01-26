@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useUserStore } from '../../stores/user';
+import { ThemeToggleButton } from '../ui/ThemeToggle';
 import './TopNav.css';
 
 export interface BreadcrumbItem {
@@ -210,6 +211,9 @@ export function TopNav({ breadcrumbs = [], onMobileMenuToggle, isMobileMenuOpen 
               <kbd className="topnav-search-kbd">⌘K</kbd>
             </button>
           </div>
+
+          {/* Theme toggle */}
+          <ThemeToggleButton className="topnav-theme-toggle" />
 
           {/* Notification bell placeholder */}
           <button
