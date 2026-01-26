@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { TopNav } from './TopNav';
 import { MobileTabBar } from './MobileTabBar';
+import { DocumentTabs } from '../DocumentTabs';
 import { ToastContainer } from '../Toast';
 import { KeyboardShortcutsHelp } from '../ui/KeyboardShortcutsHelp';
 import { KeyboardShortcutsViewer } from '../ui/KeyboardShortcutsViewer';
@@ -28,6 +29,7 @@ import { useStarredDocumentsStore } from '../../stores/starredDocuments';
 import { useTableOfContentsStore } from '../../stores/tableOfContents';
 import { useWelcomeModal } from '../../stores/welcomeModal';
 import { useAppSettingsStore } from '../../stores/appSettings';
+import { useOpenDocumentsStore } from '../../stores/openDocuments';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -85,6 +87,7 @@ export function AppShell({ children }: AppShellProps) {
     closeModal: closeShortcutsViewer,
   } = useKeyboardShortcutsStore();
   const { settings, updateAppearanceSettings } = useAppSettingsStore();
+  const { activeDocumentId, closeDocument } = useOpenDocumentsStore();
 
   const isSidebarCollapsed = settings.appearance.sidebarCollapsed;
   const isCommentsPanelCollapsed = settings.appearance.commentsPanelCollapsed;
@@ -184,8 +187,29 @@ export function AppShell({ children }: AppShellProps) {
     }
   }, [selectedFolderId, folders, toggleStar]);
 
+  // Close current document tab
+  const handleCloseCurrentTab = useCallback(() => {
+    if (activeDocumentId) {
+      closeDocument(activeDocumentId);
+    }
+  }, [activeDocumentId, closeDocument]);
+
   // Global keyboard shortcuts
   useKeyboardShortcuts([
+    {
+      key: 'w',
+      metaKey: true,
+      action: handleCloseCurrentTab,
+      description: 'Close current tab',
+      allowInInput: true,
+    },
+    {
+      key: 'w',
+      ctrlKey: true,
+      action: handleCloseCurrentTab,
+      description: 'Close current tab',
+      allowInInput: true,
+    },
     {
       key: 'k',
       metaKey: true,
@@ -434,6 +458,9 @@ export function AppShell({ children }: AppShellProps) {
           onMobileMenuToggle={handleMobileMenuToggle}
           isMobileMenuOpen={isMobileMenuOpen}
         />
+
+        {/* Document tabs - shown when multiple documents are open */}
+        <DocumentTabs />
 
         {/* Main content */}
         <main

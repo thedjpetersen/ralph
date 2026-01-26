@@ -1,0 +1,218 @@
+/* Document Tabs Container */
+.document-tabs-wrapper {
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  height: 36px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.document-tabs-container {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex: 1;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.document-tabs-container::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Scroll Buttons */
+.document-tabs-scroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 100%;
+  background: linear-gradient(90deg, #1a1a1a 70%, transparent);
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  flex-shrink: 0;
+  z-index: 2;
+  transition: color 0.15s;
+}
+
+.document-tabs-scroll-right {
+  background: linear-gradient(270deg, #1a1a1a 70%, transparent);
+}
+
+.document-tabs-scroll:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Individual Tab */
+.document-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 35px;
+  min-width: 100px;
+  max-width: 200px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid #333;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.document-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.document-tab:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: -2px;
+}
+
+/* Active Tab */
+.document-tab-active {
+  background: #242424;
+  color: #fff;
+  border-bottom: 2px solid #646cff;
+  margin-bottom: -1px;
+}
+
+.document-tab-active:hover {
+  background: #242424;
+}
+
+/* Tab Title */
+.document-tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+}
+
+/* Modified Indicator (dot) */
+.document-tab-modified-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f39c12;
+  flex-shrink: 0;
+}
+
+/* When modified, show the dot instead of close button on hover */
+.document-tab-modified .document-tab-close {
+  display: none;
+}
+
+.document-tab-modified:hover .document-tab-close {
+  display: flex;
+}
+
+.document-tab-modified:hover .document-tab-modified-indicator {
+  display: none;
+}
+
+/* Close Button */
+.document-tab-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.15s, background-color 0.15s;
+  flex-shrink: 0;
+}
+
+.document-tab:hover .document-tab-close,
+.document-tab-active .document-tab-close {
+  opacity: 0.6;
+}
+
+.document-tab-close:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+  .document-tabs-wrapper {
+    background: #f5f5f5;
+    border-bottom-color: #ddd;
+  }
+
+  .document-tabs-scroll {
+    background: linear-gradient(90deg, #f5f5f5 70%, transparent);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .document-tabs-scroll-right {
+    background: linear-gradient(270deg, #f5f5f5 70%, transparent);
+  }
+
+  .document-tabs-scroll:hover {
+    color: rgba(0, 0, 0, 0.8);
+  }
+
+  .document-tab {
+    border-right-color: #ddd;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .document-tab:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.8);
+  }
+
+  .document-tab-active {
+    background: #fff;
+    color: #000;
+  }
+
+  .document-tab-active:hover {
+    background: #fff;
+  }
+
+  .document-tab-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .document-tab-modified-indicator {
+    background: #e67e22;
+  }
+}
+
+/* Responsive - hide tabs on very small screens */
+@media (max-width: 480px) {
+  .document-tabs-wrapper {
+    display: none;
+  }
+}
+
+/* Animation for tab opening */
+@keyframes tab-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.document-tab {
+  animation: tab-slide-in 0.15s ease-out;
+}
