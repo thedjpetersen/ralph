@@ -8,6 +8,7 @@ import { useStarredDocumentsStore, type StarredDocument } from '../../stores/sta
 import { useContextMenuStore } from '../../stores/contextMenu';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ContextMenu, type ContextMenuItem } from '../ui/ContextMenu';
+import { EmptyState, DocumentIllustration } from '../ui/EmptyState';
 import { toast } from '../../stores/toast';
 import './DocumentFolders.css';
 
@@ -870,9 +871,17 @@ You can export this document to any of these formats using the export dialog.`;
         {isLoading && folderTree.length === 0 ? (
           <div className="document-folders-loading">Loading...</div>
         ) : folderTree.length === 0 && !isCreating ? (
-          <div className="document-folders-empty">
-            No folders yet
-          </div>
+          <EmptyState
+            illustration={<DocumentIllustration />}
+            title="Create your first document"
+            description="Organize your writing with folders and start creating amazing content."
+            action={{
+              label: 'New Folder',
+              onClick: handleCreateFolder,
+            }}
+            size="small"
+            className="document-folders-empty-state"
+          />
         ) : (
           <>
             {folderTree.map((folder) => (

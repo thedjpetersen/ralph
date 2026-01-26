@@ -150,6 +150,30 @@
   color: var(--color-gray-500);
 }
 
+/* Enhanced Empty State */
+.comments-empty-state-enhanced {
+  padding: 1.5rem 1rem;
+  background: var(--color-gray-50);
+  border: 1px dashed var(--color-gray-200);
+  border-radius: 8px;
+}
+
+.comments-empty-state-enhanced .empty-state-illustration-container {
+  width: 100px;
+  height: 80px;
+}
+
+.comments-empty-state-enhanced .empty-state-title {
+  font-size: 0.9375rem;
+  color: var(--color-gray-700);
+}
+
+.comments-empty-state-enhanced .empty-state-description {
+  font-size: 0.8125rem;
+  color: var(--color-gray-500);
+  max-width: 240px;
+}
+
 /* Filter Empty State */
 .comments-filter-empty {
   display: flex;
@@ -174,6 +198,30 @@
   font-size: 0.875rem;
   color: var(--color-gray-500);
   text-align: center;
+}
+
+/* Enhanced Filter Empty State */
+.comments-filter-empty-enhanced {
+  padding: 1.25rem 1rem;
+  background: var(--color-gray-50);
+  border: 1px dashed var(--color-gray-200);
+  border-radius: 8px;
+}
+
+.comments-filter-empty-enhanced .empty-state-illustration-container {
+  width: 80px;
+  height: 65px;
+}
+
+.comments-filter-empty-enhanced .empty-state-title {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+}
+
+.comments-filter-empty-enhanced .empty-state-description {
+  font-size: 0.75rem;
+  color: var(--color-gray-500);
+  max-width: 220px;
 }
 
 /* Comments List */
@@ -368,6 +416,33 @@
   }
 
   .comments-filter-empty p {
+    color: var(--color-gray-400);
+  }
+
+  /* Enhanced Empty States - Dark Mode */
+  .comments-empty-state-enhanced {
+    background: var(--color-gray-800);
+    border-color: var(--color-gray-600);
+  }
+
+  .comments-empty-state-enhanced .empty-state-title {
+    color: var(--color-gray-200);
+  }
+
+  .comments-empty-state-enhanced .empty-state-description {
+    color: var(--color-gray-400);
+  }
+
+  .comments-filter-empty-enhanced {
+    background: var(--color-gray-800);
+    border-color: var(--color-gray-600);
+  }
+
+  .comments-filter-empty-enhanced .empty-state-title {
+    color: var(--color-gray-300);
+  }
+
+  .comments-filter-empty-enhanced .empty-state-description {
     color: var(--color-gray-400);
   }
 

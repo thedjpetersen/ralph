@@ -95,6 +95,34 @@
   text-align: center;
 }
 
+/* Enhanced Empty State */
+.document-folders-empty-state {
+  padding: 1.25rem 1rem;
+  margin: 0.5rem;
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+}
+
+.document-folders-empty-state .empty-state-illustration-container {
+  width: 90px;
+  height: 75px;
+}
+
+.document-folders-empty-state .empty-state-title {
+  font-size: 0.875rem;
+}
+
+.document-folders-empty-state .empty-state-description {
+  font-size: 0.75rem;
+  max-width: 200px;
+}
+
+.document-folders-empty-state .empty-state-action {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+}
+
 .document-folders-error {
   padding: 0.5rem 1rem;
   font-size: 0.75rem;

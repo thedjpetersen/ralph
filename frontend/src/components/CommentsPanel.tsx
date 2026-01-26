@@ -5,6 +5,7 @@ import { useAppSettingsStore, type CommentSortOrder } from '../stores/appSetting
 import { useContextMenuStore } from '../stores/contextMenu';
 import { CommentSearchFilter } from './CommentSearchFilter';
 import { ContextMenu, type ContextMenuItem } from './ui/ContextMenu';
+import { EmptyState, CommentIllustration, SearchIllustration } from './ui/EmptyState';
 import { toast } from '../stores/toast';
 import './CommentsPanel.css';
 
@@ -247,9 +248,13 @@ export function CommentsPanel({
             <span>{title}</span>
           </div>
         </div>
-        <div className="comments-empty-state">
-          <p>No comments yet</p>
-        </div>
+        <EmptyState
+          illustration={<CommentIllustration />}
+          title="No comments yet"
+          description="Select text to get AI feedback on your writing, or highlight passages to add your own notes."
+          size="small"
+          className="comments-empty-state-enhanced"
+        />
       </div>
     );
   }
@@ -314,13 +319,13 @@ export function CommentsPanel({
       {/* Comments list with animations */}
       <div className="comments-list">
         {sortedComments.length === 0 && isFiltered ? (
-          <div className="comments-filter-empty">
-            <svg className="filter-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <p>No comments match your filters</p>
-          </div>
+          <EmptyState
+            illustration={<SearchIllustration />}
+            title="No matching comments"
+            description="Try adjusting your search or filters to find what you're looking for."
+            size="small"
+            className="comments-filter-empty-enhanced"
+          />
         ) : (
         <LayoutGroup>
           <AnimatePresence mode="popLayout">

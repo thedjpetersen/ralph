@@ -11,6 +11,7 @@ import { useAIVocabularyEnhancerStore } from '../stores/aiVocabularyEnhancer';
 import { useAIReadabilityStore } from '../stores/aiReadability';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
+import { EmptyState, SearchIllustration } from './ui/EmptyState';
 import './CommandPalette.css';
 
 // Category icons
@@ -634,20 +635,18 @@ export function CommandPalette() {
               aria-label="Command results"
             >
               {flatList.length === 0 ? (
-                <div className="command-palette-empty">
-                  <svg
-                    className="command-palette-empty-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="M21 21l-4.35-4.35" />
-                  </svg>
-                  <p className="command-palette-empty-text">No commands found</p>
-                  <p className="command-palette-empty-hint">Try a different search term</p>
-                </div>
+                <EmptyState
+                  illustration={<SearchIllustration />}
+                  title="No commands found"
+                  description="We couldn't find any commands matching your search."
+                  tips={[
+                    'Try shorter keywords',
+                    'Search by category: nav, ai, doc',
+                    'Check for typos in your query',
+                  ]}
+                  size="medium"
+                  className="command-palette-empty-enhanced"
+                />
               ) : (
                 Array.from(groupedCommands.entries()).map(([category, cmds]) => (
                   <div key={category} className="command-palette-group">

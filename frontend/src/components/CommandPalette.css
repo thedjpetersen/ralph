@@ -117,6 +117,40 @@
   opacity: 0.7;
 }
 
+/* Enhanced Empty State */
+.command-palette-empty-enhanced {
+  padding: 1.5rem 1rem;
+  background: transparent;
+}
+
+.command-palette-empty-enhanced .empty-state-illustration-container {
+  width: 100px;
+  height: 80px;
+}
+
+.command-palette-empty-enhanced .empty-state-title {
+  font-size: 0.9375rem;
+}
+
+.command-palette-empty-enhanced .empty-state-description {
+  font-size: 0.8125rem;
+  max-width: 260px;
+}
+
+.command-palette-empty-enhanced .empty-state-tips {
+  background-color: var(--color-bg-tertiary);
+  max-width: 240px;
+}
+
+.command-palette-empty-enhanced .empty-state-tips-label {
+  color: var(--color-text-muted);
+}
+
+.command-palette-empty-enhanced .empty-state-tips-list {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
 /* Group Styles */
 .command-palette-group {
   margin-bottom: 8px;
