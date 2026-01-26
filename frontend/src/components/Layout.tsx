@@ -7,6 +7,7 @@ import { AccountSwitcherSkeleton } from './skeletons';
 import { ToastContainer } from './Toast';
 import { KeyboardShortcutsHelp } from './ui/KeyboardShortcutsHelp';
 import { ScreenReaderAnnouncer } from './ScreenReaderAnnouncer';
+import { AIRewriteToolbar } from './AIRewriteToolbar';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import './Layout.css';
 
@@ -570,6 +571,7 @@ export function Layout() {
         onClose={() => setIsShortcutsHelpOpen(false)}
       />
       <ScreenReaderAnnouncer />
+      <AIRewriteToolbar />
     </div>
   );
 }
