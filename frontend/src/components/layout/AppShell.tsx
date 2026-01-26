@@ -62,6 +62,7 @@ const FocusModeIndicator = lazy(() => import('../FocusModeIndicator').then(m => 
 const TableOfContentsSidebar = lazy(() => import('../TableOfContentsSidebar').then(m => ({ default: m.TableOfContentsSidebar })));
 const LinkPopover = lazy(() => import('../LinkPopover').then(m => ({ default: m.LinkPopover })));
 const WelcomeModal = lazy(() => import('../WelcomeModal').then(m => ({ default: m.WelcomeModal })));
+const FeatureDiscoveryProvider = lazy(() => import('../FeatureDiscoveryProvider').then(m => ({ default: m.FeatureDiscoveryProvider })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -543,6 +544,10 @@ export function AppShell({ children }: AppShellProps) {
         <TableOfContentsSidebar />
         <LinkPopover />
         <WelcomeModal />
+        <FeatureDiscoveryProvider>
+          {/* Empty - provider listens to store changes and shows tooltips */}
+          <span style={{ display: 'none' }} />
+        </FeatureDiscoveryProvider>
       </Suspense>
     </div>
   );
