@@ -497,6 +497,233 @@
   color: #fbbf24;
 }
 
+/* Archived Section */
+.document-folders-archived {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #333;
+}
+
+.document-folders-archived-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.document-folders-archived-header:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.document-folders-archived .document-folders-title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.archived-chevron {
+  transition: transform 0.2s ease;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.archived-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+.archived-items-container {
+  overflow: hidden;
+}
+
+.archived-items-list {
+  padding: 0.25rem 0;
+}
+
+/* Archived Item */
+.archived-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem 0.375rem 1rem;
+  margin: 1px 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.archived-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.archived-item.selected {
+  background-color: rgba(100, 108, 255, 0.15);
+}
+
+.archived-item-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #646cff;
+}
+
+.archived-item-icon {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.archived-item-name {
+  flex: 1;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archived-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.archived-item:hover .archived-item-actions {
+  opacity: 1;
+}
+
+.archived-item-restore,
+.archived-item-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.archived-item-restore:hover {
+  background-color: rgba(100, 200, 100, 0.2);
+  color: #6bcf6b;
+}
+
+.archived-item-delete:hover {
+  background-color: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+}
+
+/* Bulk selection toolbar */
+.archived-bulk-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  margin: 0.25rem 0.5rem;
+  background-color: rgba(100, 108, 255, 0.1);
+  border-radius: 6px;
+  gap: 0.5rem;
+}
+
+.archived-bulk-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.archived-bulk-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.archived-bulk-select-all {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.archived-bulk-select-all:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.archived-bulk-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.archived-bulk-restore,
+.archived-bulk-delete,
+.archived-bulk-cancel {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.archived-bulk-restore:hover:not(:disabled) {
+  background-color: rgba(100, 200, 100, 0.2);
+  border-color: #6bcf6b;
+  color: #6bcf6b;
+}
+
+.archived-bulk-delete:hover:not(:disabled) {
+  background-color: rgba(255, 107, 107, 0.2);
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.archived-bulk-cancel:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.archived-bulk-restore:disabled,
+.archived-bulk-delete:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.archived-bulk-toggle {
+  display: block;
+  width: calc(100% - 1rem);
+  margin: 0.25rem 0.5rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  text-align: center;
+}
+
+.archived-bulk-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.7);
+}
+
 /* Light mode */
 @media (prefers-color-scheme: light) {
   .document-folders {
@@ -626,6 +853,69 @@
 
   .starred-item-name:hover {
     background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  /* Archived Section - Light mode */
+  .document-folders-archived {
+    border-top-color: #ddd;
+  }
+
+  .document-folders-archived-header:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .archived-chevron {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .archived-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .archived-item.selected {
+    background-color: rgba(100, 108, 255, 0.1);
+  }
+
+  .archived-item-name {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .archived-item-restore,
+  .archived-item-delete {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .archived-bulk-toolbar {
+    background-color: rgba(100, 108, 255, 0.08);
+  }
+
+  .archived-bulk-select-all,
+  .archived-bulk-restore,
+  .archived-bulk-delete,
+  .archived-bulk-cancel {
+    border-color: rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .archived-bulk-select-all:hover,
+  .archived-bulk-cancel:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .archived-bulk-count {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .archived-bulk-toggle {
+    border-color: rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .archived-bulk-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.3);
+    color: rgba(0, 0, 0, 0.6);
   }
 }
 

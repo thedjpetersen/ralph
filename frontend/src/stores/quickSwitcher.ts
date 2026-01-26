@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useArchivedDocumentsStore } from './archivedDocuments';
 
 export interface RecentDocument {
   id: string;
@@ -14,6 +15,8 @@ interface QuickSwitcherState {
   isOpen: boolean;
   searchQuery: string;
   selectedIndex: number;
+  /** Whether to include archived documents in search results */
+  includeArchived: boolean;
 
   // Recent documents (persisted)
   recentDocuments: RecentDocument[];
@@ -24,6 +27,7 @@ interface QuickSwitcherState {
   toggleSwitcher: () => void;
   setSearchQuery: (query: string) => void;
   setSelectedIndex: (index: number) => void;
+  setIncludeArchived: (include: boolean) => void;
   addRecentDocument: (doc: Omit<RecentDocument, 'lastEditedAt'>) => void;
   removeRecentDocument: (id: string) => void;
   clearRecentDocuments: () => void;
@@ -39,6 +43,7 @@ export const useQuickSwitcherStore = create<QuickSwitcherState>()(
       isOpen: false,
       searchQuery: '',
       selectedIndex: 0,
+      includeArchived: false, // Default to excluding archived documents
       recentDocuments: [],
 
       openSwitcher: () => {
@@ -64,6 +69,10 @@ export const useQuickSwitcherStore = create<QuickSwitcherState>()(
 
       setSelectedIndex: (index) => {
         set({ selectedIndex: index });
+      },
+
+      setIncludeArchived: (include) => {
+        set({ includeArchived: include, selectedIndex: 0 });
       },
 
       addRecentDocument: (doc) => {
@@ -100,6 +109,7 @@ export const useQuickSwitcherStore = create<QuickSwitcherState>()(
       name: 'clockzen-quick-switcher',
       partialize: (state) => ({
         recentDocuments: state.recentDocuments,
+        includeArchived: state.includeArchived,
       }),
     }
   )
@@ -109,4 +119,19 @@ export const useQuickSwitcherStore = create<QuickSwitcherState>()(
 export const selectIsOpen = (state: QuickSwitcherState) => state.isOpen;
 export const selectSearchQuery = (state: QuickSwitcherState) => state.searchQuery;
 export const selectSelectedIndex = (state: QuickSwitcherState) => state.selectedIndex;
+export const selectIncludeArchived = (state: QuickSwitcherState) => state.includeArchived;
 export const selectRecentDocuments = (state: QuickSwitcherState) => state.recentDocuments;
+
+/**
+ * Returns recent documents filtered by archived status.
+ * When includeArchived is false (default), archived documents are excluded.
+ */
+export const selectFilteredRecentDocuments = (state: QuickSwitcherState) => {
+  const { recentDocuments, includeArchived } = state;
+  if (includeArchived) {
+    return recentDocuments;
+  }
+  // Filter out archived documents
+  const archivedStore = useArchivedDocumentsStore.getState();
+  return recentDocuments.filter(doc => !archivedStore.isArchived(doc.id));
+};

@@ -4,6 +4,7 @@ import { useDocumentFoldersStore } from '../../stores/documentFolders';
 import { useAccountStore } from '../../stores/account';
 import { useDocumentImportStore } from '../../stores/documentImport';
 import { useStarredDocumentsStore, type StarredDocument } from '../../stores/starredDocuments';
+import { useArchivedDocumentsStore, type ArchivedDocument } from '../../stores/archivedDocuments';
 import { useDocumentPreviewsStore } from '../../stores/documentPreviews';
 import { useContextMenuStore } from '../../stores/contextMenu';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -83,6 +84,20 @@ const DuplicateIcon = () => (
 const DeleteIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
     <path d="M2.5 4h9M5.5 4V2.5a1 1 0 011-1h1a1 1 0 011 1V4M10 4v7.5a1 1 0 01-1 1H5a1 1 0 01-1-1V4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ArchiveIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M1.5 3.5v8a1 1 0 001 1h9a1 1 0 001-1v-8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M13 3.5H1l.5-2h11l.5 2z" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5.5 6.5h3" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+  </svg>
+);
+
+const RestoreIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M2.5 7h9M7 2.5v9M4.5 4.5L7 2l2.5 2.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -212,12 +227,30 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
   } = useDocumentFoldersStore();
   const { openImportDialog } = useDocumentImportStore();
   const { starredDocuments, toggleStar, isStarred, renameStarred } = useStarredDocumentsStore();
+  const {
+    archivedDocuments,
+    archive,
+    restore,
+    permanentlyDelete,
+    showArchivedSection,
+    selectedIds,
+    bulkSelectionMode,
+    toggleSelection,
+    selectAll,
+    deselectAll,
+    setBulkSelectionMode,
+    restoreMultiple,
+    permanentlyDeleteMultiple,
+  } = useArchivedDocumentsStore();
   const { viewMode, setViewMode } = useDocumentPreviewsStore();
 
   // Delete confirmation dialog state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState<{ id: string; name: string; documentCount: number } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Archive view state
+  const [showingArchived, setShowingArchived] = useState(false);
 
   // Fetch folders when account changes
   useEffect(() => {
@@ -340,6 +373,42 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
     closeMenu();
   }, [documentData, handleDeleteRequest, closeMenu]);
 
+  // Archive handlers
+  const handleArchive = useCallback((folderId: string, folderName: string) => {
+    archive(folderId, folderName, 'folder', null);
+    toast.success(`"${folderName}" archived`);
+  }, [archive]);
+
+  const handleContextMenuArchive = useCallback(() => {
+    if (documentData) {
+      handleArchive(documentData.folderId, documentData.folderName);
+    }
+    closeMenu();
+  }, [documentData, handleArchive, closeMenu]);
+
+  const handleRestore = useCallback((doc: ArchivedDocument) => {
+    restore(doc.id);
+    toast.success(`"${doc.name}" restored`);
+  }, [restore]);
+
+  const handlePermanentDelete = useCallback((doc: ArchivedDocument) => {
+    permanentlyDelete(doc.id);
+    toast.success(`"${doc.name}" permanently deleted`);
+  }, [permanentlyDelete]);
+
+  // Bulk archive handlers for archived items
+  const handleBulkRestore = useCallback(() => {
+    const ids = Array.from(selectedIds);
+    const restored = restoreMultiple(ids);
+    toast.success(`${restored.length} item${restored.length !== 1 ? 's' : ''} restored`);
+  }, [selectedIds, restoreMultiple]);
+
+  const handleBulkPermanentDelete = useCallback(() => {
+    const ids = Array.from(selectedIds);
+    permanentlyDeleteMultiple(ids);
+    toast.success(`${ids.length} item${ids.length !== 1 ? 's' : ''} permanently deleted`);
+  }, [selectedIds, permanentlyDeleteMultiple]);
+
   // Build context menu items
   const documentContextMenuItems: ContextMenuItem[] = useMemo(() => {
     if (menuType !== 'document' || !documentData) return [];
@@ -367,6 +436,12 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
         onClick: handleContextMenuDuplicate,
       },
       {
+        id: 'archive',
+        label: 'Archive',
+        icon: <ArchiveIcon />,
+        onClick: handleContextMenuArchive,
+      },
+      {
         id: 'delete',
         label: 'Delete',
         icon: <DeleteIcon />,
@@ -375,7 +450,17 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
         onClick: handleContextMenuDelete,
       },
     ];
-  }, [menuType, documentData, handleContextMenuOpen, handleContextMenuRename, handleContextMenuDuplicate, handleContextMenuDelete]);
+  }, [menuType, documentData, handleContextMenuOpen, handleContextMenuRename, handleContextMenuDuplicate, handleContextMenuArchive, handleContextMenuDelete]);
+
+  // Get all starred items (both folders and documents)
+  const starredItems = starredDocuments;
+
+  // Filter out archived items from the main folder tree
+  const archivedIds = useMemo(() => new Set(archivedDocuments.map(d => d.id)), [archivedDocuments]);
+  const filteredFolderTree = useMemo(() =>
+    folderTree.filter(f => !archivedIds.has(f.id)),
+    [folderTree, archivedIds]
+  );
 
   if (isCollapsed) {
     return (
@@ -390,9 +475,6 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
       </div>
     );
   }
-
-  // Get all starred items (both folders and documents)
-  const starredItems = starredDocuments;
 
   return (
     <div className="document-folders">
@@ -450,7 +532,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
       {/* View Mode Container with smooth transitions */}
       <AnimatePresence mode="wait">
         {/* Grid View */}
-        {viewMode === 'grid' && (
+        {viewMode === 'grid' && !showingArchived && (
           <motion.div
             key="grid-view"
             initial={{ opacity: 0, scale: 0.98 }}
@@ -459,7 +541,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             <DocumentGrid
-              items={folderTree}
+              items={filteredFolderTree}
               isLoading={isLoading}
               checkIsStarred={checkIsStarred}
               onOpen={handleOpen}
@@ -474,7 +556,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
         )}
 
         {/* List View */}
-        {viewMode === 'list' && (
+        {viewMode === 'list' && !showingArchived && (
           <motion.div
             key="list-view"
             initial={{ opacity: 0, scale: 0.98 }}
@@ -483,7 +565,7 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             <DocumentList
-              items={folderTree}
+              items={filteredFolderTree}
               isLoading={isLoading}
               checkIsStarred={checkIsStarred}
               onOpen={handleOpen}
@@ -497,6 +579,138 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Archived Section */}
+      {showArchivedSection && archivedDocuments.length > 0 && (
+        <div className="document-folders-archived">
+          <button
+            className="document-folders-header document-folders-archived-header"
+            onClick={() => setShowingArchived(!showingArchived)}
+            aria-expanded={showingArchived}
+          >
+            <span className="document-folders-title">
+              <ArchiveIcon /> Archived ({archivedDocuments.length})
+            </span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              className={`archived-chevron ${showingArchived ? 'expanded' : ''}`}
+              aria-hidden="true"
+            >
+              <path d="M4 5.5l3 3 3-3" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          <AnimatePresence>
+            {showingArchived && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="archived-items-container"
+              >
+                {/* Bulk selection toolbar */}
+                {bulkSelectionMode && (
+                  <div className="archived-bulk-toolbar">
+                    <div className="archived-bulk-toolbar-left">
+                      <button
+                        className="archived-bulk-select-all"
+                        onClick={selectedIds.size === archivedDocuments.length ? deselectAll : selectAll}
+                      >
+                        {selectedIds.size === archivedDocuments.length ? 'Deselect All' : 'Select All'}
+                      </button>
+                      <span className="archived-bulk-count">
+                        {selectedIds.size} selected
+                      </span>
+                    </div>
+                    <div className="archived-bulk-toolbar-right">
+                      <button
+                        className="archived-bulk-restore"
+                        onClick={handleBulkRestore}
+                        disabled={selectedIds.size === 0}
+                        title="Restore selected"
+                      >
+                        <RestoreIcon /> Restore
+                      </button>
+                      <button
+                        className="archived-bulk-delete"
+                        onClick={handleBulkPermanentDelete}
+                        disabled={selectedIds.size === 0}
+                        title="Permanently delete selected"
+                      >
+                        <DeleteIcon /> Delete
+                      </button>
+                      <button
+                        className="archived-bulk-cancel"
+                        onClick={() => setBulkSelectionMode(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bulk selection toggle when not in bulk mode */}
+                {!bulkSelectionMode && archivedDocuments.length > 1 && (
+                  <button
+                    className="archived-bulk-toggle"
+                    onClick={() => setBulkSelectionMode(true)}
+                  >
+                    Select multiple
+                  </button>
+                )}
+
+                <div className="archived-items-list">
+                  {archivedDocuments.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className={`archived-item ${selectedIds.has(doc.id) ? 'selected' : ''}`}
+                      onClick={bulkSelectionMode ? () => toggleSelection(doc.id) : undefined}
+                    >
+                      {bulkSelectionMode && (
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(doc.id)}
+                          onChange={() => toggleSelection(doc.id)}
+                          className="archived-item-checkbox"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      )}
+                      <span className="folder-icon archived-item-icon">
+                        {doc.type === 'folder' ? <FolderIcon /> : <DocumentIcon />}
+                      </span>
+                      <span className="archived-item-name">{doc.name}</span>
+                      {!bulkSelectionMode && (
+                        <div className="archived-item-actions">
+                          <button
+                            className="archived-item-restore"
+                            onClick={() => handleRestore(doc)}
+                            aria-label={`Restore ${doc.name}`}
+                            title="Restore"
+                          >
+                            <RestoreIcon />
+                          </button>
+                          <button
+                            className="archived-item-delete"
+                            onClick={() => handlePermanentDelete(doc)}
+                            aria-label={`Permanently delete ${doc.name}`}
+                            title="Delete permanently"
+                          >
+                            <DeleteIcon />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       {/* Delete folder confirmation dialog */}
       <ConfirmDialog
