@@ -80,3 +80,4 @@ export {
   type CurrencyCode,
   type FormattedCurrencySize,
 } from './FormattedCurrency';
+export { ErrorBoundary, type ErrorBoundaryProps } from '../ErrorBoundary';

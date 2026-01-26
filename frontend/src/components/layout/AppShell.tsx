@@ -6,6 +6,7 @@ import { MobileTabBar } from './MobileTabBar';
 import { ToastContainer } from '../Toast';
 import { KeyboardShortcutsHelp } from '../ui/KeyboardShortcutsHelp';
 import { ScreenReaderAnnouncer } from '../ScreenReaderAnnouncer';
+import { CommandPalette } from '../CommandPalette';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useFindReplaceStore } from '../../stores/findReplace';
 import { useParagraphFocusStore } from '../../stores/paragraphFocus';
@@ -13,6 +14,7 @@ import { useTypewriterScrollStore } from '../../stores/typewriterScroll';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
 import { useOnboarding } from '../../stores/onboarding';
+import { useCommandPaletteStore } from '../../stores/commandPalette';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -41,6 +43,7 @@ export function AppShell({ children }: AppShellProps) {
   const { toggle: toggleParagraphFocus } = useParagraphFocusStore();
   const { toggle: toggleTypewriterScroll } = useTypewriterScrollStore();
   const { shouldShowTour, startTour } = useOnboarding();
+  const { togglePalette: toggleCommandPalette, closePalette: closeCommandPalette } = useCommandPaletteStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -101,6 +104,20 @@ export function AppShell({ children }: AppShellProps) {
   // Global keyboard shortcuts
   useKeyboardShortcuts([
     {
+      key: 'k',
+      metaKey: true,
+      action: toggleCommandPalette,
+      description: 'Open command palette',
+      allowInInput: true,
+    },
+    {
+      key: 'k',
+      ctrlKey: true,
+      action: toggleCommandPalette,
+      description: 'Open command palette',
+      allowInInput: true,
+    },
+    {
       key: '?',
       action: () => setIsShortcutsHelpOpen(true),
       description: 'Show keyboard shortcuts',
@@ -111,6 +128,7 @@ export function AppShell({ children }: AppShellProps) {
         setIsMobileMenuOpen(false);
         setIsShortcutsHelpOpen(false);
         closeFindReplace();
+        closeCommandPalette();
       },
       description: 'Close menus',
       allowInInput: true,
@@ -219,6 +237,7 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Global overlays and toolbars */}
       <ToastContainer />
+      <CommandPalette />
       <KeyboardShortcutsHelp
         isOpen={isShortcutsHelpOpen}
         onClose={() => setIsShortcutsHelpOpen(false)}
