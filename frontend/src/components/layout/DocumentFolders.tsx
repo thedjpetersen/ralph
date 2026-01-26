@@ -286,6 +286,20 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
     }
   }, []);
 
+  // Quick action handlers for document cards
+  const handleEdit = useCallback((folderId: string) => {
+    // Open the document for editing
+    handleOpen(folderId);
+  }, [handleOpen]);
+
+  const handleQuickDuplicate = useCallback((_folderId: string, folderName: string) => {
+    handleDuplicate(_folderId, folderName);
+  }, [handleDuplicate]);
+
+  const handleQuickDelete = useCallback((folderId: string, folderName: string, documentCount: number) => {
+    handleDeleteRequest(folderId, folderName, documentCount);
+  }, [handleDeleteRequest]);
+
   // Context menu state
   const {
     isOpen: contextMenuOpen,
@@ -450,6 +464,9 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
               checkIsStarred={checkIsStarred}
               onOpen={handleOpen}
               onToggleStar={handleToggleStar}
+              onEdit={handleEdit}
+              onDuplicate={handleQuickDuplicate}
+              onDelete={handleQuickDelete}
               onContextMenu={(id, name, docCount) => handleDeleteRequest(id, name, docCount)}
               onCreateFolder={handleCreateFolder}
             />
@@ -471,6 +488,9 @@ export function DocumentFolders({ isCollapsed = false }: DocumentFoldersProps) {
               checkIsStarred={checkIsStarred}
               onOpen={handleOpen}
               onToggleStar={handleToggleStar}
+              onEdit={handleEdit}
+              onDuplicate={handleQuickDuplicate}
+              onDelete={handleQuickDelete}
               onContextMenu={(id, name, docCount) => handleDeleteRequest(id, name, docCount)}
               onCreateFolder={handleCreateFolder}
             />

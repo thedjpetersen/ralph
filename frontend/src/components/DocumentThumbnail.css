@@ -127,7 +127,8 @@
   transition: opacity 0.15s;
 }
 
-.document-thumbnail-actions-visible {
+.document-thumbnail-actions-visible,
+.document-thumbnail:focus-within .document-thumbnail-actions {
   opacity: 1;
 }
 
@@ -158,6 +159,17 @@
 
 .document-thumbnail-action-btn.starred:hover {
   color: #f59e0b;
+}
+
+.document-thumbnail-action-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.8);
+  color: #fff;
+}
+
+/* Focus visible for keyboard accessibility */
+.document-thumbnail-action-btn:focus-visible {
+  outline: 2px solid #646cff;
+  outline-offset: 2px;
 }
 
 /* Star Badge */
@@ -292,6 +304,11 @@
   .document-thumbnail-action-btn:hover {
     background: #fff;
     color: #000;
+  }
+
+  .document-thumbnail-action-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.9);
+    color: #fff;
   }
 
   .document-thumbnail-star-badge {

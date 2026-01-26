@@ -51,6 +51,37 @@ const MoreIcon = () => (
   </svg>
 );
 
+const EditIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path
+      d="M10.5 1.5l2 2-7 7H3.5v-2l7-7z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const DuplicateIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" strokeWidth="1.25" />
+  </svg>
+);
+
+const DeleteIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path
+      d="M2.5 4h9M5.5 4V2.5a1 1 0 011-1h1a1 1 0 011 1V4M10 4v7.5a1 1 0 01-1 1H5a1 1 0 01-1-1V4"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export interface DocumentListProps {
   /** List of folders/documents to display */
   items: FolderTreeNode[];
@@ -62,6 +93,12 @@ export interface DocumentListProps {
   onOpen?: (id: string) => void;
   /** Callback to toggle star status */
   onToggleStar?: (id: string, name: string) => void;
+  /** Callback to edit a document */
+  onEdit?: (id: string, name: string) => void;
+  /** Callback to duplicate a document */
+  onDuplicate?: (id: string, name: string) => void;
+  /** Callback to delete a document */
+  onDelete?: (id: string, name: string, documentCount: number) => void;
   /** Callback for context menu */
   onContextMenu?: (id: string, name: string, documentCount: number) => void;
   /** Callback to create a new folder */
@@ -137,6 +174,9 @@ interface DocumentListItemProps {
   wordCount: number;
   onOpen?: (id: string) => void;
   onStar?: (id: string, name: string) => void;
+  onEdit?: (id: string, name: string) => void;
+  onDuplicate?: (id: string, name: string) => void;
+  onDelete?: (id: string, name: string, documentCount: number) => void;
   onContextMenu?: (id: string, name: string, documentCount: number) => void;
 }
 
@@ -146,6 +186,9 @@ const DocumentListItem = memo(function DocumentListItem({
   wordCount,
   onOpen,
   onStar,
+  onEdit,
+  onDuplicate,
+  onDelete,
   onContextMenu,
 }: DocumentListItemProps) {
   const handleClick = useCallback(() => {
@@ -158,6 +201,30 @@ const DocumentListItem = memo(function DocumentListItem({
       onStar?.(item.id, item.name);
     },
     [item.id, item.name, onStar]
+  );
+
+  const handleEditClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onEdit?.(item.id, item.name);
+    },
+    [item.id, item.name, onEdit]
+  );
+
+  const handleDuplicateClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDuplicate?.(item.id, item.name);
+    },
+    [item.id, item.name, onDuplicate]
+  );
+
+  const handleDeleteClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDelete?.(item.id, item.name, item.document_count);
+    },
+    [item.id, item.name, item.document_count, onDelete]
   );
 
   const handleContextMenuClick = useCallback(
@@ -210,6 +277,36 @@ const DocumentListItem = memo(function DocumentListItem({
         {wordCount > 0 ? `${wordCount} words` : '-'}
       </div>
       <div className="document-list-item-actions">
+        {onEdit && (
+          <button
+            className="document-list-action-btn"
+            onClick={handleEditClick}
+            aria-label="Edit document"
+            title="Edit"
+          >
+            <EditIcon />
+          </button>
+        )}
+        {onDuplicate && (
+          <button
+            className="document-list-action-btn"
+            onClick={handleDuplicateClick}
+            aria-label="Duplicate document"
+            title="Duplicate"
+          >
+            <DuplicateIcon />
+          </button>
+        )}
+        {onDelete && (
+          <button
+            className="document-list-action-btn document-list-action-btn-danger"
+            onClick={handleDeleteClick}
+            aria-label="Delete document"
+            title="Delete"
+          >
+            <DeleteIcon />
+          </button>
+        )}
         {onStar && (
           <button
             className={`document-list-action-btn ${isStarred ? 'starred' : ''}`}
@@ -241,6 +338,9 @@ function DocumentListComponent({
   checkIsStarred,
   onOpen,
   onToggleStar,
+  onEdit,
+  onDuplicate,
+  onDelete,
   onContextMenu,
   onCreateFolder,
   className = '',
@@ -333,6 +433,9 @@ function DocumentListComponent({
               wordCount={getWordCount(item.id)}
               onOpen={onOpen}
               onStar={onToggleStar}
+              onEdit={onEdit}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
               onContextMenu={onContextMenu}
             />
           ))}

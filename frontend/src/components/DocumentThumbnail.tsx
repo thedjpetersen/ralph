@@ -85,6 +85,37 @@ const MoreIcon = () => (
   </svg>
 );
 
+const EditIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path
+      d="M10.5 1.5l2 2-7 7H3.5v-2l7-7z"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const DuplicateIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.25" />
+    <path d="M10 4V3a1 1 0 00-1-1H3a1 1 0 00-1 1v6a1 1 0 001 1h1" stroke="currentColor" strokeWidth="1.25" />
+  </svg>
+);
+
+const DeleteIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path
+      d="M2.5 4h9M5.5 4V2.5a1 1 0 011-1h1a1 1 0 011 1V4M10 4v7.5a1 1 0 01-1 1H5a1 1 0 01-1-1V4"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 export interface DocumentThumbnailProps {
   id: string;
   name: string;
@@ -92,6 +123,9 @@ export interface DocumentThumbnailProps {
   isStarred?: boolean;
   onOpen?: (id: string) => void;
   onStar?: (id: string, name: string) => void;
+  onEdit?: (id: string, name: string) => void;
+  onDuplicate?: (id: string, name: string) => void;
+  onDelete?: (id: string, name: string, documentCount: number) => void;
   onContextMenu?: (id: string, name: string, e: React.MouseEvent) => void;
 }
 
@@ -102,21 +136,29 @@ function DocumentThumbnailComponent({
   isStarred = false,
   onOpen,
   onStar,
+  onEdit,
+  onDuplicate,
+  onDelete,
   onContextMenu,
 }: DocumentThumbnailProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [showExpandedPreview, setShowExpandedPreview] = useState(false);
   const [cardRect, setCardRect] = useState<DOMRect | null>(null);
+  const [showActionsFromLongPress, setShowActionsFromLongPress] = useState(false);
   const hoverTimeoutRef = useRef<number | null>(null);
+  const longPressTimeoutRef = useRef<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const preview = useDocumentPreviewsStore((state) => state.getPreview(id));
 
-  // Clear timeout on unmount
+  // Clear timeouts on unmount
   useEffect(() => {
     return () => {
       if (hoverTimeoutRef.current) {
         window.clearTimeout(hoverTimeoutRef.current);
+      }
+      if (longPressTimeoutRef.current) {
+        window.clearTimeout(longPressTimeoutRef.current);
       }
     };
   }, []);
@@ -143,10 +185,6 @@ function DocumentThumbnailComponent({
     }
   }, []);
 
-  const handleClick = useCallback(() => {
-    onOpen?.(id);
-  }, [id, onOpen]);
-
   const handleStarClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -171,7 +209,62 @@ function DocumentThumbnailComponent({
     [id, name, onContextMenu]
   );
 
+  const handleEditClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onEdit?.(id, name);
+    },
+    [id, name, onEdit]
+  );
+
+  const handleDuplicateClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDuplicate?.(id, name);
+    },
+    [id, name, onDuplicate]
+  );
+
+  const handleDeleteClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDelete?.(id, name, documentCount);
+    },
+    [id, name, documentCount, onDelete]
+  );
+
+  // Touch long-press handlers
+  const handleTouchStart = useCallback(() => {
+    longPressTimeoutRef.current = window.setTimeout(() => {
+      setShowActionsFromLongPress(true);
+    }, 500);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimeoutRef.current) {
+      window.clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback(() => {
+    if (longPressTimeoutRef.current) {
+      window.clearTimeout(longPressTimeoutRef.current);
+      longPressTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Close actions when clicking outside on touch devices
+  const handleCardClick = useCallback(() => {
+    if (showActionsFromLongPress) {
+      setShowActionsFromLongPress(false);
+      return;
+    }
+    onOpen?.(id);
+  }, [id, onOpen, showActionsFromLongPress]);
+
   const hasPreview = preview && preview.preview.length > 0;
+  const showActions = isHovered || showActionsFromLongPress;
 
   // Calculate card position for expanded preview
   const expandedPreviewPosition = useMemo(() => {
@@ -194,10 +287,13 @@ function DocumentThumbnailComponent({
       <motion.div
         ref={cardRef}
         className={`document-thumbnail ${isHovered ? 'document-thumbnail-hovered' : ''} ${isStarred ? 'document-thumbnail-starred' : ''}`}
-        onClick={handleClick}
+        onClick={handleCardClick}
         onContextMenu={handleRightClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
@@ -209,9 +305,11 @@ function DocumentThumbnailComponent({
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            handleClick();
+            onOpen?.(id);
           }
         }}
+        onFocus={() => setIsHovered(true)}
+        onBlur={() => setIsHovered(false)}
       >
         {/* Thumbnail Preview Area */}
         <div className="document-thumbnail-preview">
@@ -245,7 +343,37 @@ function DocumentThumbnailComponent({
         </div>
 
         {/* Actions */}
-        <div className={`document-thumbnail-actions ${isHovered ? 'document-thumbnail-actions-visible' : ''}`}>
+        <div className={`document-thumbnail-actions ${showActions ? 'document-thumbnail-actions-visible' : ''}`}>
+          {onEdit && (
+            <button
+              className="document-thumbnail-action-btn"
+              onClick={handleEditClick}
+              aria-label="Edit document"
+              title="Edit"
+            >
+              <EditIcon />
+            </button>
+          )}
+          {onDuplicate && (
+            <button
+              className="document-thumbnail-action-btn"
+              onClick={handleDuplicateClick}
+              aria-label="Duplicate document"
+              title="Duplicate"
+            >
+              <DuplicateIcon />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              className="document-thumbnail-action-btn document-thumbnail-action-btn-danger"
+              onClick={handleDeleteClick}
+              aria-label="Delete document"
+              title="Delete"
+            >
+              <DeleteIcon />
+            </button>
+          )}
           {onStar && (
             <button
               className={`document-thumbnail-action-btn ${isStarred ? 'starred' : ''}`}

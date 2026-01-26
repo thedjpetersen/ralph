@@ -39,6 +39,12 @@ export interface DocumentGridProps {
   onOpen?: (id: string) => void;
   /** Callback to toggle star status */
   onToggleStar?: (id: string, name: string) => void;
+  /** Callback to edit a document */
+  onEdit?: (id: string, name: string) => void;
+  /** Callback to duplicate a document */
+  onDuplicate?: (id: string, name: string) => void;
+  /** Callback to delete a document */
+  onDelete?: (id: string, name: string, documentCount: number) => void;
   /** Callback for context menu */
   onContextMenu?: (id: string, name: string, documentCount: number) => void;
   /** Callback to create a new folder */
@@ -77,6 +83,9 @@ function DocumentGridComponent({
   checkIsStarred,
   onOpen,
   onToggleStar,
+  onEdit,
+  onDuplicate,
+  onDelete,
   onContextMenu,
   onCreateFolder,
   className = '',
@@ -162,6 +171,9 @@ function DocumentGridComponent({
               isStarred={checkIsStarred?.(item.id) ?? false}
               onOpen={onOpen}
               onStar={onToggleStar}
+              onEdit={onEdit}
+              onDuplicate={onDuplicate}
+              onDelete={onDelete}
               onContextMenu={handleContextMenu}
             />
           </motion.div>

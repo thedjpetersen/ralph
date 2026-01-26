@@ -82,7 +82,7 @@
 }
 
 .document-list-header-actions {
-  width: 56px;
+  width: 130px;
   flex-shrink: 0;
 }
 
@@ -175,7 +175,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  width: 56px;
+  width: 130px;
   justify-content: flex-end;
   opacity: 0;
   transition: opacity 0.15s ease;
@@ -218,6 +218,11 @@
 .document-list-action-btn.starred:hover {
   color: #fbbf24;
   transform: scale(1.1);
+}
+
+.document-list-action-btn-danger:hover {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
 }
 
 /* Light Mode */
@@ -277,6 +282,11 @@
   .document-list-action-btn:hover {
     background-color: rgba(0, 0, 0, 0.08);
     color: rgba(0, 0, 0, 0.9);
+  }
+
+  .document-list-action-btn-danger:hover {
+    background-color: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
   }
 }
 
