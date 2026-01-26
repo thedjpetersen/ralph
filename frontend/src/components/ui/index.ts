@@ -66,3 +66,9 @@ export {
   type SlideOutPanelPosition,
   type SlideOutPanelSize,
 } from './SlideOutPanel';
+export {
+  FormattedCurrency,
+  type FormattedCurrencyProps,
+  type CurrencyCode,
+  type FormattedCurrencySize,
+} from './FormattedCurrency';

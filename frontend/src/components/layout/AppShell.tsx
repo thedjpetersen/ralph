@@ -17,12 +17,14 @@ import { FormattingToolbar } from '../FormattingToolbar';
 import { FindReplaceDialog } from '../FindReplaceDialog';
 import { ParagraphFocusOverlay } from '../ParagraphFocusOverlay';
 import { TypewriterScrollManager } from '../TypewriterScrollManager';
+import { OnboardingTour } from '../OnboardingTour';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useFindReplaceStore } from '../../stores/findReplace';
 import { useParagraphFocusStore } from '../../stores/paragraphFocus';
 import { useTypewriterScrollStore } from '../../stores/typewriterScroll';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
+import { useOnboarding } from '../../stores/onboarding';
 import './AppShell.css';
 
 export interface AppShellProps {
@@ -36,10 +38,12 @@ export function AppShell({ children }: AppShellProps) {
   const { openDialog: openFindReplace, closeDialog: closeFindReplace } = useFindReplaceStore();
   const { toggle: toggleParagraphFocus } = useParagraphFocusStore();
   const { toggle: toggleTypewriterScroll } = useTypewriterScrollStore();
+  const { shouldShowTour, startTour } = useOnboarding();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
+  const [hasTriggeredTour, setHasTriggeredTour] = useState(false);
 
   const mainContentRef = useRef<HTMLElement>(null);
   const previousPathnameRef = useRef(location.pathname);
@@ -49,6 +53,18 @@ export function AppShell({ children }: AppShellProps) {
     fetchAccounts();
     fetchUser();
   }, [fetchAccounts, fetchUser]);
+
+  // Trigger onboarding tour on first login
+  useEffect(() => {
+    if (shouldShowTour && !hasTriggeredTour) {
+      // Small delay to let the UI render first
+      const timer = setTimeout(() => {
+        startTour();
+        setHasTriggeredTour(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowTour, hasTriggeredTour, startTour]);
 
   // Close mobile menu on route change - using ref to avoid lint warning
   useEffect(() => {
@@ -218,6 +234,7 @@ export function AppShell({ children }: AppShellProps) {
       <FindReplaceDialog />
       <ParagraphFocusOverlay />
       <TypewriterScrollManager />
+      <OnboardingTour />
     </div>
   );
 }

@@ -67,6 +67,21 @@
   margin: 0;
 }
 
+/* Tour section */
+.shortcuts-tour-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shortcuts-tour-description {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 /* Light mode */
 @media (prefers-color-scheme: light) {
   .shortcuts-group-title {
@@ -86,5 +101,13 @@
 
   .shortcut-description {
     color: rgba(0, 0, 0, 0.7);
+  }
+
+  .shortcuts-tour-section {
+    border-top-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .shortcuts-tour-description {
+    color: rgba(0, 0, 0, 0.6);
   }
 }

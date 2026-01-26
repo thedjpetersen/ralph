@@ -1,0 +1,30 @@
+.formatted-currency {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Sizes */
+.formatted-currency-sm {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.formatted-currency-md {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.formatted-currency-lg {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+/* Positive/Negative coloring */
+.formatted-currency-positive {
+  color: var(--color-success, #10b981);
+}
+
+.formatted-currency-negative {
+  color: var(--color-danger, #ef4444);
+}

@@ -1,4 +1,6 @@
 import { Modal } from './Modal';
+import { Button } from './Button';
+import { useOnboarding } from '../../stores/onboarding';
 import './KeyboardShortcutsHelp.css';
 
 export interface ShortcutGroup {
@@ -54,6 +56,16 @@ export function KeyboardShortcutsHelp({
   onClose,
   groups = DEFAULT_SHORTCUTS,
 }: KeyboardShortcutsHelpProps) {
+  const { startTour } = useOnboarding();
+
+  const handleStartTour = () => {
+    onClose();
+    // Small delay to allow modal to close first
+    setTimeout(() => {
+      startTour();
+    }, 150);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -84,6 +96,15 @@ export function KeyboardShortcutsHelp({
             </dl>
           </div>
         ))}
+
+        <div className="shortcuts-tour-section">
+          <Button variant="secondary" size="sm" onClick={handleStartTour}>
+            Take the Tour
+          </Button>
+          <span className="shortcuts-tour-description">
+            New here? Take a guided tour of the key features.
+          </span>
+        </div>
       </div>
     </Modal>
   );
