@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useId } from 'react';
 import type { Transaction } from '../../api/client';
 import './RecentTransactions.css';
 
@@ -17,6 +18,16 @@ const TRANSACTION_TYPE_ICONS: Record<string, string> = {
   deposit: '+',
   transfer: '~',
   other: '~',
+};
+
+const TRANSACTION_TYPE_LABELS: Record<string, string> = {
+  purchase: 'Purchase',
+  refund: 'Refund',
+  payment: 'Payment',
+  withdrawal: 'Withdrawal',
+  deposit: 'Deposit',
+  transfer: 'Transfer',
+  other: 'Transaction',
 };
 
 export function RecentTransactions({
@@ -60,16 +71,31 @@ export function RecentTransactions({
   };
 
   const displayTransactions = transactions.slice(0, limit);
+  const headingId = useId();
+  const listId = useId();
 
   if (isLoading) {
     return (
-      <div className="recent-transactions">
+      <section
+        className="recent-transactions"
+        aria-labelledby={headingId}
+        aria-busy="true"
+      >
         <div className="recent-transactions-header">
-          <h3>Recent Transactions</h3>
+          <h3 id={headingId}>Recent Transactions</h3>
         </div>
-        <div className="transactions-list">
+        <div
+          className="transactions-list"
+          role="list"
+          aria-label="Loading transactions"
+        >
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="transaction-item skeleton">
+            <div
+              key={i}
+              className="transaction-item skeleton"
+              role="listitem"
+              aria-hidden="true"
+            >
               <div className="skeleton-icon" />
               <div className="skeleton-content">
                 <div className="skeleton-title" />
@@ -79,60 +105,82 @@ export function RecentTransactions({
             </div>
           ))}
         </div>
-      </div>
+        <span className="sr-only" role="status">Loading recent transactions</span>
+      </section>
     );
   }
 
   if (transactions.length === 0) {
     return (
-      <div className="recent-transactions recent-transactions-empty">
+      <section
+        className="recent-transactions recent-transactions-empty"
+        aria-labelledby={headingId}
+      >
         <div className="recent-transactions-header">
-          <h3>Recent Transactions</h3>
+          <h3 id={headingId}>Recent Transactions</h3>
         </div>
-        <div className="recent-transactions-empty-content">
-          <span className="empty-icon">$</span>
+        <div className="recent-transactions-empty-content" role="status">
+          <span className="empty-icon" aria-hidden="true">$</span>
           <p>No transactions yet</p>
           <Link to="/transactions/new" className="add-transaction-link">
             Add Transaction
           </Link>
         </div>
-      </div>
+      </section>
     );
   }
 
+  const getAccessibleLabel = (transaction: Transaction) => {
+    const typeLabel = TRANSACTION_TYPE_LABELS[transaction.type] || 'Transaction';
+    const merchant = transaction.merchant_name || transaction.description || 'Unknown';
+    const amount = formatAmount(transaction.amount, transaction.type);
+    const date = formatDate(transaction.transaction_date);
+    return `${typeLabel}: ${merchant}, ${amount}, ${date}`;
+  };
+
   return (
-    <div className="recent-transactions">
+    <section
+      className="recent-transactions"
+      aria-labelledby={headingId}
+    >
       <div className="recent-transactions-header">
-        <h3>Recent Transactions</h3>
+        <h3 id={headingId}>Recent Transactions</h3>
         <Link to="/transactions" className="view-all-link">
           View All
         </Link>
       </div>
-      <div className="transactions-list">
+      <ul
+        id={listId}
+        className="transactions-list"
+        role="list"
+        aria-label={`${displayTransactions.length} recent transactions`}
+      >
         {displayTransactions.map((transaction) => (
-          <Link
-            key={transaction.id}
-            to={`/transactions/${transaction.id}`}
-            className="transaction-item"
-          >
-            <div className="transaction-icon">
-              <span>{TRANSACTION_TYPE_ICONS[transaction.type] || '~'}</span>
-            </div>
-            <div className="transaction-content">
-              <span className="transaction-merchant">
-                {transaction.merchant_name || transaction.description || 'Transaction'}
+          <li key={transaction.id} role="listitem">
+            <Link
+              to={`/transactions/${transaction.id}`}
+              className="transaction-item"
+              aria-label={getAccessibleLabel(transaction)}
+            >
+              <div className="transaction-icon" aria-hidden="true">
+                <span>{TRANSACTION_TYPE_ICONS[transaction.type] || '~'}</span>
+              </div>
+              <div className="transaction-content">
+                <span className="transaction-merchant">
+                  {transaction.merchant_name || transaction.description || 'Transaction'}
+                </span>
+                <span className="transaction-meta">
+                  {formatDate(transaction.transaction_date)}
+                  {transaction.merchant_category && ` • ${transaction.merchant_category}`}
+                </span>
+              </div>
+              <span className={`transaction-amount ${getAmountClass(transaction.type)}`} aria-hidden="true">
+                {formatAmount(transaction.amount, transaction.type)}
               </span>
-              <span className="transaction-meta">
-                {formatDate(transaction.transaction_date)}
-                {transaction.merchant_category && ` • ${transaction.merchant_category}`}
-              </span>
-            </div>
-            <span className={`transaction-amount ${getAmountClass(transaction.type)}`}>
-              {formatAmount(transaction.amount, transaction.type)}
-            </span>
-          </Link>
+            </Link>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </section>
   );
 }

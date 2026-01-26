@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useBudgetsStore, type BudgetDetail } from '../stores/budgets';
 import { useAccountStore } from '../stores/account';
@@ -6,6 +6,7 @@ import { useTransactionsStore } from '../stores/transactions';
 import { useReceiptsStore } from '../stores/receipts';
 import { useFinancialStore } from '../stores/financial';
 import { PageTransition } from '../components/PageTransition';
+import { announce } from '../stores/announcer';
 import {
   BudgetSummaryCard,
   SpendingByCategory,
@@ -112,6 +113,7 @@ export function Dashboard() {
     fetchBudgets,
     fetchBudgetDetail,
   } = useBudgetsStore();
+  const hasAnnouncedRef = useRef(false);
 
   const {
     transactions,
@@ -176,6 +178,26 @@ export function Dashboard() {
     [financialAccounts]
   );
 
+  // Announce when dashboard data has loaded
+  useEffect(() => {
+    if (!hasAnnouncedRef.current && currentBudget && !budgetsLoading) {
+      const formatAmount = (amount: number) =>
+        new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: currentBudget.currency || 'USD',
+        }).format(amount);
+
+      const spentPercent = currentBudget.total_amount > 0
+        ? Math.round((currentBudget.total_spent / currentBudget.total_amount) * 100)
+        : 0;
+
+      announce(
+        `Dashboard loaded. ${currentBudget.name}: ${formatAmount(currentBudget.total_spent)} spent of ${formatAmount(currentBudget.total_amount)}, ${spentPercent}% of budget used.`
+      );
+      hasAnnouncedRef.current = true;
+    }
+  }, [currentBudget, budgetsLoading]);
+
   if (!currentAccount) {
     return (
       <PageTransition>
@@ -213,17 +235,17 @@ export function Dashboard() {
 
   return (
     <PageTransition>
-      <div className="dashboard-page">
+      <div className="dashboard-page" role="region" aria-labelledby="dashboard-title">
         <div className="dashboard-header">
           <div>
-            <h1>Dashboard</h1>
+            <h1 id="dashboard-title">Dashboard</h1>
             <p className="dashboard-subtitle">
               Overview of your finances, budget, and spending
             </p>
           </div>
         </div>
 
-        <div className="dashboard-grid">
+        <div className="dashboard-grid" role="region" aria-label="Financial overview widgets">
           <div className="dashboard-widget widget-summary">
             <BudgetSummaryCard
               budget={currentBudget}

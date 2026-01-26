@@ -124,12 +124,20 @@ export function BudgetTrend({
     ? Math.max(maxSpent, budgetAmount) * 1.1
     : maxSpent * 1.1;
 
+  // Generate accessible description for screen readers
+  const latestSpent = data.length > 0 ? data[data.length - 1].spent : 0;
+  const earliestSpent = data.length > 0 ? data[0].spent : 0;
+  const spentChange = latestSpent - earliestSpent;
+  const trendDirection = spentChange > 0 ? 'increased' : spentChange < 0 ? 'decreased' : 'remained stable';
+
+  const chartDescription = `Spending trend from ${data.length > 0 ? formatDate(data[0].date) : ''} to ${data.length > 0 ? formatDate(data[data.length - 1].date) : ''}. Spending has ${trendDirection} from ${formatFullAmount(earliestSpent)} to ${formatFullAmount(latestSpent)}.${budgetAmount ? ` Budget limit: ${formatFullAmount(budgetAmount)}.` : ''}`;
+
   return (
     <div className="budget-trend">
       <div className="trend-header">
-        <h3>{title}</h3>
+        <h3 id="trend-chart-title">{title}</h3>
         {data.length > 0 && (
-          <div className="trend-legend">
+          <div className="trend-legend" aria-hidden="true">
             <div className="legend-item">
               <span className="legend-line spending" />
               <span className="legend-label">Spending</span>
@@ -143,11 +151,21 @@ export function BudgetTrend({
           </div>
         )}
       </div>
-      <div className="trend-content">
+      <div
+        className="trend-content"
+        role="img"
+        aria-labelledby="trend-chart-title"
+        aria-describedby="trend-chart-desc"
+      >
+        {/* Screen reader accessible description */}
+        <span id="trend-chart-desc" className="sr-only">
+          {chartDescription}
+        </span>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            aria-hidden="true"
           >
             <CartesianGrid
               strokeDasharray="3 3"

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useId } from 'react';
 import './QuickActions.css';
 
 interface QuickAction {
@@ -54,15 +55,30 @@ export function QuickActions({
   actions = DEFAULT_ACTIONS,
   isLoading,
 }: QuickActionsProps) {
+  const headingId = useId();
+
   if (isLoading) {
     return (
-      <div className="quick-actions">
+      <section
+        className="quick-actions"
+        aria-labelledby={headingId}
+        aria-busy="true"
+      >
         <div className="quick-actions-header">
-          <h3>Quick Actions</h3>
+          <h3 id={headingId}>Quick Actions</h3>
         </div>
-        <div className="quick-actions-grid">
+        <div
+          className="quick-actions-grid"
+          role="list"
+          aria-label="Loading quick actions"
+        >
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="quick-action-item skeleton">
+            <div
+              key={i}
+              className="quick-action-item skeleton"
+              role="listitem"
+              aria-hidden="true"
+            >
               <div className="skeleton-icon" />
               <div className="skeleton-content">
                 <div className="skeleton-title" />
@@ -71,25 +87,35 @@ export function QuickActions({
             </div>
           ))}
         </div>
-      </div>
+        <span className="sr-only" role="status">Loading quick actions</span>
+      </section>
     );
   }
 
   return (
-    <div className="quick-actions">
+    <section
+      className="quick-actions"
+      aria-labelledby={headingId}
+    >
       <div className="quick-actions-header">
-        <h3>Quick Actions</h3>
+        <h3 id={headingId}>Quick Actions</h3>
       </div>
-      <div className="quick-actions-grid">
+      <nav
+        className="quick-actions-grid"
+        role="navigation"
+        aria-label="Quick actions"
+      >
         {actions.map((action) => (
           <Link
             key={action.id}
             to={action.href}
             className="quick-action-item"
+            aria-label={`${action.label}: ${action.description}`}
           >
             <div
               className="quick-action-icon"
               style={{ backgroundColor: `${action.color}20`, color: action.color }}
+              aria-hidden="true"
             >
               <span>{action.icon}</span>
             </div>
@@ -99,7 +125,7 @@ export function QuickActions({
             </div>
           </Link>
         ))}
-      </div>
-    </div>
+      </nav>
+    </section>
   );
 }

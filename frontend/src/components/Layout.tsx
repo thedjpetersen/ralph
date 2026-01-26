@@ -6,6 +6,7 @@ import { useUserStore } from '../stores/user';
 import { AccountSwitcherSkeleton } from './skeletons';
 import { ToastContainer } from './Toast';
 import { KeyboardShortcutsHelp } from './ui/KeyboardShortcutsHelp';
+import { ScreenReaderAnnouncer } from './ScreenReaderAnnouncer';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import './Layout.css';
 
@@ -568,6 +569,7 @@ export function Layout() {
         isOpen={isShortcutsHelpOpen}
         onClose={() => setIsShortcutsHelpOpen(false)}
       />
+      <ScreenReaderAnnouncer />
     </div>
   );
 }

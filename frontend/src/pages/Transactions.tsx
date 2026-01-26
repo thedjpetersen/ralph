@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTransactionsStore, type TransactionStatus, type TransactionType } from '../stores/transactions';
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
 import { AccountsListSkeleton } from '../components/skeletons';
+import { announce } from '../stores/announcer';
 import './Transactions.css';
 
 const STATUS_OPTIONS: { value: TransactionStatus | ''; label: string }[] = [
@@ -41,6 +42,7 @@ export function Transactions() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [merchantFilter, setMerchantFilter] = useState('');
+  const prevFilteredCountRef = useRef<number | null>(null);
 
   // Load transactions when account or filters change
   useEffect(() => {
@@ -144,6 +146,18 @@ export function Transactions() {
 
   const hasActiveFilters = statusFilter || typeFilter || startDate || endDate || merchantFilter;
 
+  // Announce filter results to screen readers
+  useEffect(() => {
+    // Only announce after initial load and when count changes
+    if (prevFilteredCountRef.current !== null && prevFilteredCountRef.current !== filteredTransactions.length) {
+      const message = filteredTransactions.length === 0
+        ? 'No transactions found matching your filters'
+        : `Showing ${filteredTransactions.length} transaction${filteredTransactions.length === 1 ? '' : 's'}`;
+      announce(message);
+    }
+    prevFilteredCountRef.current = filteredTransactions.length;
+  }, [filteredTransactions.length]);
+
   if (!currentAccount) {
     return (
       <PageTransition>
@@ -208,7 +222,7 @@ export function Transactions() {
           </div>
         </div>
 
-        <div className="transactions-filters">
+        <div className="transactions-filters" role="search" aria-label="Filter transactions">
           <div className="filter-row">
             <div className="date-filter">
               <label htmlFor="start-date" className="filter-label">From</label>
@@ -218,6 +232,7 @@ export function Transactions() {
                 value={startDate}
                 onChange={handleStartDateChange}
                 className="date-input"
+                aria-describedby="date-filter-hint"
               />
             </div>
             <div className="date-filter">
@@ -228,12 +243,17 @@ export function Transactions() {
                 value={endDate}
                 onChange={handleEndDateChange}
                 className="date-input"
+                aria-describedby="date-filter-hint"
               />
             </div>
+            <span id="date-filter-hint" className="sr-only">Filter transactions by date range</span>
+            <label htmlFor="status-filter" className="sr-only">Filter by status</label>
             <select
+              id="status-filter"
               value={statusFilter}
               onChange={handleStatusChange}
               className="filter-select"
+              aria-label="Filter by transaction status"
             >
               {STATUS_OPTIONS.map((status) => (
                 <option key={status.value} value={status.value}>
@@ -241,10 +261,13 @@ export function Transactions() {
                 </option>
               ))}
             </select>
+            <label htmlFor="type-filter" className="sr-only">Filter by type</label>
             <select
+              id="type-filter"
               value={typeFilter}
               onChange={handleTypeChange}
               className="filter-select"
+              aria-label="Filter by transaction type"
             >
               {TYPE_OPTIONS.map((type) => (
                 <option key={type.value} value={type.value}>
@@ -255,16 +278,19 @@ export function Transactions() {
           </div>
           <div className="filter-row">
             <div className="search-box">
+              <label htmlFor="merchant-search" className="sr-only">Search by merchant name</label>
               <input
                 type="text"
+                id="merchant-search"
                 placeholder="Search by merchant..."
                 value={merchantFilter}
                 onChange={handleMerchantChange}
                 className="search-input"
+                aria-label="Search transactions by merchant name"
               />
             </div>
             {hasActiveFilters && (
-              <button onClick={clearFilters} className="clear-filters-button">
+              <button onClick={clearFilters} className="clear-filters-button" aria-label="Clear all filters">
                 Clear Filters
               </button>
             )}
@@ -286,49 +312,54 @@ export function Transactions() {
             )}
           </div>
         ) : (
-          <div className="transactions-list">
-            <div className="transactions-table-header">
+          <div className="transactions-list" role="region" aria-label={`Transactions list, ${filteredTransactions.length} results`}>
+            <div className="transactions-table-header" role="row" aria-hidden="true">
               <div className="table-col col-date">Date</div>
               <div className="table-col col-merchant">Merchant</div>
               <div className="table-col col-type">Type</div>
               <div className="table-col col-amount">Amount</div>
               <div className="table-col col-status">Status</div>
             </div>
-            {filteredTransactions.map((transaction) => (
-              <Link
-                key={transaction.id}
-                to={`/transactions/${transaction.id}`}
-                className="transaction-row"
-              >
-                <div className="table-col col-date">
-                  {formatDate(transaction.transaction_date)}
-                </div>
-                <div className="table-col col-merchant">
-                  <span className="merchant-name">
-                    {transaction.merchant_name || 'Unknown Merchant'}
-                  </span>
-                  {transaction.description && (
-                    <span className="transaction-description">{transaction.description}</span>
-                  )}
-                </div>
-                <div className="table-col col-type">
-                  <span className={`transaction-type ${getTypeClass(transaction.type)}`}>
-                    {transaction.type}
-                  </span>
-                </div>
-                <div className="table-col col-amount">
-                  <span className={transaction.type === 'refund' || transaction.type === 'deposit' ? 'amount-positive' : 'amount-negative'}>
-                    {transaction.type === 'refund' || transaction.type === 'deposit' ? '+' : '-'}
-                    {formatAmount(transaction.amount, transaction.currency)}
-                  </span>
-                </div>
-                <div className="table-col col-status">
-                  <span className={`transaction-status ${getStatusClass(transaction.status)}`}>
-                    {transaction.status}
-                  </span>
-                </div>
-              </Link>
-            ))}
+            {filteredTransactions.map((transaction) => {
+              const amountPrefix = transaction.type === 'refund' || transaction.type === 'deposit' ? '+' : '-';
+              const accessibleLabel = `${transaction.merchant_name || 'Unknown Merchant'}, ${formatDate(transaction.transaction_date)}, ${amountPrefix}${formatAmount(transaction.amount, transaction.currency)}, ${transaction.type}, ${transaction.status}`;
+              return (
+                <Link
+                  key={transaction.id}
+                  to={`/transactions/${transaction.id}`}
+                  className="transaction-row"
+                  aria-label={accessibleLabel}
+                >
+                  <div className="table-col col-date" aria-hidden="true">
+                    {formatDate(transaction.transaction_date)}
+                  </div>
+                  <div className="table-col col-merchant" aria-hidden="true">
+                    <span className="merchant-name">
+                      {transaction.merchant_name || 'Unknown Merchant'}
+                    </span>
+                    {transaction.description && (
+                      <span className="transaction-description">{transaction.description}</span>
+                    )}
+                  </div>
+                  <div className="table-col col-type" aria-hidden="true">
+                    <span className={`transaction-type ${getTypeClass(transaction.type)}`}>
+                      {transaction.type}
+                    </span>
+                  </div>
+                  <div className="table-col col-amount" aria-hidden="true">
+                    <span className={transaction.type === 'refund' || transaction.type === 'deposit' ? 'amount-positive' : 'amount-negative'}>
+                      {amountPrefix}
+                      {formatAmount(transaction.amount, transaction.currency)}
+                    </span>
+                  </div>
+                  <div className="table-col col-status" aria-hidden="true">
+                    <span className={`transaction-status ${getStatusClass(transaction.status)}`}>
+                      {transaction.status}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

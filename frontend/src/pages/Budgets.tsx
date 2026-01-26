@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useBudgetsStore, type BudgetStatus, type BudgetPeriodType } from '../stores/budgets';
 import { useAccountStore } from '../stores/account';
 import { PageTransition } from '../components/PageTransition';
 import { BudgetProgress } from '../components/BudgetProgress';
 import { AccountsListSkeleton } from '../components/skeletons';
+import { announce } from '../stores/announcer';
 import './Budgets.css';
 
 const STATUS_OPTIONS: { value: BudgetStatus | ''; label: string }[] = [
@@ -33,6 +34,7 @@ export function Budgets() {
   } = useBudgetsStore();
 
   const [statusFilter, setStatusFilter] = useState<BudgetStatus | ''>('');
+  const prevBudgetCountRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (currentAccount?.id) {
@@ -41,6 +43,17 @@ export function Budgets() {
       });
     }
   }, [currentAccount?.id, statusFilter, fetchBudgets]);
+
+  // Announce filter results to screen readers
+  useEffect(() => {
+    if (prevBudgetCountRef.current !== null && prevBudgetCountRef.current !== budgets.length) {
+      const message = budgets.length === 0
+        ? 'No budgets found matching your filters'
+        : `Showing ${budgets.length} budget${budgets.length === 1 ? '' : 's'}`;
+      announce(message);
+    }
+    prevBudgetCountRef.current = budgets.length;
+  }, [budgets.length]);
 
   const handleStatusChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusFilter(e.target.value as BudgetStatus | '');
@@ -136,12 +149,15 @@ export function Budgets() {
           </div>
         </div>
 
-        <div className="budgets-filters">
+        <div className="budgets-filters" role="search" aria-label="Filter budgets">
           <div className="filter-row">
+            <label htmlFor="status-filter" className="sr-only">Filter by status</label>
             <select
+              id="status-filter"
               value={statusFilter}
               onChange={handleStatusChange}
               className="filter-select"
+              aria-label="Filter by budget status"
             >
               {STATUS_OPTIONS.map((status) => (
                 <option key={status.value} value={status.value}>
@@ -150,7 +166,7 @@ export function Budgets() {
               ))}
             </select>
             {hasActiveFilters && (
-              <button onClick={clearFilters} className="clear-filters-button">
+              <button onClick={clearFilters} className="clear-filters-button" aria-label="Clear all filters">
                 Clear Filters
               </button>
             )}
@@ -172,12 +188,16 @@ export function Budgets() {
             )}
           </div>
         ) : (
-          <div className="budgets-grid">
-            {budgets.map((budget) => (
+          <div className="budgets-grid" role="list" aria-label={`${budgets.length} budgets`}>
+            {budgets.map((budget) => {
+              const accessibleLabel = `${budget.name}, ${PERIOD_TYPE_LABELS[budget.period_type]}, ${formatAmount(budget.total_amount, budget.currency)}, ${budget.status}${budget.is_default ? ', default budget' : ''}`;
+              return (
               <Link
                 key={budget.id}
                 to={`/budgets/${budget.id}`}
                 className="budget-card"
+                role="listitem"
+                aria-label={accessibleLabel}
               >
                 <div className="budget-card-header">
                   <div className="budget-card-title">
@@ -218,7 +238,7 @@ export function Budgets() {
                   />
                 </div>
 
-                <div className="budget-card-footer">
+                <div className="budget-card-footer" aria-hidden="true">
                   {budget.rollover_enabled && (
                     <span className="budget-feature">Rollover</span>
                   )}
@@ -229,7 +249,8 @@ export function Budgets() {
                   )}
                 </div>
               </Link>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>

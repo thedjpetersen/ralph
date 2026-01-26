@@ -103,16 +103,32 @@ export function SpendingByCategory({
     );
   }
 
+  // Generate accessible description for screen readers
+  const chartDescription = chartData
+    .slice(0, 6)
+    .map((item) => `${item.category_name}: ${formatAmount(item.amount)} (${item.percentage.toFixed(0)}%)`)
+    .join(', ');
+  const fullDescription = `Total spending: ${formatAmount(totalSpent)}. Breakdown by category: ${chartDescription}${data.length > 6 ? `, and ${data.length - 6} more categories` : ''}`;
+
   return (
     <div className="spending-by-category">
       <div className="spending-header">
-        <h3>{title}</h3>
+        <h3 id="spending-chart-title">{title}</h3>
         <span className="total-spent">{formatAmount(totalSpent)}</span>
       </div>
       <div className="spending-content">
-        <div className="chart-container">
+        <div
+          className="chart-container"
+          role="img"
+          aria-labelledby="spending-chart-title"
+          aria-describedby="spending-chart-desc"
+        >
+          {/* Screen reader accessible description */}
+          <span id="spending-chart-desc" className="sr-only">
+            {fullDescription}
+          </span>
           <ResponsiveContainer width="100%" height={180}>
-            <PieChart>
+            <PieChart aria-hidden="true">
               <Pie
                 data={chartData}
                 cx="50%"
@@ -130,13 +146,14 @@ export function SpendingByCategory({
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="category-list">
+        <ul className="category-list" aria-label="Category breakdown">
           {chartData.slice(0, 6).map((item) => (
-            <div key={item.category_id} className="category-item">
+            <li key={item.category_id} className="category-item">
               <div className="category-info">
                 <span
                   className="category-color"
                   style={{ backgroundColor: item.color }}
+                  aria-hidden="true"
                 />
                 <span className="category-name">{item.category_name}</span>
               </div>
@@ -144,14 +161,14 @@ export function SpendingByCategory({
                 <span className="category-amount">{formatAmount(item.amount)}</span>
                 <span className="category-percentage">{item.percentage.toFixed(0)}%</span>
               </div>
-            </div>
+            </li>
           ))}
           {data.length > 6 && (
-            <div className="category-more">
+            <li className="category-more" aria-label={`${data.length - 6} more categories not shown`}>
               +{data.length - 6} more categories
-            </div>
+            </li>
           )}
-        </div>
+        </ul>
       </div>
     </div>
   );

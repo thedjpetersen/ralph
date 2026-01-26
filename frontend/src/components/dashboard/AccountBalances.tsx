@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useId } from 'react';
 import type { FinancialAccount, FinancialAccountsSummary } from '../../api/client';
 import './AccountBalances.css';
 
@@ -30,6 +31,16 @@ const ACCOUNT_TYPE_COLORS: Record<string, string> = {
   other: '#95a5a6',
 };
 
+const ACCOUNT_TYPE_LABELS: Record<string, string> = {
+  checking: 'Checking account',
+  savings: 'Savings account',
+  credit: 'Credit card',
+  loan: 'Loan',
+  investment: 'Investment account',
+  mortgage: 'Mortgage',
+  other: 'Account',
+};
+
 export function AccountBalances({
   accounts,
   summary,
@@ -47,20 +58,35 @@ export function AccountBalances({
 
   const visibleAccounts = accounts.filter((a) => !a.is_hidden && a.is_active);
   const displayAccounts = visibleAccounts.slice(0, limit);
+  const headingId = useId();
+  const listId = useId();
 
   const totalBalance = summary?.total_current_balance ??
     visibleAccounts.reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
 
   if (isLoading) {
     return (
-      <div className="account-balances">
+      <section
+        className="account-balances"
+        aria-labelledby={headingId}
+        aria-busy="true"
+      >
         <div className="account-balances-header">
-          <h3>Account Balances</h3>
-          <div className="skeleton-total" />
+          <h3 id={headingId}>Account Balances</h3>
+          <div className="skeleton-total" aria-hidden="true" />
         </div>
-        <div className="accounts-list">
+        <div
+          className="accounts-list"
+          role="list"
+          aria-label="Loading accounts"
+        >
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="account-item skeleton">
+            <div
+              key={i}
+              className="account-item skeleton"
+              role="listitem"
+              aria-hidden="true"
+            >
               <div className="skeleton-icon" />
               <div className="skeleton-content">
                 <div className="skeleton-title" />
@@ -70,64 +96,91 @@ export function AccountBalances({
             </div>
           ))}
         </div>
-      </div>
+        <span className="sr-only" role="status">Loading account balances</span>
+      </section>
     );
   }
 
   if (accounts.length === 0) {
     return (
-      <div className="account-balances account-balances-empty">
+      <section
+        className="account-balances account-balances-empty"
+        aria-labelledby={headingId}
+      >
         <div className="account-balances-header">
-          <h3>Account Balances</h3>
+          <h3 id={headingId}>Account Balances</h3>
         </div>
-        <div className="account-balances-empty-content">
-          <span className="empty-icon">B</span>
+        <div className="account-balances-empty-content" role="status">
+          <span className="empty-icon" aria-hidden="true">B</span>
           <p>No accounts connected</p>
           <Link to="/accounts/connect" className="connect-account-link">
             Connect Account
           </Link>
         </div>
-      </div>
+      </section>
     );
   }
 
+  const getAccessibleLabel = (account: FinancialAccount) => {
+    const typeLabel = ACCOUNT_TYPE_LABELS[account.type] || 'Account';
+    const balance = formatAmount(account.current_balance);
+    const mask = account.mask ? ` ending in ${account.mask}` : '';
+    return `${account.name}, ${typeLabel}${mask}, balance ${balance}`;
+  };
+
   return (
-    <div className="account-balances">
+    <section
+      className="account-balances"
+      aria-labelledby={headingId}
+    >
       <div className="account-balances-header">
-        <h3>Account Balances</h3>
-        <span className="total-balance">{formatAmount(totalBalance)}</span>
+        <h3 id={headingId}>Account Balances</h3>
+        <span className="total-balance" aria-label={`Total balance: ${formatAmount(totalBalance)}`}>
+          {formatAmount(totalBalance)}
+        </span>
       </div>
-      <div className="accounts-list">
+      <ul
+        id={listId}
+        className="accounts-list"
+        role="list"
+        aria-label={`${displayAccounts.length} accounts`}
+      >
         {displayAccounts.map((account) => (
-          <Link
-            key={account.id}
-            to={`/accounts/${account.id}`}
-            className="account-item"
-          >
-            <div
-              className="account-icon"
-              style={{ backgroundColor: `${ACCOUNT_TYPE_COLORS[account.type]}20`, color: ACCOUNT_TYPE_COLORS[account.type] }}
+          <li key={account.id} role="listitem">
+            <Link
+              to={`/accounts/${account.id}`}
+              className="account-item"
+              aria-label={getAccessibleLabel(account)}
             >
-              <span>{ACCOUNT_TYPE_ICONS[account.type] || 'O'}</span>
-            </div>
-            <div className="account-content">
-              <span className="account-name">{account.name}</span>
-              <span className="account-meta">
-                {account.type.charAt(0).toUpperCase() + account.type.slice(1)}
-                {account.mask && ` ••${account.mask}`}
+              <div
+                className="account-icon"
+                style={{ backgroundColor: `${ACCOUNT_TYPE_COLORS[account.type]}20`, color: ACCOUNT_TYPE_COLORS[account.type] }}
+                aria-hidden="true"
+              >
+                <span>{ACCOUNT_TYPE_ICONS[account.type] || 'O'}</span>
+              </div>
+              <div className="account-content">
+                <span className="account-name">{account.name}</span>
+                <span className="account-meta">
+                  {account.type.charAt(0).toUpperCase() + account.type.slice(1)}
+                  {account.mask && ` ••${account.mask}`}
+                </span>
+              </div>
+              <span
+                className={`account-balance ${(account.current_balance || 0) < 0 ? 'balance-negative' : ''}`}
+                aria-hidden="true"
+              >
+                {formatAmount(account.current_balance)}
               </span>
-            </div>
-            <span className={`account-balance ${(account.current_balance || 0) < 0 ? 'balance-negative' : ''}`}>
-              {formatAmount(account.current_balance)}
-            </span>
-          </Link>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
       {visibleAccounts.length > limit && (
         <Link to="/accounts" className="view-all-accounts">
           View all {visibleAccounts.length} accounts
         </Link>
       )}
-    </div>
+    </section>
   );
 }

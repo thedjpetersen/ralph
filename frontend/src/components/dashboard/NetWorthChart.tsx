@@ -126,16 +126,28 @@ export function NetWorthChart({
     );
   }
 
+  // Generate accessible description for screen readers
+  const latestData = data.length > 0 ? data[data.length - 1] : null;
+  const changeDescription = netWorthChange >= 0
+    ? `increased by ${formatAmount(netWorthChange)} (${netWorthChangePercent.toFixed(1)}%)`
+    : `decreased by ${formatAmount(Math.abs(netWorthChange))} (${Math.abs(netWorthChangePercent).toFixed(1)}%)`;
+  const chartDescription = latestData
+    ? `Current net worth: ${formatAmount(currentNetWorth)}. Net worth has ${changeDescription} over the displayed period. Current assets: ${formatAmount(latestData.assets)}, liabilities: ${formatAmount(latestData.liabilities)}.`
+    : 'No net worth data available.';
+
   return (
     <div className="networth-chart">
       <div className="networth-chart-header">
         <div>
-          <h3>{title}</h3>
-          <div className="networth-summary">
+          <h3 id="networth-chart-title">{title}</h3>
+          <div className="networth-summary" aria-label={`Current net worth: ${formatAmount(currentNetWorth)}, ${changeDescription}`}>
             <span className="current-networth">
               {formatAmount(currentNetWorth)}
             </span>
-            <span className={`networth-change ${netWorthChange >= 0 ? 'positive' : 'negative'}`}>
+            <span
+              className={`networth-change ${netWorthChange >= 0 ? 'positive' : 'negative'}`}
+              aria-hidden="true"
+            >
               {netWorthChange >= 0 ? '+' : ''}{formatAmount(netWorthChange)}
               <span className="change-percent">
                 ({netWorthChange >= 0 ? '+' : ''}{netWorthChangePercent.toFixed(1)}%)
@@ -144,11 +156,21 @@ export function NetWorthChart({
           </div>
         </div>
       </div>
-      <div className="networth-chart-container">
+      <div
+        className="networth-chart-container"
+        role="img"
+        aria-labelledby="networth-chart-title"
+        aria-describedby="networth-chart-desc"
+      >
+        {/* Screen reader accessible description */}
+        <span id="networth-chart-desc" className="sr-only">
+          {chartDescription}
+        </span>
         <ResponsiveContainer width="100%" height={200}>
           <AreaChart
             data={data}
             margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            aria-hidden="true"
           >
             <defs>
               <linearGradient id="colorAssets" x1="0" y1="0" x2="0" y2="1">

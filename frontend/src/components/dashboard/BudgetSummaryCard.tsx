@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useId } from 'react';
 import { BudgetProgress } from '../BudgetProgress';
 import type { BudgetDetail, BudgetPeriodType } from '../../api/client';
 import './BudgetSummaryCard.css';
@@ -40,35 +41,53 @@ export function BudgetSummaryCard({ budget, isLoading }: BudgetSummaryCardProps)
     return 'status-good';
   };
 
+  const getStatusLabel = (percentage: number) => {
+    if (percentage >= 100) return 'over budget';
+    if (percentage >= 80) return 'approaching limit';
+    if (percentage >= 50) return 'moderate spending';
+    return 'on track';
+  };
+
+  const headingId = useId();
+  const statsId = useId();
+
   if (isLoading) {
     return (
-      <div className="budget-summary-card">
+      <section
+        className="budget-summary-card"
+        aria-labelledby={headingId}
+        aria-busy="true"
+      >
         <div className="budget-summary-header">
-          <div className="skeleton-title" />
-          <div className="skeleton-badge" />
+          <div className="skeleton-title" aria-hidden="true" />
+          <div className="skeleton-badge" aria-hidden="true" />
         </div>
-        <div className="skeleton-progress" />
-        <div className="budget-summary-stats">
+        <div className="skeleton-progress" aria-hidden="true" />
+        <div className="budget-summary-stats" aria-hidden="true">
           <div className="skeleton-stat" />
           <div className="skeleton-stat" />
           <div className="skeleton-stat" />
         </div>
-      </div>
+        <span className="sr-only" role="status">Loading budget summary</span>
+      </section>
     );
   }
 
   if (!budget) {
     return (
-      <div className="budget-summary-card budget-summary-empty">
-        <div className="budget-summary-empty-content">
-          <span className="empty-icon">$</span>
-          <h3>No Active Budget</h3>
+      <section
+        className="budget-summary-card budget-summary-empty"
+        aria-labelledby={headingId}
+      >
+        <div className="budget-summary-empty-content" role="status">
+          <span className="empty-icon" aria-hidden="true">$</span>
+          <h3 id={headingId}>No Active Budget</h3>
           <p>Create a budget to start tracking your spending</p>
           <Link to="/budgets/new" className="create-budget-link">
             Create Budget
           </Link>
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -76,20 +95,37 @@ export function BudgetSummaryCard({ budget, isLoading }: BudgetSummaryCardProps)
     ? `${formatDate(budget.current_period.start_date)} - ${formatDate(budget.current_period.end_date)}`
     : PERIOD_TYPE_LABELS[budget.period_type];
 
+  const statusLabel = getStatusLabel(budget.percentage_used);
+  const accessibleSummary = `${budget.name} budget: ${formatAmount(budget.total_spent, budget.currency)} spent of ${formatAmount(budget.total_amount, budget.currency)}, ${budget.percentage_used.toFixed(0)}% used, ${statusLabel}`;
+
   return (
-    <div className="budget-summary-card">
+    <section
+      className="budget-summary-card"
+      aria-labelledby={headingId}
+      aria-describedby={statsId}
+    >
       <div className="budget-summary-header">
         <div className="budget-summary-title">
-          <h3>{budget.name}</h3>
-          {budget.is_default && <span className="default-badge">Default</span>}
+          <h3 id={headingId}>{budget.name}</h3>
+          {budget.is_default && (
+            <span className="default-badge" aria-label="Default budget">
+              Default
+            </span>
+          )}
         </div>
-        <span className={`budget-percentage ${getStatusClass(budget.percentage_used)}`}>
+        <span
+          className={`budget-percentage ${getStatusClass(budget.percentage_used)}`}
+          role="status"
+          aria-label={`${budget.percentage_used.toFixed(0)}% of budget used, ${statusLabel}`}
+        >
           {budget.percentage_used.toFixed(0)}% used
         </span>
       </div>
 
       <div className="budget-summary-period">
-        <span className="period-label">{periodLabel}</span>
+        <span className="period-label" aria-label={`Budget period: ${periodLabel}`}>
+          {periodLabel}
+        </span>
       </div>
 
       <div className="budget-summary-progress">
@@ -102,7 +138,7 @@ export function BudgetSummaryCard({ budget, isLoading }: BudgetSummaryCardProps)
         />
       </div>
 
-      <div className="budget-summary-stats">
+      <div id={statsId} className="budget-summary-stats" role="group" aria-label="Budget statistics">
         <div className="summary-stat">
           <span className="stat-label">Budget</span>
           <span className="stat-value">{formatAmount(budget.total_amount, budget.currency)}</span>
@@ -119,9 +155,16 @@ export function BudgetSummaryCard({ budget, isLoading }: BudgetSummaryCardProps)
         </div>
       </div>
 
-      <Link to={`/budgets/${budget.id}`} className="budget-summary-link">
+      {/* Screen reader accessible summary */}
+      <span className="sr-only">{accessibleSummary}</span>
+
+      <Link
+        to={`/budgets/${budget.id}`}
+        className="budget-summary-link"
+        aria-label={`View details for ${budget.name} budget`}
+      >
         View Details
       </Link>
-    </div>
+    </section>
   );
 }
