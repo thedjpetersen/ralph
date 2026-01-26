@@ -1,0 +1,270 @@
+/* Writing Goal Progress Component */
+.writing-goal-progress {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.writing-goal-progress:hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-strong);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.writing-goal-progress:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Positioning */
+.writing-goal-progress.bottom-left {
+  bottom: 16px;
+  left: 16px;
+}
+
+.writing-goal-progress.bottom-right {
+  bottom: 16px;
+  right: 80px; /* Account for sync indicator */
+}
+
+/* Goal met state */
+.writing-goal-progress.goal-met {
+  border-color: var(--color-success-border, #22c55e);
+  background-color: var(--color-success-bg, rgba(34, 197, 94, 0.05));
+}
+
+.writing-goal-progress.goal-met:hover {
+  background-color: var(--color-success-bg, rgba(34, 197, 94, 0.1));
+}
+
+/* Content layout */
+.writing-goal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 160px;
+}
+
+/* Header row */
+.writing-goal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.writing-goal-icon {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.writing-goal-progress.goal-met .writing-goal-icon {
+  color: var(--color-success, #22c55e);
+}
+
+.writing-goal-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+}
+
+.writing-goal-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background-color: var(--color-success, #22c55e);
+  border-radius: 50%;
+  margin-left: auto;
+}
+
+.writing-goal-badge .writing-goal-check-icon {
+  color: white;
+}
+
+/* Stats row */
+.writing-goal-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.125rem;
+}
+
+.writing-goal-current {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.writing-goal-progress.goal-met .writing-goal-current {
+  color: var(--color-success, #22c55e);
+}
+
+.writing-goal-separator {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+  margin: 0 0.125rem;
+}
+
+.writing-goal-target {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.writing-goal-unit {
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  margin-left: 0.25rem;
+}
+
+/* Progress bar */
+.writing-goal-bar-container {
+  width: 100%;
+}
+
+.writing-goal-bar {
+  height: 4px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.writing-goal-bar-fill {
+  height: 100%;
+  background-color: var(--color-accent);
+  border-radius: 2px;
+  transition: width 0.3s ease-out;
+}
+
+.writing-goal-progress.goal-met .writing-goal-bar-fill {
+  background-color: var(--color-success, #22c55e);
+}
+
+/* Remaining words */
+.writing-goal-remaining {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+.remaining-count {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* Goal complete message */
+.writing-goal-complete {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-success, #22c55e);
+}
+
+/* Compact mode - circular progress */
+.writing-goal-progress-compact {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  width: 48px;
+  height: 48px;
+  justify-content: center;
+}
+
+.writing-goal-progress-compact:hover {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transform: scale(1.1);
+}
+
+.writing-goal-progress-compact.goal-met {
+  background: transparent;
+  border: none;
+}
+
+.writing-goal-circle {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circular-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.circle-bg {
+  fill: none;
+  stroke: var(--color-bg-tertiary);
+  stroke-width: 3;
+}
+
+.circle-progress {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.writing-goal-progress-compact.goal-met .circle-progress {
+  stroke: var(--color-success, #22c55e);
+}
+
+.writing-goal-circle-text {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  z-index: 1;
+}
+
+.writing-goal-progress-compact.goal-met .writing-goal-circle-text {
+  color: var(--color-success, #22c55e);
+}
+
+.writing-goal-circle-text .writing-goal-check-icon {
+  stroke: var(--color-success, #22c55e);
+}
+
+/* Responsive - hide on small screens or convert to compact */
+@media (max-width: 768px) {
+  .writing-goal-progress:not(.writing-goal-progress-compact) {
+    display: none;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .writing-goal-progress {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .writing-goal-progress:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .writing-goal-progress.goal-met {
+    background-color: rgba(34, 197, 94, 0.1);
+  }
+
+  .writing-goal-progress.goal-met:hover {
+    background-color: rgba(34, 197, 94, 0.15);
+  }
+}

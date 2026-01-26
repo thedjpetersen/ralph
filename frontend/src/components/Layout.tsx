@@ -16,6 +16,9 @@ import { CommentHighlightOverlay } from './CommentHighlightOverlay';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { MobileTabBar } from './layout/MobileTabBar';
 import { OptimisticSyncIndicator } from './OptimisticSyncIndicator';
+import { WritingGoalProgress } from './WritingGoalProgress';
+import { GoalCelebration } from './GoalCelebration';
+import { WritingStatsModal } from './WritingStatsModal';
 import './Layout.css';
 
 export function Layout() {
@@ -585,7 +588,10 @@ export function Layout() {
       <AICustomPromptToolbar />
       <CommentHighlightOverlay />
       <MobileTabBar />
+      <WritingGoalProgress position="bottom-left" />
       <OptimisticSyncIndicator position="bottom-right" />
+      <GoalCelebration />
+      <WritingStatsModal />
     </div>
   );
 }

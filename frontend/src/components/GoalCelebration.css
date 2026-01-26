@@ -1,0 +1,195 @@
+/* Goal Celebration Overlay */
+.goal-celebration-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Celebration Modal */
+.goal-celebration-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: var(--color-bg-primary);
+  border-radius: 20px;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: visible;
+  max-width: 360px;
+  width: 90%;
+}
+
+/* Confetti container */
+.confetti-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.confetti-particle {
+  position: absolute;
+  will-change: transform, opacity;
+}
+
+/* Star burst effect */
+.star-burst-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.star-ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 100px;
+  margin-left: -1px;
+  margin-top: -100px;
+  background: linear-gradient(to top, rgba(34, 197, 94, 0.4), transparent);
+  transform-origin: bottom center;
+}
+
+/* Celebration icon */
+.celebration-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  color: white;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+}
+
+/* Title */
+.celebration-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 0.75rem 0;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Message */
+.celebration-message {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.5;
+}
+
+.celebration-message strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* Encouragement */
+.celebration-encouragement {
+  font-size: 0.875rem;
+  color: var(--color-text-tertiary);
+  margin: 0 0 1.5rem 0;
+}
+
+/* Dismiss button */
+.celebration-dismiss {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.celebration-dismiss:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3);
+}
+
+.celebration-dismiss:active {
+  transform: translateY(0);
+}
+
+.celebration-dismiss:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .goal-celebration-modal {
+    padding: 2rem 1.5rem;
+  }
+
+  .celebration-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .celebration-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .celebration-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .goal-celebration-modal {
+    animation: none;
+  }
+
+  .confetti-particle,
+  .star-ray {
+    display: none;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .goal-celebration-modal {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  .celebration-icon {
+    box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+  }
+
+  .celebration-dismiss {
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+  }
+
+  .celebration-dismiss:hover {
+    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.25);
+  }
+}

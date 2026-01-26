@@ -22,6 +22,25 @@ export interface MilestoneState {
   day100: boolean;
 }
 
+export interface WeeklyStats {
+  startDate: string;
+  endDate: string;
+  totalWords: number;
+  daysWritten: number;
+  goalsMetCount: number;
+  averageWordsPerDay: number;
+}
+
+export interface MonthlyStats {
+  month: number;
+  year: number;
+  totalWords: number;
+  daysWritten: number;
+  goalsMetCount: number;
+  averageWordsPerDay: number;
+  totalDaysInMonth: number;
+}
+
 export interface WritingStreakState {
   // Core streak data
   currentStreak: number;
@@ -38,8 +57,13 @@ export interface WritingStreakState {
   // Milestones
   milestonesReached: MilestoneState;
 
+  // Goal celebration state
+  todayGoalJustCompleted: boolean;
+  lastGoalCompletionDate: string | null;
+
   // UI State
   isCalendarOpen: boolean;
+  isStatsModalOpen: boolean;
 
   // Actions
   recordWriting: (wordCount: number) => void;
@@ -47,11 +71,16 @@ export interface WritingStreakState {
   updateSettings: (settings: Partial<WritingStreakSettings>) => void;
   openCalendar: () => void;
   closeCalendar: () => void;
+  openStatsModal: () => void;
+  closeStatsModal: () => void;
   resetStreak: () => void;
+  clearGoalCelebration: () => void;
 
   // Computed helpers (called as functions)
-  getTodayProgress: () => { wordCount: number; goal: number; percentage: number; goalMet: boolean };
+  getTodayProgress: () => { wordCount: number; goal: number; percentage: number; goalMet: boolean; wordsRemaining: number };
   getStreakStatus: () => 'none' | 'active' | 'at_risk';
+  getWeeklyStats: () => WeeklyStats;
+  getMonthlyStats: (month?: number, year?: number) => MonthlyStats;
 }
 
 // Default settings
@@ -99,17 +128,21 @@ export const useWritingStreakStore = create<WritingStreakState>()(
         day30: false,
         day100: false,
       },
+      todayGoalJustCompleted: false,
+      lastGoalCompletionDate: null,
       isCalendarOpen: false,
+      isStatsModalOpen: false,
 
       recordWriting: (wordCount: number) => {
         const today = getLocalDateString();
         const state = get();
-        const { settings, writingHistory, lastWritingDate, currentStreak, longestStreak, milestonesReached } = state;
+        const { settings, writingHistory, lastWritingDate, currentStreak, longestStreak, milestonesReached, lastGoalCompletionDate } = state;
 
         // Get existing entry for today or create new one
         const existingEntry = writingHistory[today];
         const newWordCount = (existingEntry?.wordCount || 0) + wordCount;
         const goalMet = newWordCount >= settings.dailyGoal;
+        const goalJustCompleted = goalMet && !existingEntry?.goalMet;
 
         // Update entry
         const newEntry: DayEntry = {
@@ -123,7 +156,7 @@ export const useWritingStreakStore = create<WritingStreakState>()(
         let newTotalDays = state.totalDaysWritten;
 
         // If this is the first write today and goal is met
-        if (!existingEntry?.goalMet && goalMet) {
+        if (goalJustCompleted) {
           // Check if streak continues
           if (lastWritingDate === null) {
             // First ever writing
@@ -163,6 +196,9 @@ export const useWritingStreakStore = create<WritingStreakState>()(
           }
         }
 
+        // Trigger goal celebration if goal just completed today (and not already celebrated)
+        const shouldCelebrate = goalJustCompleted && lastGoalCompletionDate !== today && settings.celebrateMilestones;
+
         set({
           writingHistory: {
             ...writingHistory,
@@ -173,6 +209,8 @@ export const useWritingStreakStore = create<WritingStreakState>()(
           totalDaysWritten: newTotalDays,
           lastWritingDate: goalMet ? today : lastWritingDate,
           milestonesReached: newMilestones,
+          todayGoalJustCompleted: shouldCelebrate,
+          lastGoalCompletionDate: goalJustCompleted ? today : lastGoalCompletionDate,
         });
       },
 
@@ -202,6 +240,18 @@ export const useWritingStreakStore = create<WritingStreakState>()(
         set({ isCalendarOpen: false });
       },
 
+      openStatsModal: () => {
+        set({ isStatsModalOpen: true });
+      },
+
+      closeStatsModal: () => {
+        set({ isStatsModalOpen: false });
+      },
+
+      clearGoalCelebration: () => {
+        set({ todayGoalJustCompleted: false });
+      },
+
       resetStreak: () => {
         set({
           currentStreak: 0,
@@ -214,6 +264,8 @@ export const useWritingStreakStore = create<WritingStreakState>()(
             day30: false,
             day100: false,
           },
+          todayGoalJustCompleted: false,
+          lastGoalCompletionDate: null,
         });
       },
 
@@ -223,12 +275,14 @@ export const useWritingStreakStore = create<WritingStreakState>()(
         const entry = state.writingHistory[today];
         const wordCount = entry?.wordCount || 0;
         const goal = state.settings.dailyGoal;
+        const wordsRemaining = Math.max(0, goal - wordCount);
 
         return {
           wordCount,
           goal,
           percentage: Math.min(100, Math.round((wordCount / goal) * 100)),
           goalMet: entry?.goalMet || false,
+          wordsRemaining,
         };
       },
 
@@ -254,6 +308,92 @@ export const useWritingStreakStore = create<WritingStreakState>()(
 
         return 'none'; // Streak is broken
       },
+
+      getWeeklyStats: () => {
+        const state = get();
+        const { writingHistory } = state;
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // 0 = Sunday
+
+        // Get start of current week (Sunday)
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - dayOfWeek);
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        // Get end of current week (Saturday)
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+        let totalWords = 0;
+        let daysWritten = 0;
+        let goalsMetCount = 0;
+
+        // Iterate through each day of the week
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(startOfWeek);
+          date.setDate(startOfWeek.getDate() + i);
+          const dateString = getLocalDateString(date);
+          const entry = writingHistory[dateString];
+
+          if (entry) {
+            totalWords += entry.wordCount;
+            daysWritten++;
+            if (entry.goalMet) {
+              goalsMetCount++;
+            }
+          }
+        }
+
+        return {
+          startDate: getLocalDateString(startOfWeek),
+          endDate: getLocalDateString(endOfWeek),
+          totalWords,
+          daysWritten,
+          goalsMetCount,
+          averageWordsPerDay: daysWritten > 0 ? Math.round(totalWords / daysWritten) : 0,
+        };
+      },
+
+      getMonthlyStats: (month?: number, year?: number) => {
+        const state = get();
+        const { writingHistory } = state;
+        const today = new Date();
+        const targetMonth = month !== undefined ? month : today.getMonth();
+        const targetYear = year !== undefined ? year : today.getFullYear();
+
+        // Get last day of the month (to determine total days)
+        const lastDay = new Date(targetYear, targetMonth + 1, 0);
+        const totalDaysInMonth = lastDay.getDate();
+
+        let totalWords = 0;
+        let daysWritten = 0;
+        let goalsMetCount = 0;
+
+        // Iterate through each day of the month
+        for (let day = 1; day <= totalDaysInMonth; day++) {
+          const date = new Date(targetYear, targetMonth, day);
+          const dateString = getLocalDateString(date);
+          const entry = writingHistory[dateString];
+
+          if (entry) {
+            totalWords += entry.wordCount;
+            daysWritten++;
+            if (entry.goalMet) {
+              goalsMetCount++;
+            }
+          }
+        }
+
+        return {
+          month: targetMonth,
+          year: targetYear,
+          totalWords,
+          daysWritten,
+          goalsMetCount,
+          averageWordsPerDay: daysWritten > 0 ? Math.round(totalWords / daysWritten) : 0,
+          totalDaysInMonth,
+        };
+      },
     }),
     {
       name: 'clockzen-writing-streak',
@@ -265,6 +405,7 @@ export const useWritingStreakStore = create<WritingStreakState>()(
         writingHistory: state.writingHistory,
         settings: state.settings,
         milestonesReached: state.milestonesReached,
+        lastGoalCompletionDate: state.lastGoalCompletionDate,
       }),
     }
   )
@@ -275,3 +416,5 @@ export const useStreakSettings = () => useWritingStreakStore((state) => state.se
 export const useCurrentStreak = () => useWritingStreakStore((state) => state.currentStreak);
 export const useLongestStreak = () => useWritingStreakStore((state) => state.longestStreak);
 export const useIsCalendarOpen = () => useWritingStreakStore((state) => state.isCalendarOpen);
+export const useIsStatsModalOpen = () => useWritingStreakStore((state) => state.isStatsModalOpen);
+export const useTodayGoalJustCompleted = () => useWritingStreakStore((state) => state.todayGoalJustCompleted);

@@ -21,6 +21,43 @@ vi.mock('../../stores/toast', () => ({
   })),
 }))
 
+vi.mock('../../stores/writingStreak', () => ({
+  useWritingStreakStore: vi.fn((selector?: (state: unknown) => unknown) => {
+    const mockState = {
+      settings: { enabled: true, dailyGoal: 500, showNotifications: true, celebrateMilestones: true },
+      currentStreak: 0,
+      longestStreak: 0,
+      totalDaysWritten: 0,
+      writingHistory: {},
+      todayGoalJustCompleted: false,
+      isCalendarOpen: false,
+      isStatsModalOpen: false,
+      getTodayProgress: () => ({ wordCount: 0, goal: 500, percentage: 0, goalMet: false, wordsRemaining: 500 }),
+      getWeeklyStats: () => ({ startDate: '', endDate: '', totalWords: 0, daysWritten: 0, goalsMetCount: 0, averageWordsPerDay: 0 }),
+      getMonthlyStats: () => ({ month: 0, year: 2024, totalWords: 0, daysWritten: 0, goalsMetCount: 0, averageWordsPerDay: 0, totalDaysInMonth: 30 }),
+      openStatsModal: vi.fn(),
+      closeStatsModal: vi.fn(),
+      clearGoalCelebration: vi.fn(),
+    }
+    return selector ? selector(mockState) : mockState
+  }),
+  useTodayGoalJustCompleted: () => false,
+  useIsStatsModalOpen: () => false,
+}))
+
+// Mock the new components that depend on writingStreak
+vi.mock('../WritingGoalProgress', () => ({
+  WritingGoalProgress: () => null,
+}))
+
+vi.mock('../GoalCelebration', () => ({
+  GoalCelebration: () => null,
+}))
+
+vi.mock('../WritingStatsModal', () => ({
+  WritingStatsModal: () => null,
+}))
+
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
