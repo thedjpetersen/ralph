@@ -1,0 +1,275 @@
+.stats-cards {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  background-color: #2a2a2a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  min-height: 160px;
+}
+
+.stats-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  position: relative;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.stat-card:hover {
+  border-color: rgba(100, 108, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.stat-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-card-icon-spent {
+  background-color: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+}
+
+.stat-card-icon-receipts {
+  background-color: rgba(155, 89, 182, 0.15);
+  color: #9b59b6;
+}
+
+.stat-card-icon-store {
+  background-color: rgba(230, 126, 34, 0.15);
+  color: #e67e22;
+}
+
+.stat-card-icon-budget {
+  background-color: rgba(149, 165, 166, 0.15);
+  color: #95a5a6;
+}
+
+.stat-card-icon-budget.status-good {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.stat-card-icon-budget.status-warning {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #f1c40f;
+}
+
+.stat-card-icon-budget.status-over {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.stat-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-card-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-card-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.stat-card-value-text {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-card-value-empty {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 400;
+}
+
+.stat-card-value-status {
+  font-size: 1rem;
+}
+
+.stat-card-value-status.status-good {
+  color: #2ecc71;
+}
+
+.stat-card-value-status.status-warning {
+  color: #f1c40f;
+}
+
+.stat-card-value-status.status-over {
+  color: #e74c3c;
+}
+
+.stat-card-subvalue {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card-link {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.stat-card-link:hover {
+  color: #646cff;
+  background-color: rgba(100, 108, 255, 0.1);
+}
+
+/* Skeleton loading */
+.stat-card-skeleton {
+  pointer-events: none;
+}
+
+.skeleton-icon {
+  width: 48px;
+  height: 48px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.skeleton-label {
+  width: 60%;
+  height: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-value {
+  width: 80%;
+  height: 1.25rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Tablet: 2x2 grid */
+@media (max-width: 1100px) {
+  .stats-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile: single column */
+@media (max-width: 600px) {
+  .stats-cards {
+    padding: 1rem;
+  }
+
+  .stats-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 0.875rem;
+  }
+
+  .stat-card-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stat-card-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .stats-cards {
+    background-color: #fff;
+    border-color: #ddd;
+  }
+
+  .stat-card {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .stat-card:hover {
+    border-color: rgba(100, 108, 255, 0.3);
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .stat-card-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .stat-card-value {
+    color: #213547;
+  }
+
+  .stat-card-value-empty {
+    color: rgba(0, 0, 0, 0.4);
+  }
+
+  .stat-card-subvalue {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .stat-card-link {
+    color: rgba(0, 0, 0, 0.3);
+  }
+
+  .skeleton-icon,
+  .skeleton-label,
+  .skeleton-value {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}

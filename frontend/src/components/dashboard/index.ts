@@ -6,3 +6,4 @@ export { RecentReceipts } from './RecentReceipts';
 export { AccountBalances } from './AccountBalances';
 export { QuickActions } from './QuickActions';
 export { NetWorthChart } from './NetWorthChart';
+export { StatsCards, type StatsData } from './StatsCards';

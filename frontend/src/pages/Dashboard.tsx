@@ -7,6 +7,7 @@ import { useReceiptsStore } from '../stores/receipts';
 import { useFinancialStore } from '../stores/financial';
 import { PageTransition } from '../components/PageTransition';
 import { announce } from '../stores/announcer';
+import type { StatsData } from '../components/dashboard';
 import {
   BudgetSummaryCard,
   SpendingByCategory,
@@ -16,6 +17,7 @@ import {
   AccountBalances,
   QuickActions,
   NetWorthChart,
+  StatsCards,
 } from '../components/dashboard';
 import './Dashboard.css';
 
@@ -178,6 +180,71 @@ export function Dashboard() {
     [financialAccounts]
   );
 
+  // Calculate stats data for StatsCards
+  const statsData: StatsData = useMemo(() => {
+    // Calculate total spent this month from transactions
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthlyTransactions = transactions.filter((t) => {
+      const transactionDate = new Date(t.transaction_date || t.created_at);
+      return transactionDate >= startOfMonth && t.type === 'purchase';
+    });
+    const totalSpentMonth = monthlyTransactions.reduce(
+      (sum, t) => sum + Math.abs(t.amount),
+      0
+    );
+
+    // Receipts count this month
+    const monthlyReceipts = receipts.filter((r) => {
+      const receiptDate = new Date(r.receipt_date || r.created_at);
+      return receiptDate >= startOfMonth;
+    });
+    const receiptsCount = monthlyReceipts.length;
+
+    // Find top store by spending
+    const storeSpending: Record<string, { name: string; amount: number }> = {};
+    monthlyReceipts.forEach((r) => {
+      const storeName = r.store_name || r.merchant_name || 'Unknown';
+      const amount = r.total_amount || 0;
+      if (!storeSpending[storeName]) {
+        storeSpending[storeName] = { name: storeName, amount: 0 };
+      }
+      storeSpending[storeName].amount += amount;
+    });
+    const topStore = Object.values(storeSpending).reduce<{
+      name: string;
+      amount: number;
+    } | null>((max, store) => {
+      if (!max || store.amount > max.amount) return store;
+      return max;
+    }, null);
+
+    // Budget status
+    let budgetStatus: StatsData['budgetStatus'] = null;
+    if (currentBudget) {
+      const percentage = Math.round(currentBudget.percentage_used);
+      let status: 'on-track' | 'warning' | 'over-budget' = 'on-track';
+      if (percentage >= 100) {
+        status = 'over-budget';
+      } else if (percentage >= 80) {
+        status = 'warning';
+      }
+      budgetStatus = {
+        percentage,
+        remaining: currentBudget.total_remaining,
+        status,
+      };
+    }
+
+    return {
+      totalSpentMonth,
+      receiptsCount,
+      topStore,
+      budgetStatus,
+      currency: currentBudget?.currency || 'USD',
+    };
+  }, [transactions, receipts, currentBudget]);
+
   // Announce when dashboard data has loaded
   useEffect(() => {
     if (!hasAnnouncedRef.current && currentBudget && !budgetsLoading) {
@@ -246,6 +313,13 @@ export function Dashboard() {
         </div>
 
         <div className="dashboard-grid" role="region" aria-label="Financial overview widgets">
+          <div className="dashboard-widget widget-stats">
+            <StatsCards
+              data={statsData}
+              isLoading={budgetsLoading || transactionsLoading || receiptsLoading}
+            />
+          </div>
+
           <div className="dashboard-widget widget-summary">
             <BudgetSummaryCard
               budget={currentBudget}
