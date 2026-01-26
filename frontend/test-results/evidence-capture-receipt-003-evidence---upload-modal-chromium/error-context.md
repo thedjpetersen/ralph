@@ -1,0 +1,235 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - link "Skip to main content" [ref=e4] [cursor=pointer]:
+      - /url: "#main-content"
+    - navigation "Main navigation" [ref=e6]:
+      - 'button "Current account: Personal Finance. Press Enter to switch accounts." [ref=e9] [cursor=pointer]':
+        - generic [ref=e10]: P
+        - generic [ref=e11]: Personal Finance
+        - img [ref=e12]
+      - navigation [ref=e14]:
+        - generic [ref=e15]:
+          - button "Main" [expanded] [ref=e16] [cursor=pointer]:
+            - generic [ref=e17]: Main
+            - img [ref=e18]
+          - group "Main" [ref=e20]:
+            - link "Dashboard" [ref=e21] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e23]
+              - generic [ref=e25]: Dashboard
+        - generic [ref=e26]:
+          - button "Transactions" [expanded] [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: Transactions
+            - img [ref=e29]
+          - group "Transactions" [ref=e31]:
+            - link "Receipts" [ref=e32] [cursor=pointer]:
+              - /url: /receipts
+              - img [ref=e34]
+              - generic [ref=e36]: Receipts
+            - link "Purchases" [ref=e37] [cursor=pointer]:
+              - /url: /transactions
+              - img [ref=e39]
+              - generic [ref=e41]: Purchases
+            - link "Stores" [ref=e42] [cursor=pointer]:
+              - /url: /stores
+              - img [ref=e44]
+              - generic [ref=e46]: Stores
+        - generic [ref=e47]:
+          - button "Financial" [expanded] [ref=e48] [cursor=pointer]:
+            - generic [ref=e49]: Financial
+            - img [ref=e50]
+          - group "Financial" [ref=e52]:
+            - link "Budget" [ref=e53] [cursor=pointer]:
+              - /url: /budgets
+              - img [ref=e55]
+              - generic [ref=e57]: Budget
+            - link "Bills" [ref=e58] [cursor=pointer]:
+              - /url: /bills
+              - img [ref=e60]
+              - generic [ref=e62]: Bills
+            - link "Accounts" [ref=e63] [cursor=pointer]:
+              - /url: /financial-accounts
+              - img [ref=e65]
+              - generic [ref=e67]: Accounts
+            - link "Connections" [ref=e68] [cursor=pointer]:
+              - /url: /connections
+              - img [ref=e70]
+              - generic [ref=e72]: Connections
+        - generic [ref=e73]:
+          - button "Settings" [expanded] [ref=e74] [cursor=pointer]:
+            - generic [ref=e75]: Settings
+            - img [ref=e76]
+          - group "Settings" [ref=e78]:
+            - link "Settings" [ref=e79] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e81]
+              - generic [ref=e84]: Settings
+            - link "Integrations" [ref=e85] [cursor=pointer]:
+              - /url: /integrations
+              - img [ref=e87]
+              - generic [ref=e90]: Integrations
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - generic [ref=e93]: Documents
+            - button "Create new folder" [ref=e94] [cursor=pointer]
+          - alert [ref=e96]: Unexpected token '<', "<!doctype "... is not valid JSON
+          - tree "Document folders" [ref=e97]:
+            - generic [ref=e98]: No folders yet
+      - button "User menu for Test User. Press Enter to open menu." [ref=e101] [cursor=pointer]:
+        - generic [ref=e102]: T
+        - generic [ref=e103]:
+          - generic [ref=e104]: Test User
+          - generic [ref=e105]: test@example.com
+        - img [ref=e106]
+      - button "Collapse sidebar" [ref=e108] [cursor=pointer]
+    - generic [ref=e110]:
+      - banner [ref=e111]:
+        - generic [ref=e112]:
+          - navigation "Breadcrumb" [ref=e113]:
+            - list [ref=e114]:
+              - listitem [ref=e115]:
+                - generic [ref=e116]: Receipts
+          - generic [ref=e117]:
+            - button "Search" [ref=e119] [cursor=pointer]:
+              - img [ref=e120]
+              - generic [ref=e122]: Search...
+              - generic [ref=e123]: ⌘K
+            - button "Switch to dark mode" [ref=e124] [cursor=pointer]:
+              - img [ref=e125]
+            - button "Notifications" [ref=e127] [cursor=pointer]:
+              - img [ref=e128]
+            - button "User menu for Test User. Press Enter to open menu." [ref=e131] [cursor=pointer]:
+              - generic [ref=e132]: T
+      - main "Main content" [ref=e133]:
+        - generic [ref=e135]:
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - heading "Receipts" [level=1] [ref=e139]
+              - paragraph [ref=e140]: View and manage receipts
+            - button "Upload new receipt" [ref=e141] [cursor=pointer]:
+              - img [ref=e142]
+              - generic [ref=e145]: Upload
+          - search "Filter receipts" [ref=e146]:
+            - generic [ref=e147]:
+              - generic [ref=e148]:
+                - generic [ref=e149]: From
+                - textbox "From" [ref=e150]
+              - generic [ref=e151]:
+                - generic [ref=e152]: To
+                - textbox "To" [ref=e153]
+              - generic [ref=e154]: Filter receipts by date range
+              - generic [ref=e155]: Filter by status
+              - combobox "Filter by receipt status" [ref=e156] [cursor=pointer]:
+                - option "All Statuses" [selected]
+                - option "Pending"
+                - option "Processing"
+                - option "Processed"
+                - option "Failed"
+                - option "Archived"
+              - generic [ref=e157]: Filter by source
+              - combobox "Filter by receipt source" [ref=e158] [cursor=pointer]:
+                - option "All Sources" [selected]
+                - option "Email"
+                - option "Drive"
+                - option "Upload"
+                - option "Scan"
+            - generic [ref=e159]:
+              - generic [ref=e160]: Filter by store
+              - combobox "Filter by store" [ref=e161] [cursor=pointer]:
+                - option "All Stores" [selected]
+              - generic [ref=e162]:
+                - generic [ref=e163]: Search by merchant or filename
+                - textbox "Search receipts by merchant or filename" [ref=e164]:
+                  - /placeholder: Search by merchant or filename...
+          - toolbar "Receipt actions" [ref=e165]:
+            - generic [ref=e167] [cursor=pointer]:
+              - checkbox "Select all receipts" [ref=e168]
+              - generic [ref=e169]: Select all
+            - group "View mode" [ref=e171]:
+              - button "List view" [pressed] [ref=e172] [cursor=pointer]:
+                - img [ref=e173]
+              - button "Grid view" [ref=e175] [cursor=pointer]:
+                - img [ref=e176]
+          - region "Receipts list, 3 results" [ref=e181]:
+            - generic [ref=e182]:
+              - row [ref=e183]:
+                - generic [ref=e185]: Date
+                - generic [ref=e186]: Merchant
+                - generic [ref=e187]: Source
+                - generic [ref=e188]: Amount
+                - generic [ref=e189]: Status
+              - generic [ref=e190]:
+                - checkbox "Select Whole Foods Market" [ref=e192] [cursor=pointer]
+                - link "Whole Foods Market, Jan 14, 2024, $125.50, upload, processed" [ref=e193] [cursor=pointer]:
+                  - /url: /receipts/receipt-001
+                  - generic [ref=e194]: Jan 14, 2024
+                  - generic [ref=e195]:
+                    - generic [ref=e196]: Whole Foods Market
+                    - generic [ref=e197]: receipt-2024-01-15.pdf
+                  - generic [ref=e199]: upload
+                  - generic [ref=e200]: $125.50
+                  - generic [ref=e202]: processed
+              - generic [ref=e203]:
+                - checkbox "Select Amazon" [ref=e205] [cursor=pointer]
+                - link "Amazon, Jan 13, 2024, $89.99, email, pending" [ref=e206] [cursor=pointer]:
+                  - /url: /receipts/receipt-002
+                  - generic [ref=e207]: Jan 13, 2024
+                  - generic [ref=e208]:
+                    - generic [ref=e209]: Amazon
+                    - generic [ref=e210]: amazon-receipt.pdf
+                  - generic [ref=e212]: email
+                  - generic [ref=e213]: $89.99
+                  - generic [ref=e215]: pending
+              - generic [ref=e216]:
+                - checkbox "Select Starbucks" [ref=e218] [cursor=pointer]
+                - link "Starbucks, Jan 12, 2024, $12.45, scan, processing" [ref=e219] [cursor=pointer]:
+                  - /url: /receipts/receipt-003
+                  - generic [ref=e220]: Jan 12, 2024
+                  - generic [ref=e221]:
+                    - generic [ref=e222]: Starbucks
+                    - generic [ref=e223]: starbucks.jpg
+                  - generic [ref=e225]: scan
+                  - generic [ref=e226]: $12.45
+                  - generic [ref=e228]: processing
+          - navigation "Receipts pagination" [ref=e229]:
+            - generic [ref=e230]: Showing 1-3 of 3 receipts
+            - generic [ref=e231]:
+              - generic [ref=e232]: Results per page
+              - combobox "Results per page" [ref=e233] [cursor=pointer]:
+                - option "10 per page"
+                - option "20 per page" [selected]
+                - option "50 per page"
+                - option "100 per page"
+              - group "Page navigation" [ref=e234]:
+                - button "Go to first page" [disabled] [ref=e235]: First
+                - button "Go to previous page" [disabled] [ref=e236]: Previous
+                - generic [ref=e237]: Page 1 of 1
+                - button "Go to next page" [disabled] [ref=e238]: Next
+                - button "Go to last page" [disabled] [ref=e239]: Last
+    - generic "Notifications"
+    - status [ref=e240]
+    - alert [ref=e241]
+  - dialog "Welcome to ClockZen!" [ref=e242]:
+    - generic [active] [ref=e243]:
+      - generic [ref=e244]:
+        - heading "Welcome to ClockZen!" [level=2] [ref=e245]
+        - paragraph [ref=e246]: Let us show you around. This quick tour will highlight the key features to help you get started.
+      - generic [ref=e247]:
+        - generic [ref=e248]: 1 of 5
+        - tablist "Tour progress" [ref=e249]:
+          - 'tab "Step 1: Welcome to ClockZen!" [selected] [ref=e250] [cursor=pointer]'
+          - 'tab "Step 2: Navigation Sidebar" [disabled] [ref=e251]'
+          - 'tab "Step 3: Document Editor" [disabled] [ref=e252]'
+          - 'tab "Step 4: AI Authors" [disabled] [ref=e253]'
+          - 'tab "Step 5: Comments & Insights" [disabled] [ref=e254]'
+      - generic [ref=e255]:
+        - button "Don't show again" [ref=e257] [cursor=pointer]
+        - generic [ref=e258]:
+          - button "Skip" [ref=e259] [cursor=pointer]:
+            - generic [ref=e260]: Skip
+          - button "Next" [ref=e261] [cursor=pointer]:
+            - generic [ref=e262]: Next
+```

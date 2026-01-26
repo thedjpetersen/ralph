@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { CommentSortOrder } from './appSettings';
 
 /**
  * Represents a text range within an editable element
@@ -76,6 +77,9 @@ interface CommentHighlightState {
   navigateToPreviousComment: () => void;
   setCommentFilter: (filter: ((comment: CommentWithRange) => boolean) | null) => void;
   getFilteredComments: () => CommentWithRange[];
+
+  // Sorting
+  getSortedComments: (sortOrder: CommentSortOrder) => CommentWithRange[];
 }
 
 /**
@@ -295,6 +299,33 @@ export const useCommentHighlightStore = create<CommentHighlightState>()((set, ge
     return comments;
   },
 
+  // Get sorted comments
+  getSortedComments: (sortOrder: CommentSortOrder) => {
+    const state = get();
+    const comments = Array.from(state.commentRanges.values());
+    const filtered = state.commentFilter ? comments.filter(state.commentFilter) : comments;
+
+    return [...filtered].sort((a, b) => {
+      switch (sortOrder) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'author':
+          return (a.authorId || '').localeCompare(b.authorId || '');
+        case 'position': {
+          const aPos = a.textRange?.startIndex ?? Number.MAX_SAFE_INTEGER;
+          const bPos = b.textRange?.startIndex ?? Number.MAX_SAFE_INTEGER;
+          return aPos - bPos;
+        }
+        case 'type':
+          return a.entityType.localeCompare(b.entityType);
+        default:
+          return 0;
+      }
+    });
+  },
+
   // Set comment filter for filtered views
   setCommentFilter: (filter) => {
     set({ commentFilter: filter, currentNavigationIndex: -1 });
@@ -400,7 +431,7 @@ export function useCommentHighlight() {
 
 // Hook for comment navigation
 export function useCommentNavigation() {
-  const { navigateToNextComment, navigateToPreviousComment, setCommentFilter, getFilteredComments } = useCommentHighlightStore();
+  const { navigateToNextComment, navigateToPreviousComment, setCommentFilter, getFilteredComments, getSortedComments } = useCommentHighlightStore();
   const currentNavigationIndex = useCommentHighlightStore(selectCurrentNavigationIndex);
   const commentRanges = useCommentHighlightStore(selectCommentRanges);
 
@@ -409,6 +440,7 @@ export function useCommentNavigation() {
     navigateToPreviousComment,
     setCommentFilter,
     getFilteredComments,
+    getSortedComments,
     currentNavigationIndex,
     totalComments: commentRanges.size,
   };

@@ -1,0 +1,218 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - link "Skip to main content" [ref=e4] [cursor=pointer]:
+      - /url: "#main-content"
+    - navigation "Main navigation" [ref=e6]:
+      - 'button "Current account: Personal Finance. Press Enter to switch accounts." [ref=e9] [cursor=pointer]':
+        - generic [ref=e10]: P
+        - generic [ref=e11]: Personal Finance
+        - img [ref=e12]
+      - navigation [ref=e14]:
+        - generic [ref=e15]:
+          - button "Main" [expanded] [ref=e16] [cursor=pointer]:
+            - generic [ref=e17]: Main
+            - img [ref=e18]
+          - group "Main" [ref=e20]:
+            - link "Dashboard" [ref=e21] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e23]
+              - generic [ref=e25]: Dashboard
+        - generic [ref=e26]:
+          - button "Transactions" [expanded] [ref=e27] [cursor=pointer]:
+            - generic [ref=e28]: Transactions
+            - img [ref=e29]
+          - group "Transactions" [ref=e31]:
+            - link "Receipts" [ref=e32] [cursor=pointer]:
+              - /url: /receipts
+              - img [ref=e34]
+              - generic [ref=e36]: Receipts
+            - link "Purchases" [ref=e37] [cursor=pointer]:
+              - /url: /transactions
+              - img [ref=e39]
+              - generic [ref=e41]: Purchases
+            - link "Stores" [ref=e42] [cursor=pointer]:
+              - /url: /stores
+              - img [ref=e44]
+              - generic [ref=e46]: Stores
+        - generic [ref=e47]:
+          - button "Financial" [expanded] [ref=e48] [cursor=pointer]:
+            - generic [ref=e49]: Financial
+            - img [ref=e50]
+          - group "Financial" [ref=e52]:
+            - link "Budget" [ref=e53] [cursor=pointer]:
+              - /url: /budgets
+              - img [ref=e55]
+              - generic [ref=e57]: Budget
+            - link "Bills" [ref=e58] [cursor=pointer]:
+              - /url: /bills
+              - img [ref=e60]
+              - generic [ref=e62]: Bills
+            - link "Accounts" [ref=e63] [cursor=pointer]:
+              - /url: /financial-accounts
+              - img [ref=e65]
+              - generic [ref=e67]: Accounts
+            - link "Connections" [ref=e68] [cursor=pointer]:
+              - /url: /connections
+              - img [ref=e70]
+              - generic [ref=e72]: Connections
+        - generic [ref=e73]:
+          - button "Settings" [expanded] [ref=e74] [cursor=pointer]:
+            - generic [ref=e75]: Settings
+            - img [ref=e76]
+          - group "Settings" [ref=e78]:
+            - link "Settings" [ref=e79] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e81]
+              - generic [ref=e84]: Settings
+            - link "Integrations" [ref=e85] [cursor=pointer]:
+              - /url: /integrations
+              - img [ref=e87]
+              - generic [ref=e90]: Integrations
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - generic [ref=e93]: Documents
+            - button "Create new folder" [ref=e94] [cursor=pointer]
+          - alert [ref=e96]: Unexpected token '<', "<!doctype "... is not valid JSON
+          - tree "Document folders" [ref=e97]:
+            - generic [ref=e98]: No folders yet
+      - button "User menu for Test User. Press Enter to open menu." [ref=e101] [cursor=pointer]:
+        - generic [ref=e102]: T
+        - generic [ref=e103]:
+          - generic [ref=e104]: Test User
+          - generic [ref=e105]: test@example.com
+        - img [ref=e106]
+      - button "Collapse sidebar" [ref=e108] [cursor=pointer]
+    - generic [ref=e110]:
+      - banner [ref=e111]:
+        - generic [ref=e112]:
+          - navigation "Breadcrumb" [ref=e113]:
+            - list [ref=e114]:
+              - listitem [ref=e115]:
+                - link "Transactions" [ref=e116] [cursor=pointer]:
+                  - /url: /transactions
+                - img [ref=e117]
+              - listitem [ref=e119]:
+                - generic [ref=e120]: Txn 001
+          - generic [ref=e121]:
+            - button "Search" [ref=e123] [cursor=pointer]:
+              - img [ref=e124]
+              - generic [ref=e126]: Search...
+              - generic [ref=e127]: ⌘K
+            - button "Switch to dark mode" [ref=e128] [cursor=pointer]:
+              - img [ref=e129]
+            - button "Notifications" [ref=e131] [cursor=pointer]:
+              - img [ref=e132]
+            - button "User menu for Test User. Press Enter to open menu." [ref=e135] [cursor=pointer]:
+              - generic [ref=e136]: T
+      - main "Main content" [ref=e137]:
+        - generic [ref=e139]:
+          - generic [ref=e140]:
+            - link "← Back to Transactions" [ref=e141] [cursor=pointer]:
+              - /url: /transactions
+            - generic [ref=e142]:
+              - generic [ref=e144]:
+                - heading "Whole Foods Market" [level=1] [ref=e145]
+                - generic [ref=e146]:
+                  - generic [ref=e147]: completed
+                  - generic [ref=e148]: purchase
+              - generic [ref=e149]:
+                - link "Edit Transaction" [ref=e150] [cursor=pointer]:
+                  - /url: /transactions/txn-001/edit
+                - button "Delete" [ref=e151] [cursor=pointer]
+          - generic [ref=e152]:
+            - generic [ref=e153]:
+              - generic [ref=e155]: "-$125.50"
+              - generic [ref=e156]: Sunday, January 14, 2024
+            - generic [ref=e157]:
+              - heading "Description" [level=2] [ref=e158]
+              - paragraph [ref=e159]: Weekly groceries
+            - generic [ref=e160]:
+              - heading "Transaction Details" [level=2] [ref=e161]
+              - generic [ref=e162]:
+                - generic [ref=e163]:
+                  - generic [ref=e164]: Merchant
+                  - generic [ref=e165]: Whole Foods Market
+                - generic [ref=e166]:
+                  - generic [ref=e167]: Category
+                  - generic [ref=e168]: Groceries
+                - generic [ref=e169]:
+                  - generic [ref=e170]: Payment Method
+                  - generic [ref=e171]: Credit Card
+                - generic [ref=e172]:
+                  - generic [ref=e173]: Card
+                  - generic [ref=e174]: "**** 4242"
+            - generic [ref=e175]:
+              - heading "Tags" [level=2] [ref=e176]
+              - generic [ref=e177]:
+                - generic [ref=e178]: groceries
+                - generic [ref=e179]: food
+            - generic [ref=e180]:
+              - heading "Notes" [level=2] [ref=e181]
+              - paragraph [ref=e182]: Regular weekly shopping trip
+            - generic [ref=e183]:
+              - heading "Line Items" [level=2] [ref=e184]
+              - generic [ref=e185]:
+                - generic [ref=e186]:
+                  - generic [ref=e187]:
+                    - generic [ref=e188]: Description
+                    - generic [ref=e189]: Qty
+                    - generic [ref=e190]: Unit Price
+                    - generic [ref=e191]: Total
+                    - generic [ref=e192]: Actions
+                  - generic [ref=e193]:
+                    - generic [ref=e194]: "1"
+                    - generic [ref=e195]: $45.50
+                    - generic [ref=e196]: $45.50
+                    - generic [ref=e197]:
+                      - button "Edit" [ref=e198] [cursor=pointer]
+                      - button "Delete" [ref=e199] [cursor=pointer]
+                  - generic [ref=e200]:
+                    - generic [ref=e201]: "1"
+                    - generic [ref=e202]: $35.00
+                    - generic [ref=e203]: $35.00
+                    - generic [ref=e204]:
+                      - button "Edit" [ref=e205] [cursor=pointer]
+                      - button "Delete" [ref=e206] [cursor=pointer]
+                  - generic [ref=e207]:
+                    - strong [ref=e209]: Total
+                    - strong [ref=e213]: $80.50
+                - button "Add Line Item" [ref=e215] [cursor=pointer]
+            - generic [ref=e216]:
+              - heading "AI Analysis" [level=2] [ref=e217]
+              - button "Generate AI insight" [ref=e219] [cursor=pointer]:
+                - img [ref=e220]
+                - generic [ref=e224]: Get AI Insight
+            - generic [ref=e225]:
+              - generic [ref=e226]:
+                - generic [ref=e227]: Created
+                - generic [ref=e228]: Jan 26, 2026, 02:59 AM
+              - generic [ref=e229]:
+                - generic [ref=e230]: Updated
+                - generic [ref=e231]: Jan 26, 2026, 02:59 AM
+    - generic "Notifications"
+    - status [ref=e232]
+    - alert [ref=e233]
+  - dialog "Welcome to ClockZen!" [ref=e234]:
+    - generic [active] [ref=e235]:
+      - generic [ref=e236]:
+        - heading "Welcome to ClockZen!" [level=2] [ref=e237]
+        - paragraph [ref=e238]: Let us show you around. This quick tour will highlight the key features to help you get started.
+      - generic [ref=e239]:
+        - generic [ref=e240]: 1 of 5
+        - tablist "Tour progress" [ref=e241]:
+          - 'tab "Step 1: Welcome to ClockZen!" [selected] [ref=e242] [cursor=pointer]'
+          - 'tab "Step 2: Navigation Sidebar" [disabled] [ref=e243]'
+          - 'tab "Step 3: Document Editor" [disabled] [ref=e244]'
+          - 'tab "Step 4: AI Authors" [disabled] [ref=e245]'
+          - 'tab "Step 5: Comments & Insights" [disabled] [ref=e246]'
+      - generic [ref=e247]:
+        - button "Don't show again" [ref=e249] [cursor=pointer]
+        - generic [ref=e250]:
+          - button "Skip" [ref=e251] [cursor=pointer]:
+            - generic [ref=e252]: Skip
+          - button "Next" [ref=e253] [cursor=pointer]:
+            - generic [ref=e254]: Next
+```

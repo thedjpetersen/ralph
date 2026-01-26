@@ -9,6 +9,8 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
   confirmOnExit: true,
 };
 
+export type CommentSortOrder = 'newest' | 'oldest' | 'author' | 'position' | 'type';
+
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   smartTypography: true,
   paragraphFocus: false,
@@ -19,6 +21,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
   fontSize: 16,
   fontFamily: 'system',
   tabSize: 2,
+  commentSortOrder: 'newest',
 };
 
 export const DEFAULT_AI_SETTINGS: AISettings = {
@@ -55,6 +58,7 @@ export interface EditorSettings {
   fontSize: number;
   fontFamily: 'system' | 'serif' | 'sans-serif' | 'monospace';
   tabSize: number;
+  commentSortOrder: CommentSortOrder;
 }
 
 export interface AISettings {
