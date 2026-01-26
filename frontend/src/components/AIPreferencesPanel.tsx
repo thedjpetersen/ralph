@@ -9,6 +9,7 @@ import {
   type FeedbackVerbosity,
   type FeedbackType,
   type AIModel,
+  type FeedbackScheduleMode,
 } from '../stores/appSettings';
 import './AIPreferencesPanel.css';
 
@@ -35,6 +36,12 @@ const AI_MODEL_OPTIONS = [
   { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
   { value: 'claude-3-opus', label: 'Claude 3 Opus' },
   { value: 'claude-3-sonnet', label: 'Claude 3 Sonnet' },
+];
+
+const FEEDBACK_SCHEDULE_OPTIONS = [
+  { value: 'manual', label: 'Manual' },
+  { value: 'every-paragraph', label: 'Every paragraph' },
+  { value: 'every-500-words', label: 'Every 500 words' },
 ];
 
 export function AIPreferencesPanel({
@@ -66,6 +73,14 @@ export function AIPreferencesPanel({
     updateAISettings({ aiModel: e.target.value as AIModel });
   };
 
+  const handleFeedbackScheduleModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    updateAISettings({ feedbackScheduleMode: e.target.value as FeedbackScheduleMode });
+  };
+
+  const handleFeedbackSchedulePauseDelayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateAISettings({ feedbackSchedulePauseDelay: Number(e.target.value) });
+  };
+
   const handleResetToDefaults = () => {
     updateAISettings({
       enableSuggestions: DEFAULT_AI_SETTINGS.enableSuggestions,
@@ -73,6 +88,8 @@ export function AIPreferencesPanel({
       feedbackVerbosity: DEFAULT_AI_SETTINGS.feedbackVerbosity,
       defaultFeedbackType: DEFAULT_AI_SETTINGS.defaultFeedbackType,
       aiModel: DEFAULT_AI_SETTINGS.aiModel,
+      feedbackScheduleMode: DEFAULT_AI_SETTINGS.feedbackScheduleMode,
+      feedbackSchedulePauseDelay: DEFAULT_AI_SETTINGS.feedbackSchedulePauseDelay,
     });
   };
 
@@ -146,6 +163,36 @@ export function AIPreferencesPanel({
               onChange={handleDefaultFeedbackTypeChange}
               hint="Where AI feedback is displayed"
               fullWidth
+            />
+          </div>
+        </div>
+
+        <div className="ai-prefs-section">
+          <h3 className="ai-prefs-section-title">Feedback Scheduling</h3>
+
+          <div className="ai-prefs-field">
+            <Select
+              label="Automatic Feedback"
+              options={FEEDBACK_SCHEDULE_OPTIONS}
+              value={settings.feedbackScheduleMode}
+              onChange={handleFeedbackScheduleModeChange}
+              hint="When to automatically request AI feedback"
+              fullWidth
+            />
+          </div>
+
+          <div className="ai-prefs-field">
+            <Slider
+              label="Typing Pause Delay"
+              min={1000}
+              max={10000}
+              step={500}
+              value={settings.feedbackSchedulePauseDelay}
+              onChange={handleFeedbackSchedulePauseDelayChange}
+              valueFormatter={(v) => `${v / 1000}s`}
+              hint="Wait time after typing stops before triggering feedback"
+              fullWidth
+              disabled={settings.feedbackScheduleMode === 'manual'}
             />
           </div>
         </div>

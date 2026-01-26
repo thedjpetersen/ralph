@@ -29,6 +29,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
 export type FeedbackVerbosity = 'brief' | 'standard' | 'detailed';
 export type FeedbackType = 'inline' | 'sidebar' | 'modal';
 export type AIModel = 'gpt-4' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'default';
+export type FeedbackScheduleMode = 'manual' | 'every-paragraph' | 'every-500-words';
 
 export const DEFAULT_AI_SETTINGS: AISettings = {
   enableSuggestions: true,
@@ -40,6 +41,8 @@ export const DEFAULT_AI_SETTINGS: AISettings = {
   feedbackVerbosity: 'standard',
   defaultFeedbackType: 'inline',
   aiModel: 'default',
+  feedbackScheduleMode: 'manual',
+  feedbackSchedulePauseDelay: 3000, // ms - pause before triggering scheduled feedback
 };
 
 export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
@@ -86,6 +89,8 @@ export interface AISettings {
   feedbackVerbosity: FeedbackVerbosity;
   defaultFeedbackType: FeedbackType;
   aiModel: AIModel;
+  feedbackScheduleMode: FeedbackScheduleMode;
+  feedbackSchedulePauseDelay: number;
 }
 
 export interface AppearanceSettings {
