@@ -27,6 +27,54 @@ function useReducedMotion(): boolean {
   return prefersReducedMotion;
 }
 
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 640px)').matches;
+  });
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 640px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  return isMobile;
+}
+
+function useVirtualKeyboardHeight(): number {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.visualViewport) return;
+
+    const viewport = window.visualViewport;
+
+    const handleResize = () => {
+      const windowHeight = window.innerHeight;
+      const viewportHeight = viewport.height;
+      const diff = windowHeight - viewportHeight;
+      setKeyboardHeight(diff > 100 ? diff : 0);
+    };
+
+    viewport.addEventListener('resize', handleResize);
+    viewport.addEventListener('scroll', handleResize);
+    handleResize();
+
+    return () => {
+      viewport.removeEventListener('resize', handleResize);
+      viewport.removeEventListener('scroll', handleResize);
+    };
+  }, []);
+
+  return keyboardHeight;
+}
+
+// Split actions into primary (most used) and secondary (overflow)
+const PRIMARY_ACTIONS = FORMAT_ACTIONS.slice(0, 4); // bold, italic, underline, strikethrough
+const SECONDARY_ACTIONS = FORMAT_ACTIONS.slice(4); // code, codeblock, link
+
 interface FormattingToolbarProps {
   /** CSS selector or element to attach selection listener to. If not provided, attaches to document. */
   targetSelector?: string;
@@ -39,7 +87,11 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
   const { openColorPicker } = useTextHighlightStore();
 
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
+  const keyboardHeight = useVirtualKeyboardHeight();
+  const [showOverflow, setShowOverflow] = useState(false);
 
   // Handle text selection
   const handleSelection = useCallback(() => {
@@ -136,9 +188,10 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
 
       if (!isActive) return;
 
-      // Escape to dismiss
+      // Escape to dismiss (also close overflow menu)
       if (e.key === 'Escape') {
         e.preventDefault();
+        setShowOverflow(false);
         hideToolbar();
         return;
       }
@@ -185,13 +238,19 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isActive, applyFormat, hideToolbar, undo]);
 
+  // Create a wrapper to hide toolbar and reset overflow state
+  const handleHideToolbar = useCallback(() => {
+    setShowOverflow(false);
+    hideToolbar();
+  }, [hideToolbar]);
+
   // Handle click outside to dismiss
   useEffect(() => {
     if (!isActive) return;
 
     const handleClickOutside = (e: MouseEvent) => {
       if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
-        hideToolbar();
+        handleHideToolbar();
       }
     };
 
@@ -204,30 +263,57 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
       clearTimeout(timeout);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isActive, hideToolbar]);
+  }, [isActive, handleHideToolbar]);
 
   const handleFormatClick = (action: FormatAction) => {
     applyFormat(action);
+    setShowOverflow(false);
   };
 
   const handleAskAI = () => {
     if (selectedText && targetElement && toolbarPosition) {
-      hideToolbar();
+      handleHideToolbar();
       showAIPrompt(selectedText, selectionStart, selectionEnd, targetElement, toolbarPosition);
     }
   };
 
   const handleHighlight = () => {
     if (selectedText && targetElement && toolbarPosition) {
-      hideToolbar();
+      handleHideToolbar();
       openColorPicker(selectedText, selectionStart, selectionEnd, targetElement, toolbarPosition);
     }
   };
 
-  if (!isActive || !toolbarPosition) {
+  const toggleOverflow = () => {
+    setShowOverflow((prev) => !prev);
+  };
+
+  // Calculate mobile-adjusted position
+  const getMobileAdjustedPosition = () => {
+    if (!toolbarPosition) return toolbarPosition;
+
+    if (isMobile && keyboardHeight > 0) {
+      // When keyboard is visible, position toolbar above the keyboard
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      return {
+        top: viewportHeight - 60, // Position above keyboard with some margin
+        left: window.innerWidth / 2, // Center horizontally
+      };
+    }
+
+    return toolbarPosition;
+  };
+
+  const adjustedPosition = getMobileAdjustedPosition();
+
+  if (!isActive || !adjustedPosition) {
     // Still render the color picker even when main toolbar is hidden
     return <HighlightColorPicker prefersReducedMotion={prefersReducedMotion} />;
   }
+
+  // Desktop layout: Show all actions
+  // Mobile layout: Show primary actions + overflow menu
+  const actionsToShow = isMobile ? PRIMARY_ACTIONS : FORMAT_ACTIONS;
 
   return (
     <>
@@ -235,10 +321,11 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
     <AnimatePresence>
       <motion.div
         ref={toolbarRef}
-        className="formatting-toolbar"
+        className={`formatting-toolbar ${isMobile ? 'formatting-toolbar-mobile' : ''}`}
         style={{
-          top: toolbarPosition.top,
-          left: toolbarPosition.left,
+          top: adjustedPosition.top,
+          left: adjustedPosition.left,
+          ...(isMobile && keyboardHeight > 0 ? { position: 'fixed', transform: 'translateX(-50%)' } : {}),
         }}
         initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 10, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -247,31 +334,85 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
         role="toolbar"
         aria-label="Text formatting options"
       >
-        <div className="formatting-toolbar-buttons">
-          {FORMAT_ACTIONS.map((action) => (
+        <div
+          ref={scrollContainerRef}
+          className="formatting-toolbar-scroll-container"
+        >
+          <div className="formatting-toolbar-buttons">
+            {actionsToShow.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                className={`formatting-toolbar-btn formatting-toolbar-btn-${action.id}`}
+                onClick={() => handleFormatClick(action.id)}
+                title={`${action.label} (${action.shortcut})`}
+                aria-label={action.label}
+              >
+                <span className="formatting-toolbar-btn-icon">{action.icon}</span>
+              </button>
+            ))}
             <button
-              key={action.id}
               type="button"
-              className={`formatting-toolbar-btn formatting-toolbar-btn-${action.id}`}
-              onClick={() => handleFormatClick(action.id)}
-              title={`${action.label} (${action.shortcut})`}
-              aria-label={action.label}
+              className="formatting-toolbar-btn formatting-toolbar-btn-highlight"
+              onClick={handleHighlight}
+              title="Highlight"
+              aria-label="Highlight text with color"
             >
-              <span className="formatting-toolbar-btn-icon">{action.icon}</span>
+              <svg className="formatting-toolbar-highlight-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+              </svg>
             </button>
-          ))}
-          <button
-            type="button"
-            className="formatting-toolbar-btn formatting-toolbar-btn-highlight"
-            onClick={handleHighlight}
-            title="Highlight"
-            aria-label="Highlight text with color"
-          >
-            <svg className="formatting-toolbar-highlight-icon" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
-            </svg>
-          </button>
+          </div>
         </div>
+
+        {/* Overflow menu for mobile */}
+        {isMobile && SECONDARY_ACTIONS.length > 0 && (
+          <>
+            <div className="formatting-toolbar-divider" aria-hidden="true" />
+            <div className="formatting-toolbar-overflow-wrapper">
+              <button
+                type="button"
+                className={`formatting-toolbar-btn formatting-toolbar-btn-overflow ${showOverflow ? 'active' : ''}`}
+                onClick={toggleOverflow}
+                title="More formatting options"
+                aria-label="More formatting options"
+                aria-expanded={showOverflow}
+                aria-haspopup="menu"
+              >
+                <svg className="formatting-toolbar-overflow-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                </svg>
+              </button>
+              <AnimatePresence>
+                {showOverflow && (
+                  <motion.div
+                    className="formatting-toolbar-overflow-menu"
+                    initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                    transition={{ duration: 0.1 }}
+                    role="menu"
+                    aria-label="Additional formatting options"
+                  >
+                    {SECONDARY_ACTIONS.map((action) => (
+                      <button
+                        key={action.id}
+                        type="button"
+                        className="formatting-toolbar-overflow-item"
+                        onClick={() => handleFormatClick(action.id)}
+                        role="menuitem"
+                      >
+                        <span className="formatting-toolbar-overflow-item-icon">{action.icon}</span>
+                        <span className="formatting-toolbar-overflow-item-label">{action.label}</span>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </>
+        )}
+
         <div className="formatting-toolbar-divider" aria-hidden="true" />
         <button
           type="button"
@@ -290,7 +431,7 @@ export function FormattingToolbar({ targetSelector }: FormattingToolbarProps) {
         <button
           type="button"
           className="formatting-toolbar-close"
-          onClick={() => hideToolbar()}
+          onClick={handleHideToolbar}
           aria-label="Close toolbar"
           title="Close (Esc)"
         >
