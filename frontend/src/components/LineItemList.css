@@ -54,6 +54,37 @@
   border-bottom: none;
 }
 
+/* Draggable list integration */
+.line-items-draggable {
+  padding-left: 28px;
+}
+
+.line-items-draggable .line-item-row {
+  border-bottom: 1px solid #333;
+  border-radius: 0;
+  background: transparent;
+}
+
+.line-items-draggable .line-item-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.line-item-row-content {
+  display: flex;
+  padding: 0.75rem 1rem;
+  align-items: center;
+  width: 100%;
+}
+
+.line-item-dragging {
+  opacity: 0.8;
+}
+
+/* Show drag handle on row hover */
+.line-items-draggable .draggable-list-handle {
+  left: -28px;
+}
+
 .line-items-footer {
   display: flex;
   padding: 0.75rem 1rem;
@@ -64,6 +95,11 @@
 .line-col {
   display: flex;
   align-items: center;
+}
+
+.col-drag-handle {
+  width: 28px;
+  flex-shrink: 0;
 }
 
 .col-description {
@@ -311,6 +347,14 @@
 
   .line-item-row {
     border-bottom-color: #eee;
+  }
+
+  .line-items-draggable .line-item-row {
+    border-bottom-color: #eee;
+  }
+
+  .line-items-draggable .line-item-row:hover {
+    background: rgba(0, 0, 0, 0.02);
   }
 
   .line-items-footer {

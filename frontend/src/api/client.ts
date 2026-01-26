@@ -980,6 +980,20 @@ export const lineItemsApi = {
       throw new Error('Failed to delete line item');
     }
   },
+
+  async reorder(accountId: string, transactionId: string, itemIds: string[]): Promise<LineItem[]> {
+    const response = await fetch(`${API_BASE}/accounts/${accountId}/transactions/${transactionId}/line-items/reorder`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ item_ids: itemIds }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to reorder line items');
+    }
+    return response.json();
+  },
 };
 
 // Discount types

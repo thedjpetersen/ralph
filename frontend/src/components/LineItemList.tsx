@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTransactionsStore, type LineItem, type CreateLineItemRequest } from '../stores/transactions';
+import { DraggableList, type DraggableItem } from './ui';
 import './LineItemList.css';
 
 interface LineItemListProps {
@@ -26,7 +27,7 @@ const initialFormState: NewLineItemForm = {
 };
 
 export function LineItemList({ accountId, transactionId, lineItems, currency }: LineItemListProps) {
-  const { addLineItem, updateLineItem, deleteLineItem, isLoading } = useTransactionsStore();
+  const { addLineItem, updateLineItem, deleteLineItem, reorderLineItems, isLoading } = useTransactionsStore();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [newItemForm, setNewItemForm] = useState<NewLineItemForm>(initialFormState);
@@ -34,24 +35,27 @@ export function LineItemList({ accountId, transactionId, lineItems, currency }: 
   const [editForm, setEditForm] = useState<NewLineItemForm>(initialFormState);
   const [error, setError] = useState<string | null>(null);
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD',
-    }).format(amount);
-  };
+  const formatAmount = useCallback(
+    (amount: number) => {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency || 'USD',
+      }).format(amount);
+    },
+    [currency]
+  );
 
-  const handleNewItemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewItemChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewItemForm((prev) => ({ ...prev, [name]: value }));
     setError(null);
-  };
+  }, []);
 
-  const handleEditItemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditItemChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
     setError(null);
-  };
+  }, []);
 
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +86,7 @@ export function LineItemList({ accountId, transactionId, lineItems, currency }: 
     }
   };
 
-  const startEditing = (item: LineItem) => {
+  const startEditing = useCallback((item: LineItem) => {
     setEditingId(item.id);
     setEditForm({
       description: item.description,
@@ -91,57 +95,181 @@ export function LineItemList({ accountId, transactionId, lineItems, currency }: 
       sku: item.sku || '',
       category: item.category || '',
     });
-  };
+  }, []);
 
-  const cancelEditing = () => {
+  const cancelEditing = useCallback(() => {
     setEditingId(null);
     setEditForm(initialFormState);
     setError(null);
-  };
+  }, []);
 
-  const handleUpdateItem = async (id: string) => {
-    if (!editForm.description || !editForm.unit_price) {
-      setError('Description and unit price are required');
-      return;
-    }
+  const handleUpdateItem = useCallback(
+    async (id: string) => {
+      if (!editForm.description || !editForm.unit_price) {
+        setError('Description and unit price are required');
+        return;
+      }
 
-    try {
-      const quantity = parseFloat(editForm.quantity) || 1;
-      const unitPrice = parseFloat(editForm.unit_price) || 0;
+      try {
+        const quantity = parseFloat(editForm.quantity) || 1;
+        const unitPrice = parseFloat(editForm.unit_price) || 0;
 
-      await updateLineItem(accountId, transactionId, id, {
-        description: editForm.description,
-        quantity,
-        unit_price: unitPrice,
-        total_price: quantity * unitPrice,
-        sku: editForm.sku || undefined,
-        category: editForm.category || undefined,
-      });
+        await updateLineItem(accountId, transactionId, id, {
+          description: editForm.description,
+          quantity,
+          unit_price: unitPrice,
+          total_price: quantity * unitPrice,
+          sku: editForm.sku || undefined,
+          category: editForm.category || undefined,
+        });
 
-      setEditingId(null);
-      setEditForm(initialFormState);
-      setError(null);
-    } catch {
-      setError('Failed to update line item');
-    }
-  };
+        setEditingId(null);
+        setEditForm(initialFormState);
+        setError(null);
+      } catch {
+        setError('Failed to update line item');
+      }
+    },
+    [accountId, transactionId, editForm, updateLineItem]
+  );
 
-  const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this line item?')) {
-      return;
-    }
+  const handleDeleteItem = useCallback(
+    async (id: string) => {
+      if (!confirm('Are you sure you want to delete this line item?')) {
+        return;
+      }
 
-    try {
-      await deleteLineItem(accountId, transactionId, id);
-      setError(null);
-    } catch {
-      setError('Failed to delete line item');
-    }
-  };
+      try {
+        await deleteLineItem(accountId, transactionId, id);
+        setError(null);
+      } catch {
+        setError('Failed to delete line item');
+      }
+    },
+    [accountId, transactionId, deleteLineItem]
+  );
 
   const calculateTotal = () => {
     return lineItems.reduce((sum, item) => sum + item.total_price, 0);
   };
+
+  const handleReorder = useCallback(
+    (reorderedItems: (LineItem & DraggableItem)[]) => {
+      reorderLineItems(accountId, transactionId, reorderedItems);
+    },
+    [accountId, transactionId, reorderLineItems]
+  );
+
+  // Create draggable items with explicit id for DraggableList
+  const draggableLineItems: (LineItem & DraggableItem)[] = lineItems.map((item) => ({
+    ...item,
+    id: item.id,
+  }));
+
+  const renderLineItem = useCallback(
+    (item: LineItem & DraggableItem, _index: number, isDragging: boolean) => {
+      const isEditing = editingId === item.id;
+
+      return (
+        <div className={`line-item-row-content ${isDragging ? 'line-item-dragging' : ''}`}>
+          {isEditing ? (
+            <>
+              <div className="line-col col-description">
+                <input
+                  type="text"
+                  name="description"
+                  value={editForm.description}
+                  onChange={handleEditItemChange}
+                  className="line-input"
+                  placeholder="Description"
+                />
+              </div>
+              <div className="line-col col-quantity">
+                <input
+                  type="number"
+                  name="quantity"
+                  value={editForm.quantity}
+                  onChange={handleEditItemChange}
+                  className="line-input"
+                  min="1"
+                  step="1"
+                />
+              </div>
+              <div className="line-col col-price">
+                <input
+                  type="number"
+                  name="unit_price"
+                  value={editForm.unit_price}
+                  onChange={handleEditItemChange}
+                  className="line-input"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              <div className="line-col col-total">
+                {formatAmount(
+                  (parseFloat(editForm.quantity) || 1) *
+                    (parseFloat(editForm.unit_price) || 0)
+                )}
+              </div>
+              <div className="line-col col-actions">
+                <button
+                  onClick={() => handleUpdateItem(item.id)}
+                  className="action-button save-action"
+                  disabled={isLoading}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={cancelEditing}
+                  className="action-button cancel-action"
+                  disabled={isLoading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="line-col col-description">
+                <span className="item-description">{item.description}</span>
+                {item.sku && (
+                  <span className="item-sku">SKU: {item.sku}</span>
+                )}
+                {item.category && (
+                  <span className="item-category">{item.category}</span>
+                )}
+              </div>
+              <div className="line-col col-quantity">{item.quantity}</div>
+              <div className="line-col col-price">
+                {formatAmount(item.unit_price)}
+              </div>
+              <div className="line-col col-total">
+                {formatAmount(item.total_price)}
+              </div>
+              <div className="line-col col-actions">
+                <button
+                  onClick={() => startEditing(item)}
+                  className="action-button edit-action"
+                  disabled={isLoading}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteItem(item.id)}
+                  className="action-button delete-action"
+                  disabled={isLoading}
+                >
+                  Delete
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      );
+    },
+    [editingId, editForm, formatAmount, handleEditItemChange, handleUpdateItem, cancelEditing, startEditing, handleDeleteItem, isLoading]
+  );
 
   return (
     <div className="line-item-list">
@@ -161,6 +289,7 @@ export function LineItemList({ accountId, transactionId, lineItems, currency }: 
         <>
           <div className="line-items-table">
             <div className="line-items-header">
+              <div className="line-col col-drag-handle"></div>
               <div className="line-col col-description">Description</div>
               <div className="line-col col-quantity">Qty</div>
               <div className="line-col col-price">Unit Price</div>
@@ -168,106 +297,19 @@ export function LineItemList({ accountId, transactionId, lineItems, currency }: 
               <div className="line-col col-actions">Actions</div>
             </div>
 
-            {lineItems.map((item) => (
-              <div key={item.id} className="line-item-row">
-                {editingId === item.id ? (
-                  <>
-                    <div className="line-col col-description">
-                      <input
-                        type="text"
-                        name="description"
-                        value={editForm.description}
-                        onChange={handleEditItemChange}
-                        className="line-input"
-                        placeholder="Description"
-                      />
-                    </div>
-                    <div className="line-col col-quantity">
-                      <input
-                        type="number"
-                        name="quantity"
-                        value={editForm.quantity}
-                        onChange={handleEditItemChange}
-                        className="line-input"
-                        min="1"
-                        step="1"
-                      />
-                    </div>
-                    <div className="line-col col-price">
-                      <input
-                        type="number"
-                        name="unit_price"
-                        value={editForm.unit_price}
-                        onChange={handleEditItemChange}
-                        className="line-input"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div className="line-col col-total">
-                      {formatAmount(
-                        (parseFloat(editForm.quantity) || 1) *
-                          (parseFloat(editForm.unit_price) || 0)
-                      )}
-                    </div>
-                    <div className="line-col col-actions">
-                      <button
-                        onClick={() => handleUpdateItem(item.id)}
-                        className="action-button save-action"
-                        disabled={isLoading}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        className="action-button cancel-action"
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="line-col col-description">
-                      <span className="item-description">{item.description}</span>
-                      {item.sku && (
-                        <span className="item-sku">SKU: {item.sku}</span>
-                      )}
-                      {item.category && (
-                        <span className="item-category">{item.category}</span>
-                      )}
-                    </div>
-                    <div className="line-col col-quantity">{item.quantity}</div>
-                    <div className="line-col col-price">
-                      {formatAmount(item.unit_price)}
-                    </div>
-                    <div className="line-col col-total">
-                      {formatAmount(item.total_price)}
-                    </div>
-                    <div className="line-col col-actions">
-                      <button
-                        onClick={() => startEditing(item)}
-                        className="action-button edit-action"
-                        disabled={isLoading}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="action-button delete-action"
-                        disabled={isLoading}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
+            <DraggableList
+              items={draggableLineItems}
+              onReorder={handleReorder}
+              renderItem={renderLineItem}
+              className="line-items-draggable"
+              itemClassName="line-item-row"
+              gap={0}
+              disabled={editingId !== null}
+            />
 
             {lineItems.length > 0 && (
               <div className="line-items-footer">
+                <div className="line-col col-drag-handle"></div>
                 <div className="line-col col-description">
                   <strong>Total</strong>
                 </div>

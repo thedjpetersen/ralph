@@ -117,3 +117,7 @@ export {
   type ShortcutBadgeVariant,
   type ShortcutKeys,
 } from './ShortcutBadge';
+export {
+  DraggableList,
+  type DraggableItem,
+} from './DraggableList';

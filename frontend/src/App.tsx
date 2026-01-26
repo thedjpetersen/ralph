@@ -29,6 +29,7 @@ const AIWritingPromptsDemo = lazy(() => import('./pages/AIWritingPromptsDemo').t
 const CommentsSortDemo = lazy(() => import('./pages/CommentsSortDemo').then(m => ({ default: m.CommentsSortDemo })));
 const CodeBlockDemo = lazy(() => import('./pages/CodeBlockDemo').then(m => ({ default: m.CodeBlockDemo })));
 const BlockDragDemo = lazy(() => import('./pages/BlockDragDemo').then(m => ({ default: m.BlockDragDemo })));
+const DraggableListDemo = lazy(() => import('./pages/DraggableListDemo').then(m => ({ default: m.DraggableListDemo })));
 const EditorPreferencesDemo = lazy(() => import('./pages/EditorPreferencesDemo').then(m => ({ default: m.EditorPreferencesDemo })));
 const AIPreferencesDemo = lazy(() => import('./pages/AIPreferencesDemo').then(m => ({ default: m.AIPreferencesDemo })));
 const TouchDemo = lazy(() => import('./pages/TouchDemo').then(m => ({ default: m.TouchDemo })));
@@ -136,6 +137,7 @@ function App() {
         <Route path="/comments-sort-demo" element={<Suspense fallback={<PageLoadingSpinner />}><CommentsSortDemo /></Suspense>} />
         <Route path="/code-block-demo" element={<Suspense fallback={<PageLoadingSpinner />}><CodeBlockDemo /></Suspense>} />
         <Route path="/block-drag-demo" element={<Suspense fallback={<PageLoadingSpinner />}><BlockDragDemo /></Suspense>} />
+        <Route path="/draggable-list-demo" element={<Suspense fallback={<PageLoadingSpinner />}><DraggableListDemo /></Suspense>} />
         <Route path="/editor-preferences-demo" element={<Suspense fallback={<PageLoadingSpinner />}><EditorPreferencesDemo /></Suspense>} />
         <Route path="/ai-preferences-demo" element={<Suspense fallback={<PageLoadingSpinner />}><AIPreferencesDemo /></Suspense>} />
         <Route path="/touch-demo" element={<Suspense fallback={<PageLoadingSpinner />}><TouchDemo /></Suspense>} />

@@ -48,6 +48,7 @@ interface TransactionsState {
   addLineItem: (accountId: string, transactionId: string, data: Omit<CreateLineItemRequest, 'receipt_id'>) => Promise<LineItem | null>;
   updateLineItem: (accountId: string, transactionId: string, id: string, data: UpdateLineItemRequest) => Promise<LineItem | null>;
   deleteLineItem: (accountId: string, transactionId: string, id: string) => Promise<boolean>;
+  reorderLineItems: (accountId: string, transactionId: string, reorderedItems: LineItem[]) => Promise<void>;
 }
 
 export const useTransactionsStore = create<TransactionsState>()((set, get) => ({
@@ -414,6 +415,42 @@ export const useTransactionsStore = create<TransactionsState>()((set, get) => ({
     });
 
     return result !== null;
+  },
+
+  // Reorder line items with optimistic update and backend persistence
+  reorderLineItems: async (accountId, transactionId, reorderedItems) => {
+    const { lineItems } = get();
+
+    // Apply optimistic update immediately
+    // Update line_number to reflect new order
+    const updatedLineItems = reorderedItems.map((item, index) => ({
+      ...item,
+      line_number: index + 1,
+      updated_at: new Date().toISOString(),
+    }));
+
+    set({
+      lineItems: updatedLineItems,
+      error: null,
+    });
+
+    // Persist to backend with optimistic mutation
+    await executeOptimisticMutation({
+      mutationId: generateMutationId('lineitem-reorder'),
+      type: 'lineitem:reorder',
+      optimisticData: updatedLineItems,
+      previousData: lineItems,
+      mutationFn: () => lineItemsApi.reorder(accountId, transactionId, reorderedItems.map(item => item.id)),
+      onSuccess: (serverLineItems) => {
+        // Apply server response to ensure consistency
+        set({ lineItems: serverLineItems });
+      },
+      onRollback: () => {
+        // Restore previous order on failure
+        set({ lineItems });
+      },
+      errorMessage: 'Failed to reorder line items',
+    });
   },
 }));
 
