@@ -7,6 +7,7 @@ import { useFindReplaceStore } from '../stores/findReplace';
 import { useAISummaryStore } from '../stores/aiSummary';
 import { useAIOutlineStore } from '../stores/aiOutline';
 import { useAIToneAnalyzerStore } from '../stores/aiToneAnalyzer';
+import { useAIVocabularyEnhancerStore } from '../stores/aiVocabularyEnhancer';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { fuzzySearch, highlightMatch } from '../utils/fuzzySearch';
 import './CommandPalette.css';
@@ -59,6 +60,7 @@ function useCommands(): Command[] {
   const { openSummaryDialog } = useAISummaryStore();
   const { openOutlineDialog } = useAIOutlineStore();
   const { openPanel: openToneAnalyzer } = useAIToneAnalyzerStore();
+  const { openPanel: openVocabularyEnhancer } = useAIVocabularyEnhancerStore();
   const { closePalette } = useCommandPaletteStore();
 
   return useMemo(() => {
@@ -299,6 +301,15 @@ Also want to cover communication protocols, stakeholder management, and risk ass
         keywords: ['tone', 'sentiment', 'formal', 'casual', 'analyze', 'writing', 'style', 'mood'],
         action: () => { openToneAnalyzer(); closePalette(); },
       },
+      {
+        id: 'ai-vocabulary-enhancer',
+        label: 'Enhance Vocabulary',
+        category: 'ai',
+        description: 'Find and replace weak or overused words with better alternatives',
+        shortcut: '⌥V',
+        keywords: ['vocabulary', 'words', 'synonyms', 'thesaurus', 'enhance', 'improve', 'writing', 'weak', 'overused'],
+        action: () => { openVocabularyEnhancer(); closePalette(); },
+      },
 
       // Settings
       {
@@ -344,7 +355,7 @@ Also want to cover communication protocols, stakeholder management, and risk ass
     ];
 
     return commands;
-  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, openToneAnalyzer, closePalette]);
+  }, [navigate, openFindReplace, openSummaryDialog, openOutlineDialog, openToneAnalyzer, openVocabularyEnhancer, closePalette]);
 }
 
 // Highlight text component

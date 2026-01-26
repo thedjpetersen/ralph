@@ -1,0 +1,291 @@
+/**
+ * AI Vocabulary Suggestion Popup Styles
+ */
+
+/* CSS Variables */
+.ai-vocabulary-suggestion-popup {
+  --vocab-popup-bg: var(--color-surface, #ffffff);
+  --vocab-popup-border: var(--color-border, #e5e7eb);
+  --vocab-popup-text: var(--color-text, #1f2937);
+  --vocab-popup-text-secondary: var(--color-text-secondary, #6b7280);
+  --vocab-popup-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .ai-vocabulary-suggestion-popup {
+    --vocab-popup-bg: var(--color-surface-dark, #1f2937);
+    --vocab-popup-border: var(--color-border-dark, #374151);
+    --vocab-popup-text: var(--color-text-dark, #f9fafb);
+    --vocab-popup-text-secondary: var(--color-text-secondary-dark, #9ca3af);
+  }
+}
+
+/* Popup container */
+.ai-vocabulary-suggestion-popup {
+  position: fixed;
+  width: 280px;
+  background: var(--vocab-popup-bg);
+  border: 1px solid var(--vocab-popup-border);
+  border-radius: 12px;
+  box-shadow: var(--vocab-popup-shadow);
+  z-index: 1100;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: translateX(-50%);
+}
+
+/* Arrow pointer */
+.ai-vocabulary-suggestion-popup::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: var(--vocab-popup-bg);
+  border-left: 1px solid var(--vocab-popup-border);
+  border-top: 1px solid var(--vocab-popup-border);
+}
+
+/* Header */
+.vocab-popup-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vocab-popup-word {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vocab-popup-original {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--vocab-popup-text);
+}
+
+.vocab-popup-reason {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+}
+
+.vocab-popup-reason.reason-weak {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.vocab-popup-reason.reason-overused {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.vocab-popup-reason.reason-both {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.vocab-popup-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--vocab-popup-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.vocab-popup-close:hover {
+  background: var(--vocab-popup-border);
+  color: var(--vocab-popup-text);
+}
+
+.vocab-popup-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Synonyms section */
+.vocab-popup-synonyms {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vocab-popup-synonyms-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--vocab-popup-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vocab-popup-synonyms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Synonym button */
+.vocab-synonym-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: var(--vocab-popup-bg);
+  border: 1px solid var(--vocab-popup-border);
+  border-radius: 16px;
+  font-size: 13px;
+  color: var(--vocab-popup-text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vocab-synonym-btn:hover {
+  background: var(--color-primary, #3b82f6);
+  border-color: var(--color-primary, #3b82f6);
+  color: white;
+}
+
+.vocab-synonym-btn:hover .vocab-synonym-level {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.vocab-synonym-btn:hover .vocab-synonym-star {
+  color: #fbbf24;
+}
+
+.vocab-synonym-btn.recommended {
+  border-color: var(--color-primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.vocab-synonym-word {
+  font-weight: 500;
+}
+
+.vocab-synonym-level {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.vocab-level-simple {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.vocab-level-standard {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.vocab-level-advanced {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.vocab-level-academic {
+  background: #f3e8ff;
+  color: #9333ea;
+}
+
+.vocab-synonym-star {
+  width: 12px;
+  height: 12px;
+  color: #f59e0b;
+}
+
+/* Hints */
+.vocab-popup-hints {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vocab-popup-border);
+}
+
+.vocab-popup-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--vocab-popup-text-secondary);
+}
+
+.vocab-popup-hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--vocab-popup-border);
+  border: 1px solid var(--vocab-popup-border);
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 10px;
+  box-shadow: 0 1px 0 var(--vocab-popup-border);
+}
+
+/* Legend */
+.vocab-popup-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--vocab-popup-border);
+}
+
+.vocab-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--vocab-popup-text-secondary);
+}
+
+.vocab-level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  font-size: 8px;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ai-vocabulary-suggestion-popup {
+    width: calc(100vw - 40px);
+    max-width: 300px;
+  }
+}

@@ -18,6 +18,7 @@ import { useOnboarding } from '../../stores/onboarding';
 import { useCommandPaletteStore } from '../../stores/commandPalette';
 import { useQuickSwitcherStore } from '../../stores/quickSwitcher';
 import { useAIToneAnalyzerStore } from '../../stores/aiToneAnalyzer';
+import { useAIVocabularyEnhancerStore } from '../../stores/aiVocabularyEnhancer';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -36,6 +37,8 @@ const OnboardingTour = lazy(() => import('../OnboardingTour').then(m => ({ defau
 const AISummaryDialog = lazy(() => import('../AISummaryDialog').then(m => ({ default: m.AISummaryDialog })));
 const AIOutlineDialog = lazy(() => import('../AIOutlineDialog').then(m => ({ default: m.AIOutlineDialog })));
 const AIToneAnalyzerPanel = lazy(() => import('../AIToneAnalyzerPanel').then(m => ({ default: m.AIToneAnalyzerPanel })));
+const AIVocabularyEnhancerPanel = lazy(() => import('../AIVocabularyEnhancerPanel').then(m => ({ default: m.AIVocabularyEnhancerPanel })));
+const AIVocabularySuggestionPopup = lazy(() => import('../AIVocabularySuggestionPopup').then(m => ({ default: m.AIVocabularySuggestionPopup })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -52,6 +55,7 @@ export function AppShell({ children }: AppShellProps) {
   const { togglePalette: toggleCommandPalette, closePalette: closeCommandPalette } = useCommandPaletteStore();
   const { toggleSwitcher: toggleQuickSwitcher, closeSwitcher: closeQuickSwitcher } = useQuickSwitcherStore();
   const { togglePanel: toggleToneAnalyzer, closePanel: closeToneAnalyzer } = useAIToneAnalyzerStore();
+  const { togglePanel: toggleVocabularyEnhancer, closePanel: closeVocabularyEnhancer } = useAIVocabularyEnhancerStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -153,6 +157,7 @@ export function AppShell({ children }: AppShellProps) {
         closeCommandPalette();
         closeQuickSwitcher();
         closeToneAnalyzer();
+        closeVocabularyEnhancer();
       },
       description: 'Close menus',
       allowInInput: true,
@@ -205,6 +210,13 @@ export function AppShell({ children }: AppShellProps) {
       altKey: true,
       action: toggleToneAnalyzer,
       description: 'Toggle tone analyzer panel',
+      allowInInput: true,
+    },
+    {
+      key: 'v',
+      altKey: true,
+      action: toggleVocabularyEnhancer,
+      description: 'Toggle vocabulary enhancer panel',
       allowInInput: true,
     },
   ]);
@@ -292,6 +304,8 @@ export function AppShell({ children }: AppShellProps) {
         <AISummaryDialog />
         <AIOutlineDialog />
         <AIToneAnalyzerPanel />
+        <AIVocabularyEnhancerPanel />
+        <AIVocabularySuggestionPopup />
       </Suspense>
     </div>
   );
