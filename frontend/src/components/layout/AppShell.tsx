@@ -24,6 +24,7 @@ import { useCommentNavigation } from '../../stores/commentHighlight';
 import { useDocumentFoldersStore } from '../../stores/documentFolders';
 import { useStarredDocumentsStore } from '../../stores/starredDocuments';
 import { useTableOfContentsStore } from '../../stores/tableOfContents';
+import { useWelcomeModal } from '../../stores/welcomeModal';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -50,6 +51,7 @@ const AIReadabilityPanel = lazy(() => import('../AIReadabilityPanel').then(m => 
 const FocusModeIndicator = lazy(() => import('../FocusModeIndicator').then(m => ({ default: m.FocusModeIndicator })));
 const TableOfContentsSidebar = lazy(() => import('../TableOfContentsSidebar').then(m => ({ default: m.TableOfContentsSidebar })));
 const LinkPopover = lazy(() => import('../LinkPopover').then(m => ({ default: m.LinkPopover })));
+const WelcomeModal = lazy(() => import('../WelcomeModal').then(m => ({ default: m.WelcomeModal })));
 
 export interface AppShellProps {
   children?: React.ReactNode;
@@ -73,11 +75,13 @@ export function AppShell({ children }: AppShellProps) {
   const { selectedFolderId, folders } = useDocumentFoldersStore();
   const { toggleStar } = useStarredDocumentsStore();
   const { togglePanel: toggleTableOfContents, closePanel: closeTableOfContents } = useTableOfContentsStore();
+  const { shouldShowWelcome, openModal: openWelcomeModal } = useWelcomeModal();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState(false);
   const [hasTriggeredTour, setHasTriggeredTour] = useState(false);
+  const [hasTriggeredWelcome, setHasTriggeredWelcome] = useState(false);
 
   const mainContentRef = useRef<HTMLElement>(null);
   const previousPathnameRef = useRef(location.pathname);
@@ -88,9 +92,21 @@ export function AppShell({ children }: AppShellProps) {
     fetchUser();
   }, [fetchAccounts, fetchUser]);
 
-  // Trigger onboarding tour on first login
+  // Trigger welcome modal on first visit (before the onboarding tour)
   useEffect(() => {
-    if (shouldShowTour && !hasTriggeredTour) {
+    if (shouldShowWelcome && !hasTriggeredWelcome) {
+      // Small delay to let the UI render first
+      const timer = setTimeout(() => {
+        openWelcomeModal();
+        setHasTriggeredWelcome(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldShowWelcome, hasTriggeredWelcome, openWelcomeModal]);
+
+  // Trigger onboarding tour on first login (when started from welcome modal or directly)
+  useEffect(() => {
+    if (shouldShowTour && !hasTriggeredTour && !shouldShowWelcome) {
       // Small delay to let the UI render first
       const timer = setTimeout(() => {
         startTour();
@@ -98,7 +114,7 @@ export function AppShell({ children }: AppShellProps) {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [shouldShowTour, hasTriggeredTour, startTour]);
+  }, [shouldShowTour, hasTriggeredTour, shouldShowWelcome, startTour]);
 
   // Close mobile menu on route change - using ref to avoid lint warning
   useEffect(() => {
@@ -400,6 +416,7 @@ export function AppShell({ children }: AppShellProps) {
         <FocusModeIndicator />
         <TableOfContentsSidebar />
         <LinkPopover />
+        <WelcomeModal />
       </Suspense>
     </div>
   );
