@@ -7,6 +7,7 @@ import { ToastContainer } from '../Toast';
 import { KeyboardShortcutsHelp } from '../ui/KeyboardShortcutsHelp';
 import { ScreenReaderAnnouncer } from '../ScreenReaderAnnouncer';
 import { CommandPalette } from '../CommandPalette';
+import { QuickSwitcher } from '../QuickSwitcher';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { useFindReplaceStore } from '../../stores/findReplace';
 import { useParagraphFocusStore } from '../../stores/paragraphFocus';
@@ -15,6 +16,7 @@ import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
 import { useOnboarding } from '../../stores/onboarding';
 import { useCommandPaletteStore } from '../../stores/commandPalette';
+import { useQuickSwitcherStore } from '../../stores/quickSwitcher';
 import './AppShell.css';
 
 // Lazy-load heavy feature components to reduce initial bundle size
@@ -44,6 +46,7 @@ export function AppShell({ children }: AppShellProps) {
   const { toggle: toggleTypewriterScroll } = useTypewriterScrollStore();
   const { shouldShowTour, startTour } = useOnboarding();
   const { togglePalette: toggleCommandPalette, closePalette: closeCommandPalette } = useCommandPaletteStore();
+  const { toggleSwitcher: toggleQuickSwitcher, closeSwitcher: closeQuickSwitcher } = useQuickSwitcherStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -118,6 +121,20 @@ export function AppShell({ children }: AppShellProps) {
       allowInInput: true,
     },
     {
+      key: 'o',
+      metaKey: true,
+      action: toggleQuickSwitcher,
+      description: 'Open quick switcher',
+      allowInInput: true,
+    },
+    {
+      key: 'o',
+      ctrlKey: true,
+      action: toggleQuickSwitcher,
+      description: 'Open quick switcher',
+      allowInInput: true,
+    },
+    {
       key: '?',
       action: () => setIsShortcutsHelpOpen(true),
       description: 'Show keyboard shortcuts',
@@ -129,6 +146,7 @@ export function AppShell({ children }: AppShellProps) {
         setIsShortcutsHelpOpen(false);
         closeFindReplace();
         closeCommandPalette();
+        closeQuickSwitcher();
       },
       description: 'Close menus',
       allowInInput: true,
@@ -238,6 +256,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Global overlays and toolbars */}
       <ToastContainer />
       <CommandPalette />
+      <QuickSwitcher />
       <KeyboardShortcutsHelp
         isOpen={isShortcutsHelpOpen}
         onClose={() => setIsShortcutsHelpOpen(false)}
