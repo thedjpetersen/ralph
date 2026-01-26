@@ -1,0 +1,173 @@
+.tooltip {
+  position: fixed;
+  z-index: 9999;
+  max-width: 300px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.tooltip-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Variant - Default (dark) */
+.tooltip-default {
+  background-color: var(--color-tooltip-bg, #1f2937);
+  color: var(--color-tooltip-text, #ffffff);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Variant - Light */
+.tooltip-light {
+  background-color: var(--color-bg, #ffffff);
+  color: var(--color-text, #374151);
+  border: 1px solid var(--color-border, #d1d5db);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Variant - Stripe */
+.tooltip-stripe {
+  background-color: var(--color-bg, #ffffff);
+  color: var(--color-text, #374151);
+  border: 1px solid var(--color-border, #d1d5db);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.tooltip-stripe::after {
+  content: '';
+  position: absolute;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary, #3b82f6) 0%,
+    var(--color-info, #06b6d4) 50%,
+    var(--color-success, #10b981) 100%
+  );
+}
+
+/* Stripe position based on tooltip position */
+.tooltip-stripe.tooltip-top::after {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 0 0 6px 6px;
+}
+
+.tooltip-stripe.tooltip-bottom::after {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 6px 6px 0 0;
+}
+
+.tooltip-stripe.tooltip-left::after {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 0 6px 6px 0;
+}
+
+.tooltip-stripe.tooltip-right::after {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 6px 0 0 6px;
+}
+
+/* Arrow styles */
+.tooltip-arrow::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+}
+
+/* Arrow - Default variant */
+.tooltip-default.tooltip-arrow::before {
+  background-color: var(--color-tooltip-bg, #1f2937);
+}
+
+/* Arrow - Light variant */
+.tooltip-light.tooltip-arrow::before {
+  background-color: var(--color-bg, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+}
+
+/* Arrow - Stripe variant */
+.tooltip-stripe.tooltip-arrow::before {
+  background-color: var(--color-bg, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+}
+
+/* Arrow positions */
+.tooltip-arrow.tooltip-top::before {
+  bottom: -4px;
+  left: 50%;
+  margin-left: -4px;
+  border-top: none;
+  border-left: none;
+}
+
+.tooltip-arrow.tooltip-bottom::before {
+  top: -4px;
+  left: 50%;
+  margin-left: -4px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.tooltip-arrow.tooltip-left::before {
+  right: -4px;
+  top: 50%;
+  margin-top: -4px;
+  border-bottom: none;
+  border-left: none;
+}
+
+.tooltip-arrow.tooltip-right::before {
+  left: -4px;
+  top: 50%;
+  margin-top: -4px;
+  border-top: none;
+  border-right: none;
+}
+
+/* Content wrapper */
+.tooltip-content {
+  display: block;
+  word-wrap: break-word;
+}
+
+/* Stripe padding adjustments */
+.tooltip-stripe .tooltip-content {
+  position: relative;
+  z-index: 1;
+}
+
+.tooltip-stripe.tooltip-top {
+  padding-bottom: 0.625rem;
+}
+
+.tooltip-stripe.tooltip-bottom {
+  padding-top: 0.625rem;
+}
+
+.tooltip-stripe.tooltip-left {
+  padding-right: 0.875rem;
+}
+
+.tooltip-stripe.tooltip-right {
+  padding-left: 0.875rem;
+}

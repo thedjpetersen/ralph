@@ -41,3 +41,10 @@ export {
   type TabPanelsProps,
   type TabPanelProps,
 } from './Tabs';
+export { Badge, type BadgeProps, type BadgeVariant, type BadgeSize } from './Badge';
+export {
+  Tooltip,
+  type TooltipProps,
+  type TooltipPosition,
+  type TooltipVariant,
+} from './Tooltip';
