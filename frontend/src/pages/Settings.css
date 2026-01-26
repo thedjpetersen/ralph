@@ -1,6 +1,7 @@
 .settings-page {
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
+  padding-bottom: 2rem;
 }
 
 .settings-header {
@@ -41,34 +42,110 @@
   color: #ff6b6b;
 }
 
-.settings-form {
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #646cff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.retry-button:hover {
+  background-color: #747bff;
+}
+
+.settings-card {
   background-color: #2a2a2a;
   border: 1px solid #333;
   border-radius: 12px;
-  padding: 2rem;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
 }
 
 .settings-section {
-  margin-bottom: 2rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #333;
-}
-
-.settings-section:last-of-type {
-  margin-bottom: 1rem;
-  padding-bottom: 0;
-  border-bottom: none;
+  padding: 1.5rem;
 }
 
 .section-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.section-description {
   margin: 0 0 1.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.settings-form-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Profile Avatar Section */
+.profile-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.avatar-container {
+  flex-shrink: 0;
+}
+
+.avatar-image {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #646cff 0%, #9b59b6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+}
+
+.avatar-info {
+  min-width: 0;
+}
+
+.avatar-name {
+  margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.87);
 }
 
+.avatar-email {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Form Elements */
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .form-group:last-child {
@@ -80,6 +157,28 @@
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.87);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.form-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .form-select {
@@ -108,12 +207,13 @@
 
 .form-help {
   margin: 0.5rem 0 0;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: rgba(255, 255, 255, 0.5);
 }
 
+/* Checkbox Styles */
 .checkbox-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .checkbox-label {
@@ -156,31 +256,31 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+/* Form Messages */
 .form-error {
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
   background-color: rgba(255, 107, 107, 0.1);
   border: 1px solid rgba(255, 107, 107, 0.3);
   border-radius: 6px;
   color: #ff6b6b;
+  font-size: 0.875rem;
 }
 
 .form-success {
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
   background-color: rgba(46, 204, 113, 0.1);
   border: 1px solid rgba(46, 204, 113, 0.3);
   border-radius: 6px;
   color: #2ecc71;
+  font-size: 0.875rem;
 }
 
+/* Form Actions */
 .form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
-  padding-top: 1rem;
-  border-top: 1px solid #333;
-  margin-top: 1.5rem;
+  padding-top: 0.5rem;
 }
 
 .save-button {
@@ -191,6 +291,8 @@
   color: white;
   cursor: pointer;
   font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
 .save-button:hover:not(:disabled) {
@@ -202,6 +304,69 @@
   cursor: not-allowed;
 }
 
+/* Danger Zone */
+.danger-zone {
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.danger-title {
+  color: #ff6b6b;
+}
+
+.danger-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.danger-item {
+  padding: 1rem;
+  background-color: rgba(255, 107, 107, 0.05);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  border-radius: 8px;
+}
+
+.danger-item-info h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.danger-item-info p {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.danger-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.delete-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #ff6b6b;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.delete-button:hover:not(:disabled) {
+  background-color: #ff5252;
+}
+
+.delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Light Mode */
 @media (prefers-color-scheme: light) {
   .settings-subtitle {
     color: rgba(0, 0, 0, 0.6);
@@ -211,21 +376,43 @@
     background-color: #f5f5f5;
   }
 
-  .settings-form {
+  .settings-card {
     background-color: #fff;
     border-color: #ddd;
-  }
-
-  .settings-section {
-    border-bottom-color: #ddd;
   }
 
   .section-title {
     color: #213547;
   }
 
+  .section-description {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .profile-avatar-section {
+    background-color: #f5f5f5;
+  }
+
+  .avatar-name {
+    color: #213547;
+  }
+
+  .avatar-email {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
   .form-label {
     color: #213547;
+  }
+
+  .form-input {
+    background-color: #f9f9f9;
+    border-color: #ccc;
+    color: #213547;
+  }
+
+  .form-input::placeholder {
+    color: rgba(0, 0, 0, 0.3);
   }
 
   .form-select {
@@ -254,7 +441,40 @@
     color: rgba(0, 0, 0, 0.5);
   }
 
+  .danger-item-info h3 {
+    color: #213547;
+  }
+
+  .danger-item-info p {
+    color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .settings-page {
+    padding: 0 1rem 2rem;
+  }
+
+  .settings-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .settings-section {
+    padding: 1rem;
+  }
+
+  .profile-avatar-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
   .form-actions {
-    border-top-color: #ddd;
+    flex-direction: column;
+  }
+
+  .save-button,
+  .delete-button {
+    width: 100%;
   }
 }

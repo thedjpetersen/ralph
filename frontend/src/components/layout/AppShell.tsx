@@ -14,7 +14,9 @@ import { GhostTonePreview } from '../GhostTonePreview';
 import { CommentHighlightOverlay } from '../CommentHighlightOverlay';
 import { DocumentExportDialog } from '../DocumentExportDialog';
 import { FormattingToolbar } from '../FormattingToolbar';
+import { FindReplaceDialog } from '../FindReplaceDialog';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { useFindReplaceStore } from '../../stores/findReplace';
 import { useAccountStore } from '../../stores/account';
 import { useUserStore } from '../../stores/user';
 import './AppShell.css';
@@ -27,6 +29,7 @@ export function AppShell({ children }: AppShellProps) {
   const location = useLocation();
   const { fetchAccounts } = useAccountStore();
   const { fetchUser } = useUserStore();
+  const { openDialog: openFindReplace, closeDialog: closeFindReplace } = useFindReplaceStore();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -83,6 +86,7 @@ export function AppShell({ children }: AppShellProps) {
       action: () => {
         setIsMobileMenuOpen(false);
         setIsShortcutsHelpOpen(false);
+        closeFindReplace();
       },
       description: 'Close menus',
       allowInInput: true,
@@ -91,6 +95,20 @@ export function AppShell({ children }: AppShellProps) {
       key: '[',
       action: handleSidebarToggle,
       description: 'Toggle sidebar',
+    },
+    {
+      key: 'f',
+      ctrlKey: true,
+      action: () => openFindReplace(),
+      description: 'Find and replace',
+      allowInInput: true,
+    },
+    {
+      key: 'h',
+      ctrlKey: true,
+      action: () => openFindReplace(),
+      description: 'Find and replace',
+      allowInInput: true,
     },
   ]);
 
@@ -167,6 +185,7 @@ export function AppShell({ children }: AppShellProps) {
       <CommentHighlightOverlay />
       <DocumentExportDialog />
       <FormattingToolbar />
+      <FindReplaceDialog />
     </div>
   );
 }

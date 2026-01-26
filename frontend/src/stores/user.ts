@@ -17,6 +17,8 @@ export interface UserPreferences {
     push: boolean;
   };
   defaultTimezone?: string;
+  currency?: string;
+  locale?: string;
 }
 
 export interface APIKey {
@@ -44,6 +46,8 @@ interface UserState {
   fetchAPIKeys: () => Promise<void>;
   createAPIKey: (name: string, expiresAt?: string) => Promise<APIKey & { key: string }>;
   deleteAPIKey: (keyId: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -213,6 +217,63 @@ export const useUserStore = create<UserState>()(
             apiKeys: state.apiKeys.filter((k) => k.id !== keyId),
             isLoading: false,
           }));
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
+        }
+      },
+
+      // Change password
+      changePassword: async (currentPassword, newPassword) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE}/user/password`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ currentPassword, newPassword }),
+          });
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to change password');
+          }
+          set({ isLoading: false });
+        } catch (err) {
+          set({
+            error: err instanceof Error ? err.message : 'Unknown error',
+            isLoading: false,
+          });
+          throw err;
+        }
+      },
+
+      // Delete account
+      deleteAccount: async (password) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(`${API_BASE}/user`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ password }),
+          });
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Failed to delete account');
+          }
+          // Clear state after successful deletion
+          set({
+            user: null,
+            preferences: DEFAULT_PREFERENCES,
+            apiKeys: [],
+            isLoading: false,
+            error: null,
+          });
         } catch (err) {
           set({
             error: err instanceof Error ? err.message : 'Unknown error',
