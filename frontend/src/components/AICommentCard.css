@@ -314,6 +314,68 @@
   }
 }
 
+/* Highlight Interaction States */
+.ai-comment-card.has-highlight {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-comment-card.has-highlight:hover {
+  border-color: var(--comment-color, var(--color-primary-400));
+  box-shadow: 0 2px 12px var(--comment-color-light, rgba(59, 130, 246, 0.15));
+  transform: translateY(-1px);
+}
+
+.ai-comment-card.has-highlight::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--comment-color, var(--color-primary-500));
+  border-radius: 12px 0 0 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ai-comment-card.has-highlight:hover::before {
+  opacity: 1;
+}
+
+/* Focused state when clicking highlighted text */
+.ai-comment-card.is-focused,
+.ai-comment-card.comment-focused {
+  border-color: var(--comment-color, var(--color-primary-400));
+  box-shadow: 0 4px 16px var(--comment-color-light, rgba(59, 130, 246, 0.2));
+  animation: comment-focus-pulse 2s ease-out;
+}
+
+.ai-comment-card.is-focused::before,
+.ai-comment-card.comment-focused::before {
+  opacity: 1;
+}
+
+@keyframes comment-focus-pulse {
+  0% {
+    box-shadow: 0 4px 16px var(--comment-color-light, rgba(59, 130, 246, 0.3));
+    transform: scale(1.01);
+  }
+  50% {
+    box-shadow: 0 4px 20px var(--comment-color-light, rgba(59, 130, 246, 0.4));
+    transform: scale(1.02);
+  }
+  100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transform: scale(1);
+  }
+}
+
+/* Make the card position relative for the pseudo-element */
+.ai-comment-card {
+  position: relative;
+}
+
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   .ai-comment-card {
@@ -342,5 +404,17 @@
   .ai-generate-button:hover {
     background: linear-gradient(135deg, var(--color-gray-700) 0%, var(--color-gray-600) 100%);
     border-color: var(--color-gray-500);
+  }
+}
+
+/* Reduced motion for highlight interactions */
+@media (prefers-reduced-motion: reduce) {
+  .ai-comment-card.has-highlight:hover {
+    transform: none;
+  }
+
+  .ai-comment-card.is-focused,
+  .ai-comment-card.comment-focused {
+    animation: none;
   }
 }

@@ -1,0 +1,279 @@
+/* Mobile Tab Bar - Fixed bottom navigation for mobile devices */
+.mobile-tab-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background-color: #1a1a1a;
+  border-top: 1px solid #333;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Show on mobile devices */
+@media (max-width: 768px) {
+  .mobile-tab-bar {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+  }
+
+  /* Add padding to main content so tab bar doesn't overlap */
+  .layout-main {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0) + 1rem);
+  }
+}
+
+/* Tab bar item */
+.mobile-tab-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 8px 4px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 0;
+}
+
+.mobile-tab-bar-item:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-tab-bar-item.active {
+  color: #646cff;
+}
+
+/* Icon styling */
+.mobile-tab-bar-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* Label styling */
+.mobile-tab-bar-label {
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 4px;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+}
+
+/* Add button - center prominent button */
+.mobile-tab-bar-add {
+  position: relative;
+}
+
+.mobile-tab-bar-add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  border-radius: 50%;
+  color: white;
+  box-shadow: 0 4px 12px rgba(100, 108, 255, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: -12px;
+}
+
+.mobile-tab-bar-add:hover .mobile-tab-bar-add-button {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(100, 108, 255, 0.5);
+}
+
+.mobile-tab-bar-add:active .mobile-tab-bar-add-button {
+  transform: scale(0.95);
+}
+
+.mobile-tab-bar-add .mobile-tab-bar-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-tab-bar-add.active .mobile-tab-bar-label {
+  color: #646cff;
+}
+
+/* Overlay for More menu */
+.mobile-tab-bar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+/* More menu popup */
+.mobile-tab-bar-more-menu {
+  position: fixed;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0));
+  right: 8px;
+  min-width: 180px;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 12px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+  z-index: 101;
+  overflow: hidden;
+  animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* More menu item */
+.mobile-tab-bar-more-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-tab-bar-more-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.mobile-tab-bar-more-item:active {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-tab-bar-more-item.active {
+  color: #646cff;
+  background-color: rgba(100, 108, 255, 0.1);
+}
+
+.mobile-tab-bar-more-item:not(:last-child) {
+  border-bottom: 1px solid #333;
+}
+
+.mobile-tab-bar-more-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.mobile-tab-bar-more-item.active .mobile-tab-bar-more-icon {
+  opacity: 1;
+}
+
+.mobile-tab-bar-more-label {
+  font-weight: 500;
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .mobile-tab-bar-item {
+    transition: transform 0.1s ease;
+  }
+
+  .mobile-tab-bar-item:active {
+    transform: scale(0.95);
+  }
+
+  .mobile-tab-bar-add:active {
+    transform: none;
+  }
+
+  .mobile-tab-bar-more-item {
+    min-height: 48px;
+  }
+}
+
+/* Light mode support */
+@media (prefers-color-scheme: light) {
+  .mobile-tab-bar {
+    background-color: #ffffff;
+    border-top-color: #e0e0e0;
+  }
+
+  .mobile-tab-bar-item {
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  .mobile-tab-bar-item:hover {
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  .mobile-tab-bar-item.active {
+    color: #646cff;
+  }
+
+  .mobile-tab-bar-add .mobile-tab-bar-label {
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .mobile-tab-bar-overlay {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .mobile-tab-bar-more-menu {
+    background-color: #ffffff;
+    border-color: #e0e0e0;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .mobile-tab-bar-more-item {
+    color: #213547;
+  }
+
+  .mobile-tab-bar-more-item:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  .mobile-tab-bar-more-item:active {
+    background-color: rgba(0, 0, 0, 0.06);
+  }
+
+  .mobile-tab-bar-more-item.active {
+    color: #646cff;
+    background-color: rgba(100, 108, 255, 0.08);
+  }
+
+  .mobile-tab-bar-more-item:not(:last-child) {
+    border-bottom-color: #e0e0e0;
+  }
+}
+
+/* Extra small screens - tighter spacing */
+@media (max-width: 360px) {
+  .mobile-tab-bar-label {
+    font-size: 9px;
+  }
+
+  .mobile-tab-bar-add-button {
+    width: 44px;
+    height: 44px;
+    margin-top: -10px;
+  }
+}

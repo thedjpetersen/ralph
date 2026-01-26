@@ -1,6 +1,7 @@
-import { useRef, useEffect, useSyncExternalStore } from 'react';
+import { useRef, useEffect, useSyncExternalStore, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAICommentStore, useAIComment } from '../stores/aiComments';
+import { useCommentHighlightStore, useCommentHighlight, getAuthorColor, hexToRgba } from '../stores/commentHighlight';
 import './AICommentCard.css';
 
 function getReducedMotionSnapshot() {
@@ -30,13 +31,84 @@ interface AICommentCardProps {
   entityId: string;
   context?: Record<string, unknown>;
   onGenerate?: () => void;
+  /** ID of the target text element for highlighting */
+  targetElementId?: string;
+  /** Text range this comment refers to */
+  textRange?: { startIndex: number; endIndex: number };
+  /** Author ID for color assignment */
+  authorId?: string;
 }
 
-export function AICommentCard({ entityType, entityId, context }: AICommentCardProps) {
+export function AICommentCard({
+  entityType,
+  entityId,
+  context,
+  targetElementId,
+  textRange,
+  authorId,
+}: AICommentCardProps) {
   const comment = useAIComment(entityId);
   const { generateComment, cancelStream, clearComment, error, clearError } = useAICommentStore();
+  const { registerComment, unregisterComment, highlightFromComment, clearHighlight } = useCommentHighlightStore();
+  const { focusedCommentId } = useCommentHighlight();
   const contentRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  // Get the author color for this comment
+  const authorColor = getAuthorColor(authorId);
+
+  // Register this comment with the highlight store when it has a text range
+  useEffect(() => {
+    if (comment && textRange) {
+      registerComment({
+        id: comment.id,
+        entityType,
+        entityId,
+        text: comment.text,
+        textRange,
+        authorId,
+        authorColor,
+        createdAt: comment.createdAt,
+      });
+
+      return () => {
+        unregisterComment(comment.id);
+      };
+    }
+  }, [comment, textRange, entityType, entityId, authorId, authorColor, registerComment, unregisterComment]);
+
+  // Scroll this card into view and highlight when focused from text click
+  useEffect(() => {
+    if (focusedCommentId && comment && focusedCommentId === comment.id && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Add a visual pulse effect
+      cardRef.current.classList.add('comment-focused');
+      const timeout = setTimeout(() => {
+        cardRef.current?.classList.remove('comment-focused');
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [focusedCommentId, comment]);
+
+  // Handle mouse enter on comment card to highlight text
+  const handleMouseEnter = useCallback(() => {
+    if (comment && targetElementId && textRange) {
+      highlightFromComment(comment.id, targetElementId);
+    }
+  }, [comment, targetElementId, textRange, highlightFromComment]);
+
+  // Handle mouse leave to clear highlight
+  const handleMouseLeave = useCallback(() => {
+    clearHighlight();
+  }, [clearHighlight]);
+
+  // Handle click to scroll to highlighted text
+  const handleClick = useCallback(() => {
+    if (comment && targetElementId && textRange) {
+      highlightFromComment(comment.id, targetElementId);
+    }
+  }, [comment, targetElementId, textRange, highlightFromComment]);
 
   // Auto-scroll to keep streaming content visible
   useEffect(() => {
@@ -127,12 +199,16 @@ export function AICommentCard({ entityType, entityId, context }: AICommentCardPr
     );
   }
 
+  // Determine if this comment has highlighting capability
+  const hasHighlighting = !!textRange && !!targetElementId;
+
   return (
     <AnimatePresence mode="wait">
       {comment && (
         <motion.div
+          ref={cardRef}
           key={comment.id}
-          className={`ai-comment-card ${comment.isStreaming ? 'is-streaming' : ''}`}
+          className={`ai-comment-card ${comment.isStreaming ? 'is-streaming' : ''} ${hasHighlighting ? 'has-highlight' : ''} ${focusedCommentId === comment.id ? 'is-focused' : ''}`}
           initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 10, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }}
@@ -141,6 +217,13 @@ export function AICommentCard({ entityType, entityId, context }: AICommentCardPr
           aria-label="AI-generated insight"
           aria-live="polite"
           aria-busy={comment.isStreaming}
+          onMouseEnter={hasHighlighting ? handleMouseEnter : undefined}
+          onMouseLeave={hasHighlighting ? handleMouseLeave : undefined}
+          onClick={hasHighlighting ? handleClick : undefined}
+          style={hasHighlighting ? {
+            '--comment-color': authorColor,
+            '--comment-color-light': hexToRgba(authorColor, 0.1),
+          } as React.CSSProperties : undefined}
         >
           <div className="ai-comment-header">
             {aiIcon}

@@ -1,0 +1,78 @@
+/* Comment Highlight Overlay - Inline overlay for comment-text bidirectional highlighting */
+
+.comment-highlight-overlay {
+  position: fixed;
+  z-index: 9997; /* Below ghost previews (9998) and toolbars (9999) */
+  background: var(--color-white, #ffffff);
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: opacity 0.3s ease-out;
+}
+
+.comment-highlight-before,
+.comment-highlight-after {
+  color: var(--color-gray-900, #111827);
+}
+
+.comment-highlight-text {
+  color: var(--color-gray-900, #111827);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 1px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  animation: comment-highlight-pulse 1.5s ease-in-out 2;
+}
+
+@keyframes comment-highlight-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Hover effect for clickable highlight */
+.comment-highlight-overlay:hover .comment-highlight-text {
+  filter: brightness(0.95);
+}
+
+/* Focus visible for accessibility */
+.comment-highlight-overlay:focus-visible {
+  outline: 2px solid var(--color-primary-500, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .comment-highlight-overlay {
+    background: var(--color-gray-800, #1f2937);
+  }
+
+  .comment-highlight-before,
+  .comment-highlight-after {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .comment-highlight-text {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .comment-highlight-overlay:hover .comment-highlight-text {
+    filter: brightness(1.1);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .comment-highlight-text {
+    animation: none;
+  }
+
+  .comment-highlight-overlay {
+    transition: none;
+  }
+}

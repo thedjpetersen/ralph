@@ -11,7 +11,9 @@ import { AIRewriteToolbar } from './AIRewriteToolbar';
 import { GhostRewritePreview } from './GhostRewritePreview';
 import { AIToneToolbar } from './AIToneToolbar';
 import { GhostTonePreview } from './GhostTonePreview';
+import { CommentHighlightOverlay } from './CommentHighlightOverlay';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { MobileTabBar } from './layout/MobileTabBar';
 import './Layout.css';
 
 export function Layout() {
@@ -578,6 +580,8 @@ export function Layout() {
       <AIRewriteToolbar />
       <GhostTonePreview />
       <AIToneToolbar />
+      <CommentHighlightOverlay />
+      <MobileTabBar />
     </div>
   );
 }
