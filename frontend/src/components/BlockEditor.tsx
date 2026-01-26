@@ -28,6 +28,8 @@ import { useContextMenuStore } from '../stores/contextMenu';
 import { ContextMenu, type ContextMenuItem } from './ui/ContextMenu';
 import { toast } from '../stores/toast';
 import { useEditorStyles } from '../hooks/useEditorStyles';
+import { useAIParagraphReorderStore } from '../stores/aiParagraphReorder';
+import { AIParagraphReorderPanel } from './AIParagraphReorderPanel';
 import './BlockEditor.css';
 
 // Context menu icons
@@ -57,6 +59,13 @@ const DefineIcon = () => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
     <path d="M2 3h10M2 7h7M2 11h10" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
     <circle cx="11" cy="7" r="2" stroke="currentColor" strokeWidth="1.25"/>
+  </svg>
+);
+
+const ReorderIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+    <path d="M11 2l2 2-2 2M3 10l-2 2 2 2" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -222,6 +231,14 @@ export function BlockEditor({
     closeMenu();
   }, [editorData, closeMenu]);
 
+  // AI Paragraph Reorder
+  const { openPanel: openReorderPanel } = useAIParagraphReorderStore();
+
+  const handleAIReorder = useCallback(() => {
+    openReorderPanel(content, onChange);
+    closeMenu();
+  }, [content, onChange, openReorderPanel, closeMenu]);
+
   // Build context menu items
   const editorContextMenuItems: ContextMenuItem[] = useMemo(() => {
     if (menuType !== 'editor' || !editorData) return [];
@@ -255,8 +272,15 @@ export function BlockEditor({
         shortcut: '⌘D',
         onClick: handleDefine,
       },
+      {
+        id: 'ai-reorder',
+        label: 'Reorder Paragraphs',
+        icon: <ReorderIcon />,
+        shortcut: '⌘⇧R',
+        onClick: handleAIReorder,
+      },
     ];
-  }, [menuType, editorData, handleCopy, handleCut, handleAIComment, handleDefine]);
+  }, [menuType, editorData, handleCopy, handleCut, handleAIComment, handleDefine, handleAIReorder]);
 
   // Handle drag start
   const handleDragStart = useCallback(
@@ -327,17 +351,22 @@ export function BlockEditor({
     [enableDrag, draggedBlockIndex, content, reorderBlocks, pushUndo, onChange, endDrag]
   );
 
-  // Handle escape key to cancel drag
+  // Handle escape key to cancel drag and keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isDragging) {
         cancelDrag();
       }
+      // Cmd/Ctrl + Shift + R to open AI Reorder panel
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        openReorderPanel(content, onChange);
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isDragging, cancelDrag]);
+  }, [isDragging, cancelDrag, content, onChange, openReorderPanel]);
 
   // Handle drag end when leaving the editor area
   const handleContainerDragLeave = useCallback(
@@ -409,6 +438,9 @@ export function BlockEditor({
         onClose={closeMenu}
         header="Selection"
       />
+
+      {/* AI Paragraph Reorder Panel */}
+      <AIParagraphReorderPanel />
     </div>
   );
 }
