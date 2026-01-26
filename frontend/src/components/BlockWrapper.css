@@ -1,0 +1,99 @@
+/* Block Wrapper Styles */
+
+.block-wrapper {
+  position: relative;
+  padding: 0.25rem 0 0.25rem 32px;
+  margin-left: -32px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+/* Hover state when not dragging */
+.block-wrapper:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* During drag - highlight the dragged block */
+.block-wrapper-dragging {
+  opacity: 0.5;
+  background: var(--color-gray-100, #f3f4f6);
+  border: 1px dashed var(--color-gray-300, #d1d5db);
+  border-radius: 6px;
+}
+
+/* Other blocks during drag - show they're potential drop targets */
+.block-wrapper-drag-active {
+  transition: background-color 0.1s ease;
+}
+
+.block-wrapper-drag-active:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Content container */
+.block-wrapper-content {
+  min-height: 1.5em;
+}
+
+/* Block type specific styles */
+.block-wrapper-heading .block-wrapper-content {
+  font-weight: 600;
+}
+
+.block-wrapper-code {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.block-wrapper-list {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+
+.block-wrapper-blockquote {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.block-wrapper-blockquote .block-wrapper-content {
+  padding-left: 1rem;
+  border-left: 3px solid var(--color-gray-300, #d1d5db);
+  color: var(--color-gray-600, #4b5563);
+}
+
+.block-wrapper-image {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .block-wrapper:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .block-wrapper-dragging {
+    background: var(--color-gray-800, #1f2937);
+    border-color: var(--color-gray-600, #4b5563);
+  }
+
+  .block-wrapper-drag-active:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  .block-wrapper-blockquote .block-wrapper-content {
+    border-left-color: var(--color-gray-600, #4b5563);
+    color: var(--color-gray-400, #9ca3af);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .block-wrapper {
+    transition: none;
+  }
+
+  .block-wrapper-drag-active {
+    transition: none;
+  }
+}

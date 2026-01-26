@@ -1,0 +1,413 @@
+/* Block Drag Demo Styles */
+
+.block-drag-demo {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.block-drag-demo .demo-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.block-drag-demo .demo-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--color-gray-900, #111827);
+}
+
+.block-drag-demo .demo-header p {
+  font-size: 1.125rem;
+  color: var(--color-gray-600, #4b5563);
+  margin: 0;
+}
+
+/* Instructions section */
+.block-drag-demo .demo-instructions {
+  background: var(--color-gray-50, #f9fafb);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.block-drag-demo .demo-instructions h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: var(--color-gray-900, #111827);
+}
+
+.block-drag-demo .instructions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.block-drag-demo .instruction-card {
+  background: white;
+  border: 1px solid var(--color-gray-200, #e5e7eb);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.block-drag-demo .instruction-card h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--color-gray-900, #111827);
+}
+
+.block-drag-demo .instruction-card p {
+  font-size: 0.8125rem;
+  color: var(--color-gray-600, #4b5563);
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.block-drag-demo .instruction-card kbd {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  background: var(--color-gray-100, #f3f4f6);
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.instruction-visual {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--color-gray-100, #f3f4f6);
+  border-radius: 6px;
+}
+
+.instruction-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  border-radius: 4px;
+  color: var(--color-gray-500, #6b7280);
+}
+
+.instruction-text {
+  font-size: 0.75rem;
+  color: var(--color-gray-600, #4b5563);
+}
+
+/* Editor section */
+.demo-editor-section {
+  margin-bottom: 2rem;
+}
+
+.block-drag-demo .demo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.block-drag-demo .demo-toolbar-spacer {
+  flex: 1;
+}
+
+.undo-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.demo-editor-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-700, #374151);
+  margin-bottom: 0.5rem;
+}
+
+.demo-editor-hint {
+  font-weight: 400;
+  color: var(--color-gray-500, #6b7280);
+  font-size: 0.8125rem;
+}
+
+.block-drag-demo-raw-editor .raw-markdown-textarea textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  min-height: 500px;
+}
+
+.block-editor-container {
+  background: white;
+  border: 1px solid var(--color-gray-200, #e5e7eb);
+  border-radius: 8px;
+  min-height: 500px;
+  overflow: auto;
+}
+
+/* Block types section */
+.demo-block-types {
+  margin-bottom: 2rem;
+}
+
+.demo-block-types h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: var(--color-gray-900, #111827);
+}
+
+.block-types-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+
+.block-type-card {
+  background: white;
+  border: 1px solid var(--color-gray-200, #e5e7eb);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.block-type-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 0.5rem;
+  background: var(--color-gray-100, #f3f4f6);
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-600, #4b5563);
+}
+
+.block-type-card h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+  color: var(--color-gray-900, #111827);
+}
+
+.block-type-card p {
+  font-size: 0.75rem;
+  color: var(--color-gray-500, #6b7280);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Features section */
+.block-drag-demo .demo-features {
+  margin-bottom: 2rem;
+}
+
+.block-drag-demo .demo-features h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: var(--color-gray-900, #111827);
+}
+
+.block-drag-demo .features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.block-drag-demo .feature-card {
+  background: white;
+  border: 1px solid var(--color-gray-200, #e5e7eb);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.block-drag-demo .feature-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.block-drag-demo .feature-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-50, #eff6ff);
+  border-radius: 8px;
+  color: var(--color-primary-600, #2563eb);
+  margin-bottom: 0.75rem;
+}
+
+.block-drag-demo .feature-card h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.375rem;
+  color: var(--color-gray-900, #111827);
+}
+
+.block-drag-demo .feature-card p {
+  font-size: 0.875rem;
+  color: var(--color-gray-600, #4b5563);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .block-drag-demo .demo-header h1 {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .block-drag-demo .demo-header p {
+    color: var(--color-gray-400, #9ca3af);
+  }
+
+  .block-drag-demo .demo-instructions {
+    background: var(--color-gray-800, #1f2937);
+  }
+
+  .block-drag-demo .demo-instructions h2 {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .block-drag-demo .instruction-card {
+    background: var(--color-gray-900, #111827);
+    border-color: var(--color-gray-700, #374151);
+  }
+
+  .block-drag-demo .instruction-card h3 {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .block-drag-demo .instruction-card p {
+    color: var(--color-gray-400, #9ca3af);
+  }
+
+  .block-drag-demo .instruction-card kbd {
+    background: var(--color-gray-700, #374151);
+    border-color: var(--color-gray-600, #4b5563);
+    color: var(--color-gray-200, #e5e7eb);
+  }
+
+  .instruction-visual {
+    background: var(--color-gray-800, #1f2937);
+  }
+
+  .instruction-handle {
+    background: var(--color-gray-700, #374151);
+    border-color: var(--color-gray-600, #4b5563);
+    color: var(--color-gray-400, #9ca3af);
+  }
+
+  .instruction-text {
+    color: var(--color-gray-400, #9ca3af);
+  }
+
+  .demo-editor-label {
+    color: var(--color-gray-300, #d1d5db);
+  }
+
+  .demo-editor-hint {
+    color: var(--color-gray-500, #6b7280);
+  }
+
+  .block-editor-container {
+    background: var(--color-gray-800, #1f2937);
+    border-color: var(--color-gray-700, #374151);
+  }
+
+  .demo-block-types h2 {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .block-type-card {
+    background: var(--color-gray-800, #1f2937);
+    border-color: var(--color-gray-700, #374151);
+  }
+
+  .block-type-icon {
+    background: var(--color-gray-700, #374151);
+    color: var(--color-gray-300, #d1d5db);
+  }
+
+  .block-type-card h3 {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .block-type-card p {
+    color: var(--color-gray-400, #9ca3af);
+  }
+
+  .block-drag-demo .demo-features h2 {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .block-drag-demo .feature-card {
+    background: var(--color-gray-800, #1f2937);
+    border-color: var(--color-gray-700, #374151);
+  }
+
+  .block-drag-demo .feature-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .block-drag-demo .feature-icon {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--color-primary-400, #60a5fa);
+  }
+
+  .block-drag-demo .feature-card h3 {
+    color: var(--color-gray-100, #f3f4f6);
+  }
+
+  .block-drag-demo .feature-card p {
+    color: var(--color-gray-400, #9ca3af);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .block-drag-demo {
+    padding: 1rem;
+  }
+
+  .block-drag-demo .demo-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .block-types-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .block-drag-demo .features-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .block-drag-demo .feature-card {
+    transition: none;
+  }
+
+  .block-drag-demo .feature-card:hover {
+    transform: none;
+  }
+}
