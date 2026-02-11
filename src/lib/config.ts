@@ -5,15 +5,16 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Supported AI providers
-export type AIProvider = 'claude' | 'gemini' | 'cursor';
+export type AIProvider = 'claude' | 'gemini' | 'cursor' | 'codex';
 
 export interface ProviderConfig {
   taskProvider: AIProvider;           // Provider for main task execution
   validationProvider?: AIProvider;    // Provider for validation (defaults to taskProvider)
-  claudeModel: 'opus' | 'sonnet';     // Claude-specific model
+  claudeModel: 'opus' | 'sonnet' | 'haiku';  // Claude-specific model
   geminiModel: 'pro' | 'flash';       // Gemini-specific model
   cursorModel: string;                // Cursor model name
   cursorMode: 'agent' | 'plan' | 'ask';  // Cursor mode
+  codexModel: string;                 // Codex model name
 }
 
 export interface ValidationGatesConfig {
@@ -65,12 +66,16 @@ export interface RalphConfig {
   // Filter
   filterCategory: string;
   filterPriority: string;
+  filterTaskId: string;
 
   // Model (legacy - use providerConfig instead)
   model: 'opus' | 'sonnet';
 
   // Provider configuration
   providerConfig: ProviderConfig;
+
+  // Factory mode token limit
+  haikuTokenLimit: number;
 
   // Validation
   validationGates: ValidationGatesConfig;
@@ -96,6 +101,7 @@ export const defaultConfig: RalphConfig = {
   maxIterations: 100,
   opusTokenLimit: 150000,
   sonnetTokenLimit: 50000,
+  haikuTokenLimit: 50000,
 
   notifyEnabled: true,
   captureEnabled: false,
@@ -111,6 +117,7 @@ export const defaultConfig: RalphConfig = {
 
   filterCategory: '',
   filterPriority: '',
+  filterTaskId: '',
 
   model: 'opus',
 
@@ -121,6 +128,7 @@ export const defaultConfig: RalphConfig = {
     geminiModel: 'pro',
     cursorModel: 'claude-3-5-sonnet',
     cursorMode: 'agent',
+    codexModel: 'default',
   },
 
   validationGates: {

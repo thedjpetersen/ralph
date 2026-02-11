@@ -11,6 +11,7 @@ import { initConfig, validateConfig, RalphConfig, AIProvider } from './lib/confi
 import { isProviderAvailable, getProviderDisplayName } from './lib/providers.js';
 import { logger } from './lib/logger.js';
 import { runCommand } from './commands/run.js';
+import { factoryCommand } from './commands/factory.js';
 import { statusCommand } from './commands/status.js';
 import { evidenceCommand } from './commands/evidence.js';
 import { testCommand } from './commands/test.js';
@@ -49,6 +50,7 @@ program
   .option('--cursor-mode <mode>', 'Cursor mode (agent, plan, ask)', 'agent')
   .option('--category <category>', 'Filter tasks by category')
   .option('--priority <priority>', 'Filter tasks by priority')
+  .option('--task <id>', 'Run a specific task by ID')
   // Validation options
   .option('--skip-validation', 'Skip all validation gates')
   .option('--no-build-check', 'Skip build validation')
@@ -178,6 +180,50 @@ program
     });
   });
 
+// Factory command - parallel convergent software factory
+program
+  .command('factory')
+  .description('Run in factory mode: parallel workers, complexity routing, dynamic planning')
+  .option('--max-workers <n>', 'Maximum concurrent workers', '5')
+  .option('--opus-slots <n>', 'Concurrent Claude Opus slots', '1')
+  .option('--sonnet-slots <n>', 'Concurrent Claude Sonnet slots', '2')
+  .option('--haiku-slots <n>', 'Concurrent Claude Haiku slots', '3')
+  .option('--gemini-pro-slots <n>', 'Concurrent Gemini Pro slots', '2')
+  .option('--gemini-flash-slots <n>', 'Concurrent Gemini Flash slots', '3')
+  .option('--codex-slots <n>', 'Concurrent Codex slots', '2')
+  .option('--cursor-slots <n>', 'Concurrent Cursor slots', '2')
+  .option('--planner-interval <ms>', 'Planner evaluation interval (ms)', '120000')
+  .option('--planner-model <model>', 'Model for planner (sonnet, opus, pro)', 'sonnet')
+  .option('--retry-limit <n>', 'Max retries per task', '3')
+  .option('--escalate-on-retry', 'Escalate tier on retry (default true)')
+  .option('--no-escalate-on-retry', 'Do not escalate tier on retry')
+  .option('--no-auto-route', 'Disable automatic complexity routing')
+  .option('--no-cleanup', 'Do not cleanup worktrees on shutdown')
+  .action(async (cmdOpts: Record<string, string | boolean | undefined>) => {
+    const opts = program.opts();
+    const config = buildConfig(opts);
+
+    if (!await validateSetup(config)) return;
+
+    await factoryCommand({
+      config,
+      maxWorkers: cmdOpts.maxWorkers ? parseInt(cmdOpts.maxWorkers as string, 10) : undefined,
+      opusSlots: cmdOpts.opusSlots ? parseInt(cmdOpts.opusSlots as string, 10) : undefined,
+      sonnetSlots: cmdOpts.sonnetSlots ? parseInt(cmdOpts.sonnetSlots as string, 10) : undefined,
+      haikuSlots: cmdOpts.haikuSlots ? parseInt(cmdOpts.haikuSlots as string, 10) : undefined,
+      geminiProSlots: cmdOpts.geminiProSlots ? parseInt(cmdOpts.geminiProSlots as string, 10) : undefined,
+      geminiFlashSlots: cmdOpts.geminiFlashSlots ? parseInt(cmdOpts.geminiFlashSlots as string, 10) : undefined,
+      codexSlots: cmdOpts.codexSlots ? parseInt(cmdOpts.codexSlots as string, 10) : undefined,
+      cursorSlots: cmdOpts.cursorSlots ? parseInt(cmdOpts.cursorSlots as string, 10) : undefined,
+      plannerInterval: cmdOpts.plannerInterval ? parseInt(cmdOpts.plannerInterval as string, 10) : undefined,
+      plannerModel: cmdOpts.plannerModel as string | undefined,
+      retryLimit: cmdOpts.retryLimit ? parseInt(cmdOpts.retryLimit as string, 10) : undefined,
+      escalateOnRetry: cmdOpts.escalateOnRetry !== false,
+      autoRoute: cmdOpts.autoRoute !== false,
+      cleanup: cmdOpts.cleanup !== false,
+    });
+  });
+
 // Helper functions
 function buildConfig(opts: Record<string, unknown>): RalphConfig {
   logger.configure({
@@ -196,6 +242,7 @@ function buildConfig(opts: Record<string, unknown>): RalphConfig {
     model: (opts.model as 'opus' | 'sonnet') || 'sonnet',
     filterCategory: (opts.category as string) || '',
     filterPriority: (opts.priority as string) || '',
+    filterTaskId: (opts.task as string) || '',
     prdFile: (opts.prd as string) || '',
     // Validation options
     skipValidation: Boolean(opts.skipValidation),
@@ -223,10 +270,11 @@ function buildConfig(opts: Record<string, unknown>): RalphConfig {
     providerConfig: {
       taskProvider: (opts.provider as AIProvider) || 'claude',
       validationProvider: opts.validationProvider as AIProvider | undefined,
-      claudeModel: (opts.model as 'opus' | 'sonnet') || 'opus',
+      claudeModel: (opts.model as 'opus' | 'sonnet' | 'haiku') || 'opus',
       geminiModel: (opts.geminiModel as 'pro' | 'flash') || 'pro',
       cursorModel: (opts.cursorModel as string) || 'claude-3-5-sonnet',
       cursorMode: (opts.cursorMode as 'agent' | 'plan' | 'ask') || 'agent',
+      codexModel: 'default',
     },
   });
 }
@@ -250,8 +298,9 @@ async function validateSetup(config: RalphConfig): Promise<boolean> {
   if (!available) {
     const installInstructions: Record<AIProvider, string> = {
       claude: 'npm install -g @anthropic-ai/claude-code',
-      gemini: 'npm install -g @anthropic-ai/gemini-cli',  // Update with actual package name
-      cursor: 'Download from cursor.com',  // Update with actual instructions
+      gemini: 'npm install -g @anthropic-ai/gemini-cli',
+      cursor: 'Download from cursor.com',
+      codex: 'npm install -g @openai/codex',
     };
     logger.error(`${providerName} CLI not found. Install with: ${installInstructions[provider]}`);
     return false;
@@ -635,6 +684,10 @@ async function showActionMenu(config: RalphConfig, prdPath: string): Promise<voi
         value: 'all'
       },
       {
+        name: chalk.magenta('⚙') + ' ' + chalk.bold.magenta('Factory Mode') + chalk.dim(' - Parallel workers with dynamic planning'),
+        value: 'factory'
+      },
+      {
         name: chalk.yellow('↻') + ' ' + chalk.bold('Resume Session') + chalk.dim(' - Continue interrupted work'),
         value: 'resume'
       },
@@ -682,6 +735,11 @@ async function showActionMenu(config: RalphConfig, prdPath: string): Promise<voi
       if (!await validateSetup(config)) return;
       console.log(chalk.red.bold(`\n🔥 Running ALL ${pendingCount} remaining tasks...\n`));
       await runCommand({ iterations: 9999, config });
+      break;
+    case 'factory':
+      if (!await validateSetup(config)) return;
+      console.log(chalk.magenta.bold(`\n⚙ Starting Factory Mode...\n`));
+      await factoryCommand({ config });
       break;
     case 'resume':
       await resumeCommand({ config, sessionId: undefined });

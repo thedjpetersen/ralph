@@ -75,7 +75,7 @@ export interface ProviderPlugin extends Plugin {
 // ============================================================================
 
 export interface ClaudeProviderOptions extends ProviderRunOptions {
-  model?: 'opus' | 'sonnet';
+  model?: 'opus' | 'sonnet' | 'haiku';
 }
 
 export interface GeminiProviderOptions extends ProviderRunOptions {
@@ -113,7 +113,7 @@ export interface RunnerContext {
 
 export interface ResolvedProviderConfig {
   provider: AIProvider;
-  claudeModel: 'opus' | 'sonnet';
+  claudeModel: 'opus' | 'sonnet' | 'haiku';
   geminiModel: 'pro' | 'flash';
   cursorModel: string;
   cursorMode: CursorMode;

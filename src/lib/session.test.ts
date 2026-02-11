@@ -45,6 +45,7 @@ describe('SessionManager', () => {
     skipValidation: false,
     filterCategory: '',
     filterPriority: '',
+    filterTaskId: '',
     model: 'sonnet',
     providerConfig: {
       taskProvider: 'claude',
@@ -53,7 +54,9 @@ describe('SessionManager', () => {
       geminiModel: 'pro',
       cursorModel: 'claude-3-5-sonnet',
       cursorMode: 'agent',
+      codexModel: 'default',
     },
+    haikuTokenLimit: 50000,
     validationGates: { oxlint: true, build: true, test: true, lint: true, custom: true },
     validationTimeout: 120000,
     validationFailFast: false,

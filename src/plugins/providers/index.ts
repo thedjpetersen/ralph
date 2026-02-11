@@ -7,6 +7,7 @@ import { registry, registerBuiltin } from '../registry.js';
 import { claudeProvider } from './claude.js';
 import { geminiProvider } from './gemini.js';
 import { cursorProvider } from './cursor.js';
+import { codexProvider } from './codex.js';
 import type { ProviderPlugin } from './types.js';
 
 // Re-export types
@@ -17,6 +18,7 @@ export * from './base.js';
 export { claudeProvider } from './claude.js';
 export { geminiProvider } from './gemini.js';
 export { cursorProvider } from './cursor.js';
+export { codexProvider } from './codex.js';
 
 // ============================================================================
 // Provider Registration
@@ -29,6 +31,7 @@ export async function registerProviderPlugins(): Promise<void> {
   await registerBuiltin('provider', claudeProvider);
   await registerBuiltin('provider', geminiProvider);
   await registerBuiltin('provider', cursorProvider);
+  await registerBuiltin('provider', codexProvider);
 }
 
 /**
@@ -65,8 +68,8 @@ export function listProviders(): string[] {
 // Provider Validation
 // ============================================================================
 
-const VALID_PROVIDERS = ['claude', 'gemini', 'cursor'] as const;
-const VALID_CLAUDE_MODELS = ['opus', 'sonnet'] as const;
+const VALID_PROVIDERS = ['claude', 'gemini', 'cursor', 'codex'] as const;
+const VALID_CLAUDE_MODELS = ['opus', 'sonnet', 'haiku'] as const;
 const VALID_GEMINI_MODELS = ['pro', 'flash'] as const;
 const VALID_CURSOR_MODES = ['agent', 'plan', 'ask'] as const;
 

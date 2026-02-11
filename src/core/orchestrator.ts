@@ -301,7 +301,7 @@ export class Orchestrator {
 
       if (taskProvider.model) {
         if (provider === 'claude' && isValidClaudeModel(taskProvider.model)) {
-          claudeModel = taskProvider.model as 'opus' | 'sonnet';
+          claudeModel = taskProvider.model as 'opus' | 'sonnet' | 'haiku';
         } else if (provider === 'gemini' && isValidGeminiModel(taskProvider.model)) {
           geminiModel = taskProvider.model as 'pro' | 'flash';
         } else if (provider === 'cursor') {

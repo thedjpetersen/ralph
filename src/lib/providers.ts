@@ -14,7 +14,7 @@ import { logger } from './logger.js';
 // Types
 // ============================================================================
 
-export type AIProvider = 'claude' | 'gemini' | 'cursor';
+export type AIProvider = 'claude' | 'gemini' | 'cursor' | 'codex';
 
 export interface ProviderResult {
   success: boolean;
@@ -34,7 +34,11 @@ export interface ProviderOptions {
 }
 
 export interface ClaudeOptions extends ProviderOptions {
-  model?: 'opus' | 'sonnet';
+  model?: 'opus' | 'sonnet' | 'haiku';
+}
+
+export interface CodexOptions extends ProviderOptions {
+  model?: string;
 }
 
 export interface GeminiOptions extends ProviderOptions {
@@ -64,7 +68,7 @@ interface StreamState {
   lineCount: number;
 }
 
-const PROVIDER_CONFIGS: Record<AIProvider, ProviderConfig> = {
+const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
   claude: {
     command: 'claude',
     displayName: 'Claude Code',
@@ -141,6 +145,32 @@ const PROVIDER_CONFIGS: Record<AIProvider, ProviderConfig> = {
           state.toolCounts[toolName] = (state.toolCounts[toolName] || 0) + 1;
         } else if (event.type === 'text' || event.content) {
           state.lastTextResponse = event.content || event.text || '';
+        }
+      } catch {
+        if (line.trim()) {
+          state.lastTextResponse = line;
+        }
+      }
+    },
+  },
+
+  codex: {
+    command: 'codex',
+    displayName: 'OpenAI Codex',
+    getModelDisplay: () => 'codex',
+    buildArgs: (prompt) => [
+      '--prompt', prompt,
+      '--approval-mode', 'full-auto',
+      '--json',
+    ],
+    parseEvent: (line, state) => {
+      try {
+        const event = JSON.parse(line);
+        if (event.type === 'tool_use' || event.tool) {
+          const toolName = event.tool || event.name || 'unknown';
+          state.toolCounts[toolName] = (state.toolCounts[toolName] || 0) + 1;
+        } else if (event.type === 'text' || event.content || event.message) {
+          state.lastTextResponse = event.content || event.message || event.text || '';
         }
       } catch {
         if (line.trim()) {
@@ -339,16 +369,24 @@ export function runCursor(prompt: string, options: CursorOptions): Promise<Provi
 }
 
 /**
+ * Run OpenAI Codex CLI
+ */
+export function runCodex(prompt: string, options: CodexOptions): Promise<ProviderResult> {
+  return runStreamingCLI('codex', prompt, options as ProviderOptions & Record<string, unknown>);
+}
+
+/**
  * Unified provider runner - routes to the appropriate provider
  */
 export async function runProvider(
   provider: AIProvider,
   prompt: string,
   options: ProviderOptions & {
-    claudeModel?: 'opus' | 'sonnet';
+    claudeModel?: 'opus' | 'sonnet' | 'haiku';
     geminiModel?: 'pro' | 'flash';
     cursorModel?: string;
     cursorMode?: 'agent' | 'plan' | 'ask';
+    codexModel?: string;
   }
 ): Promise<ProviderResult> {
   switch (provider) {
@@ -358,6 +396,8 @@ export async function runProvider(
       return runGemini(prompt, { ...options, model: options.geminiModel });
     case 'cursor':
       return runCursor(prompt, { ...options, model: options.cursorModel, mode: options.cursorMode });
+    case 'codex':
+      return runCodex(prompt, { ...options, model: options.codexModel });
     default:
       throw new Error(`Unknown provider: ${provider}`);
   }
@@ -395,10 +435,11 @@ import type { PrdFile, PrdItem, PrdProviderConfig } from './prd.js';
 
 export interface ResolvedProviderConfig {
   provider: AIProvider;
-  claudeModel: 'opus' | 'sonnet';
+  claudeModel: 'opus' | 'sonnet' | 'haiku';
   geminiModel: 'pro' | 'flash';
   cursorModel: string;
   cursorMode: 'agent' | 'plan' | 'ask';
+  codexModel: string;
 }
 
 /**
@@ -415,6 +456,7 @@ export function resolveProviderConfig(
   let geminiModel = cliConfig.geminiModel;
   let cursorModel = cliConfig.cursorModel;
   let cursorMode = cliConfig.cursorMode;
+  let codexModel = cliConfig.codexModel;
 
   // File-level override
   const fileProvider = prdFile.metadata?.provider;
@@ -442,13 +484,13 @@ export function resolveProviderConfig(
     });
   }
 
-  return { provider, claudeModel, geminiModel, cursorModel, cursorMode };
+  return { provider, claudeModel, geminiModel, cursorModel, cursorMode, codexModel };
 }
 
 interface ProviderSetters {
   getProvider: () => AIProvider;
   setProvider: (p: AIProvider) => void;
-  setClaudeModel: (m: 'opus' | 'sonnet') => void;
+  setClaudeModel: (m: 'opus' | 'sonnet' | 'haiku') => void;
   setGeminiModel: (m: 'pro' | 'flash') => void;
   setCursorModel: (m: string) => void;
   setCursorMode: (m: 'agent' | 'plan' | 'ask') => void;
@@ -480,8 +522,8 @@ function applyProviderOverride(override: PrdProviderConfig, setters: ProviderSet
 // Validation Helpers
 // ============================================================================
 
-const VALID_PROVIDERS: AIProvider[] = ['claude', 'gemini', 'cursor'];
-const VALID_CLAUDE_MODELS = ['opus', 'sonnet'] as const;
+const VALID_PROVIDERS: AIProvider[] = ['claude', 'gemini', 'cursor', 'codex'];
+const VALID_CLAUDE_MODELS = ['opus', 'sonnet', 'haiku'] as const;
 const VALID_GEMINI_MODELS = ['pro', 'flash'] as const;
 const VALID_CURSOR_MODES = ['agent', 'plan', 'ask'] as const;
 
@@ -489,7 +531,7 @@ export function isValidProvider(value: string): value is AIProvider {
   return VALID_PROVIDERS.includes(value as AIProvider);
 }
 
-export function isValidClaudeModel(value: string): value is 'opus' | 'sonnet' {
+export function isValidClaudeModel(value: string): value is 'opus' | 'sonnet' | 'haiku' {
   return (VALID_CLAUDE_MODELS as readonly string[]).includes(value);
 }
 

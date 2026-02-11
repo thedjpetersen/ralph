@@ -18,6 +18,7 @@ describe('providers', () => {
         expect(isValidProvider('claude')).toBe(true);
         expect(isValidProvider('gemini')).toBe(true);
         expect(isValidProvider('cursor')).toBe(true);
+        expect(isValidProvider('codex')).toBe(true);
       });
 
       it('should return false for invalid providers', () => {
@@ -33,8 +34,11 @@ describe('providers', () => {
         expect(isValidClaudeModel('sonnet')).toBe(true);
       });
 
+      it('should return true for haiku model', () => {
+        expect(isValidClaudeModel('haiku')).toBe(true);
+      });
+
       it('should return false for invalid Claude models', () => {
-        expect(isValidClaudeModel('haiku')).toBe(false);
         expect(isValidClaudeModel('gpt-4')).toBe(false);
         expect(isValidClaudeModel('')).toBe(false);
       });
@@ -72,6 +76,7 @@ describe('providers', () => {
       expect(getProviderDisplayName('claude')).toBe('Claude Code');
       expect(getProviderDisplayName('gemini')).toBe('Gemini CLI');
       expect(getProviderDisplayName('cursor')).toBe('Cursor Agent');
+      expect(getProviderDisplayName('codex')).toBe('OpenAI Codex');
     });
   });
 
@@ -83,6 +88,7 @@ describe('providers', () => {
       geminiModel: 'pro',
       cursorModel: 'claude-3-5-sonnet',
       cursorMode: 'agent',
+      codexModel: 'default',
       ...overrides,
     });
 

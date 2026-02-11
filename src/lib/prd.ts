@@ -84,6 +84,8 @@ export interface PrdItem {
   provider?: PrdProviderConfig;
   // Validation override for this specific task
   validation?: PrdValidationConfig;
+  // Complexity hint for factory mode routing
+  complexity?: 'low' | 'medium' | 'high';
 }
 
 export interface PrdFile {
@@ -173,8 +175,20 @@ export function getNextTask(
   options: {
     filterCategory?: string;
     filterPriority?: string;
+    filterTaskId?: string;
   } = {}
 ): { prdFile: PrdFile; item: PrdItem } | null {
+  // If a specific task ID is requested, find and return it directly
+  if (options.filterTaskId) {
+    for (const prd of prdFiles) {
+      const item = prd.items.find(i => i.id === options.filterTaskId);
+      if (item && !isItemComplete(item)) {
+        return { prdFile: prd, item };
+      }
+    }
+    return null;
+  }
+
   // Priority order: high > medium > low
   const priorityOrder = ['high', 'medium', 'low'];
 
@@ -473,6 +487,42 @@ function archiveCompletedTask(item: PrdItem, archivePath: string): void {
   } catch (error) {
     logger.warning(`Failed to archive task ${item.id}: ${error}`);
   }
+}
+
+/**
+ * Get ALL tasks with satisfied dependencies (for factory mode).
+ * Unlike getNextTask which returns only the first one, this returns all ready tasks.
+ */
+export function getReadyTasks(
+  prdFiles: PrdFile[],
+  options: {
+    filterCategory?: string;
+    filterPriority?: string;
+  } = {}
+): Array<{ prdFile: PrdFile; item: PrdItem }> {
+  const readyTasks: Array<{ prdFile: PrdFile; item: PrdItem }> = [];
+
+  for (const prd of prdFiles) {
+    if (options.filterCategory && prd.category !== options.filterCategory) continue;
+
+    for (const item of prd.items) {
+      if (isItemComplete(item)) continue;
+      if (!isItemPending(item)) continue;
+      if (options.filterPriority && item.priority !== options.filterPriority) continue;
+
+      // Check dependencies
+      if (item.dependencies && item.dependencies.length > 0) {
+        const allDepsComplete = item.dependencies.every(depId =>
+          prdFiles.some(p => p.items.some(i => i.id === depId && isItemComplete(i)))
+        );
+        if (!allDepsComplete) continue;
+      }
+
+      readyTasks.push({ prdFile: prd, item });
+    }
+  }
+
+  return readyTasks;
 }
 
 export function formatTaskForPrompt(item: PrdItem, prdFile: PrdFile): string {

@@ -19,7 +19,7 @@ export class ClaudeProviderPlugin extends BaseProviderPlugin implements BuiltinP
     version: '1.0.0',
     description: 'Claude Code CLI provider for task execution',
     command: 'claude',
-    models: ['opus', 'sonnet'],
+    models: ['opus', 'sonnet', 'haiku'],
     displayName: 'Claude Code',
   };
 

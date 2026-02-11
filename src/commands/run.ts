@@ -186,6 +186,7 @@ export async function runCommand(options: RunOptions): Promise<void> {
     const next = getNextTask(prdFiles, {
       filterCategory: config.filterCategory,
       filterPriority: config.filterPriority,
+      filterTaskId: config.filterTaskId,
     });
 
     if (!next) {

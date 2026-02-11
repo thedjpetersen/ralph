@@ -28,6 +28,13 @@ export interface CompletedTask {
   completedAt: string;
 }
 
+export interface WorkerStateSnapshot {
+  id: number;
+  status: string;
+  currentTaskId?: string;
+  completedTasks: string[];
+}
+
 export interface SessionState {
   sessionId: string;
   version: '1.0.0';
@@ -55,6 +62,10 @@ export interface SessionState {
     stack?: string;
     timestamp: string;
   };
+  // Factory mode fields
+  mode?: 'sequential' | 'factory';
+  workers?: WorkerStateSnapshot[];
+  activeTasks?: Record<string, string>;  // taskId -> workerId
 }
 
 export interface SessionIndex {

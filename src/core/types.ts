@@ -70,8 +70,8 @@ export interface Task {
 // Provider Types
 // ============================================================================
 
-export type AIProvider = 'claude' | 'gemini' | 'cursor';
-export type ClaudeModel = 'opus' | 'sonnet';
+export type AIProvider = 'claude' | 'gemini' | 'cursor' | 'codex';
+export type ClaudeModel = 'opus' | 'sonnet' | 'haiku';
 export type GeminiModel = 'pro' | 'flash';
 export type CursorMode = 'agent' | 'plan' | 'ask';
 
