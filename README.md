@@ -22,8 +22,8 @@
 │   PRD.json ──► Ralph ──► AI Provider ──► Code Changes ──► Validation ──►   │
 │       ▲                   (Claude/        (Edit files,     (Build,     │   │
 │       │                    Gemini/         run tests)       Test,      │   │
-│       │                    Cursor)                          Lint)      │   │
-│       │                                                        │       │   │
+│       │                    Cursor/                          Lint)      │   │
+│       │                    Codex)                               │       │   │
 │       └────────────────────── Retry if failed ─────────────────┘       │   │
 │                                                                             │
 │   ✓ Task complete ──► Next task                                            │
@@ -68,17 +68,28 @@ EOF
 
 # Run it
 ralph run 5 --prd tasks.json
+
+# Or just run `ralph` for the interactive menu
+ralph
 ```
 
 ## Features
 
 ### Multi-Provider Support
 
-Use the best AI for each task. Configure at the CLI, file, or task level.
+Use the best AI for each task. Ralph supports four providers:
+
+| Provider | Models | Install |
+|----------|--------|---------|
+| **Claude Code** | opus, sonnet, haiku | `npm install -g @anthropic-ai/claude-code` |
+| **Gemini CLI** | pro, flash | `npm install -g @google/gemini-cli` |
+| **Cursor** | configurable | [cursor.com](https://cursor.com) |
+| **OpenAI Codex** | configurable | `npm install -g @openai/codex` |
 
 ```bash
-ralph run 10 --provider claude --model opus     # Complex tasks
+ralph run 10 --provider claude --model opus       # Complex tasks
 ralph run 50 --provider gemini --gemini-model flash  # Bulk simple tasks
+ralph run 10 --provider codex                     # Codex full-auto
 ```
 
 Or mix providers in one PRD:
@@ -98,6 +109,54 @@ Or mix providers in one PRD:
     }
   ]
 }
+```
+
+### Factory Mode
+
+Run multiple AI workers in parallel with intelligent task routing. Factory mode spins up isolated git worktrees, routes tasks by complexity, and merges completed work back to your main branch.
+
+```bash
+ralph factory --prd features.json \
+  --max-workers 5 \
+  --opus-slots 1 \
+  --sonnet-slots 2 \
+  --haiku-slots 3 \
+  --gemini-pro-slots 2 \
+  --gemini-flash-slots 3
+```
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                                                                  │
+│   PRD ──► Complexity Router ──┬──► Worker 1 (Claude Opus)       │
+│                               ├──► Worker 2 (Claude Sonnet)     │
+│                               ├──► Worker 3 (Gemini Pro)        │
+│                               ├──► Worker 4 (Claude Haiku)      │
+│                               └──► Worker 5 (Gemini Flash)      │
+│                                          │                       │
+│   Planner (generates new tasks) ◄────────┤                       │
+│                                          ▼                       │
+│                                   Merge Coordinator              │
+│                                   (cherry-pick to main)          │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+Key capabilities:
+
+- **Complexity routing** — High-complexity tasks go to Opus/Pro, medium to Sonnet, low to Haiku/Flash
+- **Git worktrees** — Each worker gets an isolated workspace, no conflicts
+- **Dynamic planner** — AI generates new tasks from spec URLs or existing PRD context
+- **Retry escalation** — Failed tasks automatically escalate to higher-tier providers
+- **Merge coordinator** — Cherry-picks completed work back to your main branch
+- **Convergence detection** — Stops when all tasks are done or the spec is satisfied
+
+```bash
+# Feed a spec URL so the planner can generate tasks dynamically
+ralph factory --spec-url https://example.com/api-docs --max-workers 3
+
+# Multiple spec URLs
+ralph factory --spec-url https://example.com/spec --spec-url https://example.com/design
 ```
 
 ### Validation Gates
@@ -128,17 +187,19 @@ AI-powered code review before marking tasks complete:
     {
       "persona": "Security Auditor",
       "criteria": ["No hardcoded secrets", "Input validation present"],
-      "required": true
+      "required": true,
+      "threshold": 80
     },
     {
       "persona": "QA Engineer",
-      "criteria": ["Test coverage > 80%", "Edge cases handled"]
+      "criteria": ["Test coverage > 80%", "Edge cases handled"],
+      "threshold": 70
     }
   ]
 }
 ```
 
-Personas: `QA Engineer` · `Security Auditor` · `UX Designer` · `Performance Engineer` · `Architect`
+Personas: `QA Engineer` · `Security Auditor` · `UX Designer` · `Performance Engineer` · `Software Architect`
 
 ### Session Recovery
 
@@ -148,7 +209,17 @@ Ralph saves state. Crash? Resume where you left off.
 ralph sessions          # List all sessions
 ralph resume            # Resume most recent
 ralph resume abc123     # Resume specific session
+ralph abort abc123      # Abort and reset orphaned tasks
 ```
+
+### Interactive Mode
+
+Run `ralph` with no arguments for an interactive menu:
+
+- Discovers PRD files across your project with progress bars
+- Create new PRDs from templates
+- Choose actions: run one, run multiple, run all, factory mode, or resume
+- Enter custom PRD paths
 
 ### Claude Code Hooks
 
@@ -186,19 +257,25 @@ You need at least one AI CLI installed:
 | Provider | Install |
 |----------|---------|
 | Claude Code | `npm install -g @anthropic-ai/claude-code` |
-| Gemini CLI | [cloud.google.com/gemini](https://cloud.google.com/gemini) |
+| Gemini CLI | `npm install -g @google/gemini-cli` |
 | Cursor | Included with [Cursor IDE](https://cursor.com) |
+| OpenAI Codex | `npm install -g @openai/codex` |
 
 ## Usage
 
-### Basic Commands
+### Commands
 
 ```bash
+ralph                   # Interactive menu
 ralph run [n]           # Run n iterations (default: 30)
 ralph once              # Run single task
+ralph factory           # Parallel factory mode
 ralph status            # Show PRD status
 ralph sessions          # List sessions
 ralph resume [id]       # Resume crashed session
+ralph abort [id]        # Abort session, reset tasks
+ralph test [packages]   # Run tests for packages
+ralph evidence [pkgs]   # Capture screenshots/video
 ```
 
 ### Common Patterns
@@ -213,8 +290,14 @@ ralph run 20 --provider gemini --gemini-model flash
 # High-quality with code review
 ralph run 10 --hooks --provider claude --model opus
 
-# Filter by priority
-ralph run 10 --priority high
+# Parallel factory with spec-driven planning
+ralph factory --prd features.json --spec-url https://example.com/spec
+
+# Filter by priority or category
+ralph run 10 --priority high --category backend
+
+# Run a specific task by ID
+ralph run 1 --task my-task-id
 
 # Dry run to see what would execute
 ralph run 10 --dry-run
@@ -224,25 +307,45 @@ ralph run 10 --dry-run
 
 ```json
 {
+  "project": "My Project",
+  "description": "Project description",
   "metadata": {
-    "version": "1.0"
+    "version": "1.0",
+    "provider": {
+      "provider": "claude",
+      "model": "opus"
+    }
   },
   "items": [
     {
       "id": "unique-id",
+      "name": "Task Name",
       "description": "What to build",
       "priority": "high",
+      "category": "backend",
+      "dependencies": ["other-task-id"],
+      "complexity": "high",
       "acceptance_criteria": [
         "Criterion 1",
         "Criterion 2"
       ],
+      "provider": {
+        "provider": "gemini",
+        "model": "pro"
+      },
+      "validation": {
+        "gates": { "test": true, "build": true },
+        "skip": false
+      },
       "judges": [
-        { "persona": "QA Engineer" }
+        { "persona": "QA Engineer", "threshold": 70 }
       ]
     }
   ]
 }
 ```
+
+Tasks support **dependency DAGs** via the `dependencies` field — Ralph will only execute a task once its dependencies are complete. The `complexity` field (`low`, `medium`, `high`) hints factory mode's routing.
 
 See [docs/PRD_FORMAT.md](docs/PRD_FORMAT.md) for the complete specification.
 
@@ -252,25 +355,50 @@ See [docs/PRD_FORMAT.md](docs/PRD_FORMAT.md) for the complete specification.
 
 ```bash
 # Providers
---provider <name>           # claude, gemini, cursor
---model <model>             # opus, sonnet (Claude)
+--provider <name>           # claude, gemini, cursor, codex
+--model <model>             # opus, sonnet, haiku (Claude)
 --gemini-model <model>      # pro, flash (Gemini)
+--cursor-model <model>      # Model name (Cursor)
+--cursor-mode <mode>        # plan, ask (Cursor)
+--validation-provider <p>   # Separate provider for validation
 
 # Validation
 --skip-validation           # Skip all gates
 --no-build-check            # Skip build
 --no-test-check             # Skip tests
+--no-lint-check             # Skip lint
+--validation-timeout <ms>   # Timeout per gate
 --fail-fast                 # Stop on first failure
 
 # Tasks
 --prd <path>                # Specific PRD file
 --priority <level>          # Filter: high/medium/low
+--category <category>       # Filter by category
+--task <id>                 # Run a specific task
 --pop-tasks                 # Remove completed tasks
+--no-archive                # Don't archive popped tasks
+
+# Factory mode
+--max-workers <n>           # Max concurrent workers (default: 5)
+--opus-slots <n>            # Claude Opus slots
+--sonnet-slots <n>          # Claude Sonnet slots
+--haiku-slots <n>           # Claude Haiku slots
+--gemini-pro-slots <n>      # Gemini Pro slots
+--gemini-flash-slots <n>    # Gemini Flash slots
+--codex-slots <n>           # Codex slots
+--cursor-slots <n>          # Cursor slots
+--planner-model <model>     # Model for the planner
+--spec-url <url...>         # Spec URLs for planner
+--retry-limit <n>           # Max retries per task
+--escalate-on-retry         # Escalate tier on failure
 
 # Output
 -v, --verbose               # Detailed logging
 -q, --quiet                 # Minimal output
 --dry-run                   # Preview without executing
+--no-commit                 # Skip git commits
+--capture                   # Capture screenshots
+--capture-video             # Capture video
 ```
 
 ### Environment Variables
@@ -286,7 +414,7 @@ Full reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
 ## How It Works
 
 ```
-1. Load PRD         Parse JSON, find next pending task by priority
+1. Load PRD         Parse JSON, find next pending task by priority/dependencies
                     ↓
 2. Build Prompt     Task description + acceptance criteria + previous errors
                     ↓
