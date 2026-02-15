@@ -6,6 +6,8 @@
  */
 
 import { resolve } from 'path';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import type { RalphConfig } from '../config.js';
 import type { ProviderSlot, FactoryTask, WorkerResult, WorkerState, WorkerStatus } from './types.js';
 import { resetWorktreeToHead, commitInWorktree } from './git-worktree.js';
@@ -17,6 +19,8 @@ import { runValidation, shouldMarkComplete } from '../validation/index.js';
 import { detectPackageFromCategory } from '../validation/package-detector.js';
 import type { Package } from '../validation/validation.types.js';
 import { logger } from '../logger.js';
+
+const execFileAsync = promisify(execFile);
 
 // ============================================================================
 // Worker
@@ -100,7 +104,7 @@ export class Worker {
           claudeModel: slot.provider === 'claude' ? slot.model as 'opus' | 'sonnet' | 'haiku' : undefined,
           geminiModel: slot.provider === 'gemini' ? slot.model as 'pro' | 'flash' : undefined,
           cursorModel: slot.provider === 'cursor' ? slot.model : undefined,
-          cursorMode: slot.provider === 'cursor' ? 'agent' : undefined,
+          cursorMode: undefined,
           tokenLimit,
         }
       );
@@ -114,9 +118,15 @@ export class Worker {
         return this.buildResult(task, startTime, { success: false, error: result.error || 'Provider failed' });
       }
 
-      // 5. Check completion marker
+      // 5. Check completion marker — if not signalled, check for uncommitted work
       if (!checkForCompletion(result.output)) {
-        return this.buildResult(task, startTime, { success: false, error: 'Provider did not signal completion' });
+        // The provider may have written code but ran out of turns before signalling.
+        // Check if there are actual file changes in the worktree.
+        const hasChanges = await this.worktreeHasChanges(absWorktree);
+        if (!hasChanges) {
+          return this.buildResult(task, startTime, { success: false, error: 'Provider did not signal completion and no changes found' });
+        }
+        logger.info(`Worker ${this.id}: provider didn't signal completion but found uncommitted changes — committing`);
       }
 
       // 6. Run validation in worktree
@@ -159,11 +169,18 @@ export class Worker {
       const commitMsg = `Ralph: ${taskName} (${task.prdCategory}-${task.item.id})`;
       const commitHash = await commitInWorktree(absWorktree, commitMsg);
 
+      if (!commitHash) {
+        return this.buildResult(task, startTime, {
+          success: false,
+          error: 'No changes to commit after execution',
+        });
+      }
+
       this.state.completedTasks.push(task.item.id);
 
       return this.buildResult(task, startTime, {
         success: true,
-        commitHash: commitHash || undefined,
+        commitHash,
         validationPassed: true,
       });
     } catch (error) {
@@ -174,6 +191,21 @@ export class Worker {
       this.state.status = 'idle';
       this.state.currentTask = undefined;
       this.state.currentSlot = undefined;
+    }
+  }
+
+  /**
+   * Check if the worktree has any uncommitted changes (modified, added, or untracked files).
+   */
+  private async worktreeHasChanges(worktreePath: string): Promise<boolean> {
+    try {
+      const { stdout } = await execFileAsync('git', ['status', '--porcelain'], {
+        cwd: worktreePath,
+        timeout: 10000,
+      });
+      return stdout.trim().length > 0;
+    } catch {
+      return false;
     }
   }
 
@@ -196,13 +228,15 @@ export class Worker {
 // Helpers
 // ============================================================================
 
+const DEFAULT_HAIKU_TOKEN_LIMIT = 50000;
+
 function resolveTokenLimit(
   slot: ProviderSlot,
   config: RalphConfig
 ): number {
   if (slot.provider === 'claude') {
     if (slot.model === 'opus') return config.opusTokenLimit;
-    if (slot.model === 'haiku') return (config as RalphConfig & { haikuTokenLimit?: number }).haikuTokenLimit || 50000;
+    if (slot.model === 'haiku') return DEFAULT_HAIKU_TOKEN_LIMIT;
     return config.sonnetTokenLimit;
   }
   // Default for other providers

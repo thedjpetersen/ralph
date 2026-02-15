@@ -96,12 +96,17 @@ export class FactoryOrchestrator {
     const gitBranch = await git.getCurrentBranch(mainRepo);
     const gitStatus = await git.getStatus(mainRepo);
     const sessionId = await this.sessionManager.createSession(
-      this.config, 9999, gitBranch, gitStatus.branch
+      this.config, Date.now(), gitBranch, gitStatus.branch
     );
     logger.info(`Factory session: ${sessionId}`);
 
     // 3. Initialize worker pool
     await this.pool.init();
+
+    if (this.pool.size === 0) {
+      logger.error('Factory: no workers could be initialized, aborting');
+      return;
+    }
 
     // 4. Start planner loop
     this.planner.start(
@@ -111,6 +116,10 @@ export class FactoryOrchestrator {
 
     // 5. Build initial task queue
     this.refreshTaskQueue();
+    logger.info(`Factory: ${this.taskQueue.length} tasks in queue after refresh`);
+    for (const t of this.taskQueue) {
+      logger.info(`  [${t.item.id}] tier=${t.tier} score=${t.complexityScore} "${t.item.name || t.item.description.substring(0, 40)}"`);
+    }
 
     // 6. Main loop
     await this.mainLoop();
@@ -148,19 +157,32 @@ export class FactoryOrchestrator {
         }
       } else if (assigned === 0) {
         // No active workers and couldn't assign anything
+        if (this.taskQueue.length === 0 && this.inProgressTasks.size === 0) {
+          // If waiting for planner, don't exit yet
+          if (this.factoryConfig.specContent && !this.planner.hasEvaluated()) {
+            logger.debug('Factory: waiting for planner to generate initial tasks...');
+            await sleep(3000);
+            this.refreshTaskQueue();
+            continue;
+          }
+          logger.info('Factory: no more tasks in queue');
+          break;
+        }
+
         // Check if we're waiting on rate limits
         const availableSlots = this.rateLimiter.getAvailableSlots();
         if (availableSlots.length === 0 && this.taskQueue.length > 0) {
           // All slots in backoff, wait a bit
           logger.debug('Factory: all slots in backoff, waiting...');
           await sleep(5000);
+        } else if (this.taskQueue.length > 0 && this.inProgressTasks.size === 0) {
+          // Tasks exist but none could be assigned and nothing is running
+          // This means all remaining tasks are stuck (no matching slots)
+          logger.warning(`Factory: ${this.taskQueue.length} tasks stuck — no available slots match their tiers`);
+          logger.info('Factory: aborting — remaining tasks cannot be assigned with current slot config');
+          break;
         } else {
-          // No tasks available at all
-          if (this.taskQueue.length === 0 && this.inProgressTasks.size === 0) {
-            logger.info('Factory: no more tasks in queue');
-            break;
-          }
-          // Wait for planner to add tasks or in-progress to complete
+          // Wait for in-progress tasks to complete or planner to add new tasks
           await sleep(2000);
         }
       }
@@ -174,30 +196,34 @@ export class FactoryOrchestrator {
   private tryAssignTasks(): number {
     let assigned = 0;
 
-    while (this.taskQueue.length > 0) {
+    logger.debug(`tryAssignTasks: queue=${this.taskQueue.length}, idle=${this.pool.getIdleWorker() ? 'yes' : 'no'}, active=${this.pool.getActiveCount()}`);
+
+    let i = 0;
+    while (i < this.taskQueue.length) {
       const idleWorker = this.pool.getIdleWorker();
-      if (!idleWorker) break;
+      if (!idleWorker) { logger.debug('tryAssignTasks: no idle worker'); break; }
 
       // Check total active worker limit
-      if (this.pool.getActiveCount() >= this.factoryConfig.pool.maxTotalWorkers) break;
+      if (this.pool.getActiveCount() >= this.factoryConfig.pool.maxTotalWorkers) { logger.debug('tryAssignTasks: at max workers'); break; }
 
-      const task = this.taskQueue[0];
+      const task = this.taskQueue[i];
 
       // Find an available slot for this task's tier
       const slot = findAvailableSlot(task.tier, this.rateLimiter, this.factoryConfig);
       if (!slot) {
-        // No slot available for this tier, try next task
-        // (but don't loop forever — if first task can't go, probably none can)
-        break;
+        logger.debug(`tryAssignTasks: no slot for tier=${task.tier} task=${task.item.id}, trying next`);
+        i++;
+        continue;
       }
 
       // Acquire the rate limiter permit
       if (!this.rateLimiter.tryAcquire(slot.provider, slot.model)) {
-        break;
+        i++;
+        continue;
       }
 
       // Remove from queue and track
-      this.taskQueue.shift();
+      this.taskQueue.splice(i, 1);
       task.assignedSlot = slot;
       task.assignedWorkerId = idleWorker.id;
       this.inProgressTasks.set(task.item.id, task);
@@ -279,8 +305,9 @@ export class FactoryOrchestrator {
           completedAt: new Date().toISOString(),
         });
 
-        // Notify planner
-        this.planner.notifyCompletion();
+        // Check if planner should generate more tasks
+        const pendingCount = this.taskQueue.length + this.inProgressTasks.size;
+        this.planner.maybeRefill(pendingCount);
 
         logger.success(
           `Task ${result.taskId} completed and merged ` +
@@ -411,6 +438,12 @@ export class FactoryOrchestrator {
 
     // No more tasks and nothing in progress
     if (this.taskQueue.length === 0 && this.inProgressTasks.size === 0) {
+      // If spec content is provided but planner hasn't evaluated yet,
+      // wait for the planner to have a chance to generate new tasks
+      if (this.factoryConfig.specContent && !this.planner.hasEvaluated()) {
+        logger.debug('Factory: waiting for planner initial evaluation before converging...');
+        return false;
+      }
       return true;
     }
 

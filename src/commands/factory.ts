@@ -36,6 +36,7 @@ export interface FactoryOptions {
   escalateOnRetry?: boolean;
   autoRoute?: boolean;
   cleanup?: boolean;
+  specUrl?: string[];
 }
 
 // ============================================================================
@@ -47,6 +48,18 @@ export async function factoryCommand(options: FactoryOptions): Promise<void> {
 
   // Build factory config from CLI options
   const factoryConfig = buildFactoryConfig(options);
+
+  // Fetch spec URL content if provided
+  if (factoryConfig.specUrls && factoryConfig.specUrls.length > 0) {
+    logger.info(`Fetching specification from ${factoryConfig.specUrls.length} URL(s)...`);
+    factoryConfig.specContent = await fetchSpecContent(factoryConfig.specUrls);
+    if (factoryConfig.specContent) {
+      const lines = factoryConfig.specContent.split('\n').length;
+      logger.success(`Fetched spec content (${lines} lines)`);
+    } else {
+      logger.warning('Could not fetch spec content, continuing without it');
+    }
+  }
 
   // Load PRD files for banner
   let prdFiles;
@@ -76,6 +89,87 @@ export async function factoryCommand(options: FactoryOptions): Promise<void> {
 // Config Builder
 // ============================================================================
 
+// ============================================================================
+// Spec URL Fetching
+// ============================================================================
+
+/**
+ * Fetch content from spec URLs and extract text.
+ * Strips HTML tags to get readable text content for the planner.
+ */
+async function fetchSpecContent(urls: string[]): Promise<string> {
+  const sections: string[] = [];
+
+  for (const url of urls) {
+    try {
+      logger.debug(`Fetching spec: ${url}`);
+      const response = await fetch(url, {
+        headers: { 'User-Agent': 'Ralph/1.0 (spec-fetcher)' },
+        signal: AbortSignal.timeout(30000),
+      });
+
+      if (!response.ok) {
+        logger.warning(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+        continue;
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      const body = await response.text();
+
+      let text: string;
+      if (contentType.includes('text/html')) {
+        text = htmlToText(body);
+      } else {
+        text = body;
+      }
+
+      // Truncate to reasonable size for planner context
+      const maxChars = 15000;
+      if (text.length > maxChars) {
+        text = text.substring(0, maxChars) + '\n\n[... truncated ...]';
+      }
+
+      sections.push(`### Source: ${url}\n${text}`);
+    } catch (error) {
+      logger.warning(`Error fetching ${url}: ${error}`);
+    }
+  }
+
+  return sections.join('\n\n---\n\n');
+}
+
+/**
+ * Simple HTML to text conversion.
+ * Strips tags, decodes common entities, normalizes whitespace.
+ */
+function htmlToText(html: string): string {
+  return html
+    // Remove script and style content
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[\s\S]*?<\/nav>/gi, '')
+    .replace(/<footer[\s\S]*?<\/footer>/gi, '')
+    // Convert block elements to newlines
+    .replace(/<\/?(h[1-6]|p|div|li|tr|br|hr)[^>]*>/gi, '\n')
+    // Strip remaining tags
+    .replace(/<[^>]+>/g, ' ')
+    // Decode entities
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    // Normalize whitespace
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
+    .trim();
+}
+
+// ============================================================================
+// Config Builder
+// ============================================================================
+
 function buildFactoryConfig(options: FactoryOptions): FactoryConfig {
   const defaults = DEFAULT_FACTORY_CONFIG;
   const config = options.config;
@@ -89,7 +183,7 @@ function buildFactoryConfig(options: FactoryOptions): FactoryConfig {
   if (options.geminiProSlots !== undefined) slots['gemini:pro'] = options.geminiProSlots;
   if (options.geminiFlashSlots !== undefined) slots['gemini:flash'] = options.geminiFlashSlots;
   if (options.codexSlots !== undefined) slots['codex:default'] = options.codexSlots;
-  if (options.cursorSlots !== undefined) slots['cursor:agent'] = options.cursorSlots;
+  if (options.cursorSlots !== undefined) slots['cursor:default'] = options.cursorSlots;
 
   // Determine planner provider
   let plannerProvider: ProviderSlot = defaults.plannerProvider;
@@ -117,6 +211,7 @@ function buildFactoryConfig(options: FactoryOptions): FactoryConfig {
     plannerProvider,
     escalateOnRetry: options.escalateOnRetry !== false,
     cleanupOnShutdown: options.cleanup !== false,
+    specUrls: options.specUrl,
   };
 }
 
@@ -133,18 +228,26 @@ function showFactoryBanner(
     .map(([key, count]) => `${key} x${count}`)
     .join(', ');
 
-  const content = [
+  const lines = [
     chalk.bold.magenta('FACTORY MODE'),
     '',
     chalk.white(`Tasks: ${summary.pending} pending / ${summary.total} total`),
     chalk.white(`Workers: ${factoryConfig.pool.maxTotalWorkers}`),
     chalk.white(`Slots: ${activeSlots}`),
-    chalk.white(`Planner: ${factoryConfig.plannerProvider.provider}:${factoryConfig.plannerProvider.model}`),
-    chalk.white(`Interval: ${Math.round(factoryConfig.plannerInterval / 1000)}s`),
+    chalk.white(`Planner: ${factoryConfig.plannerProvider.provider}:${factoryConfig.plannerProvider.model} (demand-driven)`),
     chalk.white(`Retry limit: ${factoryConfig.pool.retryLimit}`),
     chalk.white(`Auto-route: ${factoryConfig.routing.autoRoute}`),
     chalk.white(`Escalate on retry: ${factoryConfig.escalateOnRetry}`),
-  ].join('\n');
+  ];
+
+  if (factoryConfig.specUrls && factoryConfig.specUrls.length > 0) {
+    lines.push(chalk.white(`Spec URLs: ${factoryConfig.specUrls.length}`));
+    if (factoryConfig.specContent) {
+      lines.push(chalk.white(`Spec content: ${factoryConfig.specContent.split('\n').length} lines`));
+    }
+  }
+
+  const content = lines.join('\n');
 
   console.log(boxen(content, {
     padding: 1,

@@ -117,10 +117,10 @@ export class RateLimiter {
     if (!slot) return;
 
     slot.consecutiveRateLimits++;
-    slot.backoffMs = Math.min(
-      BASE_BACKOFF_MS * Math.pow(BACKOFF_MULTIPLIER, slot.consecutiveRateLimits - 1),
-      MAX_BACKOFF_MS
-    );
+    const baseBackoffMs =
+      BASE_BACKOFF_MS * Math.pow(BACKOFF_MULTIPLIER, slot.consecutiveRateLimits - 1);
+    const jitteredBackoffMs = baseBackoffMs * (0.8 + Math.random() * 0.4);
+    slot.backoffMs = Math.min(jitteredBackoffMs, MAX_BACKOFF_MS);
     slot.backoffUntil = Date.now() + slot.backoffMs;
 
     logger.warning(

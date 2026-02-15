@@ -38,6 +38,18 @@ export async function createWorktree(
       await removeWorktree(mainRepo, worktreePath);
     }
 
+    // Prune stale worktree refs FIRST (so branch -D can succeed)
+    await execa('git', ['worktree', 'prune'], {
+      cwd: mainRepo,
+      reject: false,
+    });
+
+    // Delete existing branch if it exists (leftover from previous run)
+    await execa('git', ['branch', '-D', branchName], {
+      cwd: mainRepo,
+      reject: false,
+    });
+
     // Create worktree with new branch
     await execa('git', ['worktree', 'add', '-b', branchName, absPath], {
       cwd: mainRepo,
@@ -144,7 +156,7 @@ export async function commitInWorktree(
   message: string
 ): Promise<string | null> {
   try {
-    // Stage all changes
+    // Stage all changes (node_modules should be in .gitignore)
     await execa('git', ['add', '-A'], {
       cwd: worktreePath,
       reject: true,
@@ -162,7 +174,7 @@ export async function commitInWorktree(
     }
 
     // Commit
-    const fullMessage = `${message}\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>`;
+    const fullMessage = `${message}\n\nCo-Authored-By: Ralph Factory <noreply@anthropic.com>`;
     await execa('git', ['commit', '-m', fullMessage], {
       cwd: worktreePath,
       reject: true,

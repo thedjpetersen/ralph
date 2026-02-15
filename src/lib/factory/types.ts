@@ -12,7 +12,7 @@ import type { PrdItem } from '../prd.js';
 // ============================================================================
 
 export type ComplexityTier = 'low' | 'medium' | 'high';
-export type WorkerStatus = 'idle' | 'running' | 'validating' | 'merging' | 'rate_limited';
+export type WorkerStatus = 'idle' | 'running' | 'validating' | 'merging';
 
 // ============================================================================
 // Provider Routing
@@ -61,6 +61,10 @@ export interface FactoryConfig {
   escalateOnRetry: boolean;
   /** Cleanup worktrees on shutdown (default true) */
   cleanupOnShutdown: boolean;
+  /** URL(s) to fetch as reference specification for the planner */
+  specUrls?: string[];
+  /** Pre-fetched specification content (populated at startup from specUrls) */
+  specContent?: string;
 }
 
 // ============================================================================
@@ -142,7 +146,7 @@ export const DEFAULT_FACTORY_CONFIG: FactoryConfig = {
       'gemini:pro': 2,
       'gemini:flash': 3,
       'codex:default': 2,
-      'cursor:agent': 2,
+      'cursor:default': 2,
     },
     maxTotalWorkers: 5,
     retryLimit: 3,

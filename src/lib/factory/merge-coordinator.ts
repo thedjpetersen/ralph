@@ -78,11 +78,38 @@ export class MergeCoordinator {
     try {
       logger.debug(`Merge coordinator: cherry-picking ${commitHash.substring(0, 8)} for ${taskId}`);
 
+      // Clean up any leftover state from previous failed cherry-picks.
+      // We avoid `reset --hard HEAD` here because it would discard uncommitted
+      // PRD status updates that the orchestrator writes during operation.
+      await execa('git', ['cherry-pick', '--abort'], { cwd: this.mainRepo, reject: false });
+      // Only reset the index, preserving working tree changes (like PRD files)
+      await execa('git', ['reset', 'HEAD'], { cwd: this.mainRepo, reject: false });
+
       // Cherry-pick the commit
-      const result = await execa('git', ['cherry-pick', commitHash], {
+      let result = await execa('git', ['cherry-pick', commitHash], {
         cwd: this.mainRepo,
         reject: false,
       });
+
+      // If cherry-pick fails because untracked files would be overwritten,
+      // stage those files first and retry
+      if (result.exitCode !== 0 && result.stderr?.includes('untracked working tree files would be overwritten')) {
+        logger.debug(`Merge coordinator: untracked files conflict for ${taskId}, staging and retrying`);
+
+        // Stage all untracked files so they become part of the index
+        await execa('git', ['add', '-A'], { cwd: this.mainRepo, reject: false });
+        await execa('git', ['stash'], { cwd: this.mainRepo, reject: false });
+        await execa('git', ['cherry-pick', '--abort'], { cwd: this.mainRepo, reject: false });
+
+        // Retry the cherry-pick on the now-clean tree
+        result = await execa('git', ['cherry-pick', commitHash], {
+          cwd: this.mainRepo,
+          reject: false,
+        });
+
+        // Pop the stash to restore any other changes (may conflict, that's ok)
+        await execa('git', ['stash', 'pop'], { cwd: this.mainRepo, reject: false });
+      }
 
       if (result.exitCode !== 0) {
         // Check if it's a conflict
@@ -105,7 +132,6 @@ export class MergeCoordinator {
           return { success: false, conflict: true };
         }
 
-        // Non-conflict failure
         entry.conflict = false;
         this.history.push(entry);
 

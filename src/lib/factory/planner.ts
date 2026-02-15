@@ -16,70 +16,109 @@ import { runProvider } from '../providers.js';
 import { logger } from '../logger.js';
 
 // ============================================================================
+// Stream-JSON text extraction
+// ============================================================================
+
+/**
+ * Extract all text blocks from Claude's stream-json output.
+ * Stream-json format: each line is a JSON event like:
+ *   {"type":"assistant","message":{"content":[{"type":"text","text":"..."}]}}
+ * We need to extract the actual text content from these events.
+ */
+function extractTextFromStreamJson(rawOutput: string): string {
+  const textBlocks: string[] = [];
+
+  for (const line of rawOutput.split('\n')) {
+    if (!line.trim()) continue;
+    try {
+      const event = JSON.parse(line);
+      // Claude stream-json format
+      if (event.type === 'assistant' && event.message?.content) {
+        for (const block of event.message.content) {
+          if (block.type === 'text' && block.text) {
+            textBlocks.push(block.text);
+          }
+        }
+      }
+      // Gemini format
+      if ((event.type === 'text' || event.text) && !event.message) {
+        textBlocks.push(event.text || event.content || '');
+      }
+    } catch {
+      // Not JSON, might be raw text
+    }
+  }
+
+  return textBlocks.join('\n');
+}
+
+// ============================================================================
 // Planner
 // ============================================================================
 
 export class Planner {
   private running = false;
-  private interval: ReturnType<typeof setInterval> | null = null;
-  private completionsSinceLastRun = 0;
   private specSatisfied = false;
+  private hasEvaluatedOnce = false;
+  private evaluating = false;
+  private onNewTasks?: (tasks: PrdItem[]) => void;
+  private onSpecSatisfied?: () => void;
+
+  /** Queue threshold: only generate new tasks when pending count drops below this */
+  private readonly refillThreshold: number;
 
   constructor(
     private readonly config: RalphConfig,
     private readonly factoryConfig: FactoryConfig,
     private readonly mainRepo: string,
-  ) {}
+  ) {
+    // Refill when queue drops below 5 tasks (or maxWorkers * 2, whichever is larger)
+    this.refillThreshold = Math.max(5, this.factoryConfig.pool.maxTotalWorkers * 2);
+  }
 
   /**
-   * Start the planner loop in the background.
+   * Start the planner. Does NOT run on a fixed interval.
+   * Instead, the orchestrator calls `maybeRefill()` after task completions.
+   * If spec content is available, runs an immediate initial evaluation.
    */
   start(onNewTasks: (tasks: PrdItem[]) => void, onSpecSatisfied: () => void): void {
     if (this.running) return;
 
     this.running = true;
-    logger.info(`Planner started (interval: ${Math.round(this.factoryConfig.plannerInterval / 1000)}s)`);
+    this.onNewTasks = onNewTasks;
+    this.onSpecSatisfied = onSpecSatisfied;
+    logger.info(`Planner started (refill threshold: ${this.refillThreshold} tasks)`);
 
-    this.interval = setInterval(async () => {
-      if (!this.running) return;
-
-      try {
-        const result = await this.evaluate();
-
-        if (result.newTasks.length > 0) {
-          logger.info(`Planner generated ${result.newTasks.length} new task(s)`);
-          onNewTasks(result.newTasks);
-        }
-
-        if (result.specSatisfied) {
-          this.specSatisfied = true;
-          logger.info('Planner: specification satisfied');
-          onSpecSatisfied();
-        }
-      } catch (error) {
-        logger.error(`Planner evaluation failed: ${error}`);
-      }
-    }, this.factoryConfig.plannerInterval);
+    // If spec content is provided, run an immediate evaluation
+    // so the planner can generate initial tasks before the main loop checks convergence
+    if (this.factoryConfig.specContent) {
+      logger.info('Planner: running initial evaluation with spec content...');
+      this.runEvaluation();  // Fire-and-forget (async)
+    }
   }
 
   /**
-   * Stop the planner loop.
+   * Stop the planner.
    */
   stop(): void {
     this.running = false;
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
     logger.debug('Planner stopped');
   }
 
   /**
-   * Notify the planner that a task was completed.
-   * After N completions, may trigger an early evaluation.
+   * Called by the orchestrator when the queue might need refilling.
+   * Only triggers an evaluation if pending tasks are below the threshold.
    */
-  notifyCompletion(): void {
-    this.completionsSinceLastRun++;
+  async maybeRefill(pendingCount: number): Promise<void> {
+    if (!this.running || this.evaluating || this.specSatisfied) return;
+
+    if (pendingCount >= this.refillThreshold) {
+      logger.debug(`Planner: queue has ${pendingCount} tasks (threshold ${this.refillThreshold}), skipping`);
+      return;
+    }
+
+    logger.info(`Planner: queue low (${pendingCount}/${this.refillThreshold}), generating more tasks...`);
+    await this.runEvaluation();
   }
 
   /**
@@ -90,11 +129,43 @@ export class Planner {
   }
 
   /**
+   * Check if the planner has completed at least one evaluation.
+   * Used to avoid premature convergence when spec content is provided.
+   */
+  hasEvaluated(): boolean {
+    return this.hasEvaluatedOnce;
+  }
+
+  private async runEvaluation(): Promise<void> {
+    if (this.evaluating) return;
+    this.evaluating = true;
+
+    try {
+      const result = await this.evaluate();
+      this.hasEvaluatedOnce = true;
+
+      if (result.newTasks.length > 0) {
+        logger.info(`Planner generated ${result.newTasks.length} new task(s)`);
+        this.onNewTasks?.(result.newTasks);
+      }
+
+      if (result.specSatisfied) {
+        this.specSatisfied = true;
+        logger.info('Planner: specification satisfied');
+        this.onSpecSatisfied?.();
+      }
+    } catch (error) {
+      this.hasEvaluatedOnce = true;
+      logger.error(`Planner evaluation failed: ${error}`);
+    } finally {
+      this.evaluating = false;
+    }
+  }
+
+  /**
    * Run a single planner evaluation.
    */
   async evaluate(): Promise<PlannerResult> {
-    this.completionsSinceLastRun = 0;
-
     // 1. Gather context
     const prdFiles = this.loadPrdFiles();
     const completedTasks = this.getCompletedTasks(prdFiles);
@@ -132,8 +203,11 @@ export class Planner {
       return { newTasks: [], specSatisfied: false, reasoning: 'LLM call failed' };
     }
 
-    // 4. Parse response
-    return this.parseResponse(result.output, prdFiles);
+    // 4. Extract text from stream-json output and parse response
+    const textContent = extractTextFromStreamJson(result.output);
+    // Also check the summary (lastTextResponse) as a fallback
+    const fullText = textContent || result.summary || result.output;
+    return this.parseResponse(fullText, prdFiles);
   }
 
   // ============================================================================
@@ -207,13 +281,20 @@ export class Planner {
       ? context.pendingTasks.map(t => `- [PENDING] ${t.id}: ${t.name || t.description.substring(0, 80)} (priority: ${t.priority})`).join('\n')
       : 'None queued';
 
-    return `You are a software project planner for an autonomous coding system called "Ralph Factory".
+    // Include spec URL content if available
+    const specContentSection = this.factoryConfig.specContent
+      ? `\n## Reference Specification (from docs)\n${this.factoryConfig.specContent}\n`
+      : '';
 
-Your job is to evaluate progress toward a specification and identify what NEW tasks are needed.
+    return `You are a software project planner. You MUST respond with ONLY a JSON object — no explanations, no markdown fences, no tool usage.
 
-## Specification
+Do NOT use any tools. Do NOT read files. Do NOT explore the codebase. ONLY output JSON.
+
+Your job: evaluate progress toward the specification and identify what SPECIFIC, DISCRETE units of work remain.
+
+## Project Specification
 ${context.specDescription}
-
+${specContentSection}
 ## Completed Tasks
 ${completedSummary}
 
@@ -223,38 +304,28 @@ ${pendingSummary}
 ## Recent Code Changes
 ${context.gitDiffSummary}
 
-## Your Task
+## Instructions
 
-Evaluate the current state against the specification. Then:
+Compare completed + queued tasks against the specification. Output ONLY this JSON:
 
-1. If the specification is fully satisfied by completed + queued tasks, respond with:
-   \`\`\`json
-   { "specSatisfied": true, "reasoning": "...", "newTasks": [] }
-   \`\`\`
+If the specification is fully satisfied:
+{"specSatisfied": true, "reasoning": "All features implemented", "newTasks": []}
 
-2. If there are gaps, generate NEW tasks to fill them. Each task needs:
-   - \`id\`: unique string (use format "PLAN-XXX")
-   - \`description\`: clear description of what to implement
-   - \`priority\`: "high", "medium", or "low"
-   - \`acceptance_criteria\`: array of strings
-   - \`estimated_hours\`: number
-   - \`complexity\`: "low", "medium", or "high"
+If there are gaps, generate NEW tasks (use ID format "PLAN-001", "PLAN-002", etc.):
+{"specSatisfied": false, "reasoning": "Missing X, Y, Z features", "newTasks": [{"id": "PLAN-001", "name": "Short name", "description": "What to implement", "priority": "high", "acceptance_criteria": ["criterion 1", "criterion 2"], "estimated_hours": 1, "complexity": "medium"}]}
 
-   Respond with:
-   \`\`\`json
-   {
-     "specSatisfied": false,
-     "reasoning": "...",
-     "newTasks": [{ ... }]
-   }
-   \`\`\`
-
-IMPORTANT:
-- Do NOT duplicate existing completed or queued tasks
-- Focus on tasks that move toward the specification goal
-- Keep tasks atomic and independently executable
-- Prioritize tasks that unblock other work
-- Respond ONLY with valid JSON (no markdown fences outside the JSON)`;
+CRITICAL RULES:
+- Output ONLY valid JSON, nothing else
+- Every task MUST map to a specific API resource, endpoint, or feature described in the specification
+- Do NOT invent features that aren't in the spec — only generate tasks for things the spec explicitly requires
+- Do NOT generate tasks that overlap with completed or queued tasks, even if named differently (e.g. "User CRUD routes" and "Users REST endpoints" are the same work)
+- Before adding a task, check if any completed/queued task already covers that work under a different name
+- Each task is a single discrete unit: one model, one repository, one set of routes, one set of tests — never combine multiple resources
+- Generate at most 10 new tasks at a time — focus on the most important gaps first
+- If there are already ${context.pendingTasks.length} tasks queued, only add what's truly missing
+- Set complexity to "low" (simple CRUD, config), "medium" (business logic, validation), or "high" (auth flows, integrations)
+- Each task should have: id, name, description, priority, acceptance_criteria, estimated_hours, complexity
+- When the spec is fully covered by completed + queued tasks, set specSatisfied to true — do NOT keep generating tangential work`;
   }
 
   private parseResponse(output: string, prdFiles: PrdFile[]): PlannerResult {
@@ -300,6 +371,7 @@ IMPORTANT:
             acceptance_criteria: task.acceptance_criteria,
             estimated_hours: task.estimated_hours,
             steps: task.steps,
+            complexity: task.complexity || 'medium',
           } as PrdItem);
 
           existingIds.add(task.id);

@@ -14,16 +14,6 @@ import { createWorktree, removeWorktree, worktreePath, branchName, cleanupAllWor
 import { logger } from '../logger.js';
 
 // ============================================================================
-// Events
-// ============================================================================
-
-export interface WorkerPoolEvents {
-  'worker:idle': (workerId: number) => void;
-  'worker:complete': (result: WorkerResult) => void;
-  'worker:error': (workerId: number, error: Error) => void;
-}
-
-// ============================================================================
 // WorkerPool
 // ============================================================================
 
@@ -161,15 +151,18 @@ export class WorkerPool extends EventEmitter {
 
     if (raceResult === 'timeout') {
       logger.warning('Worker drain timed out, some tasks may be incomplete');
-      // Collect whatever has finished
+      // Collect results from promises that have already settled
       const results: WorkerResult[] = [];
-      for (const [workerId, promise] of this.activePromises) {
-        // Check if promise is settled by racing with an immediate resolve
-        const result = await Promise.race([
-          promise,
-          Promise.resolve(null),
+      for (const [, promise] of this.activePromises) {
+        const settled = await Promise.race([
+          promise.then(r => ({ status: 'fulfilled' as const, value: r })),
+          new Promise<{ status: 'pending' }>(resolve =>
+            setTimeout(() => resolve({ status: 'pending' }), 0)
+          ),
         ]);
-        if (result) results.push(result);
+        if (settled.status === 'fulfilled') {
+          results.push(settled.value);
+        }
       }
       return results;
     }
