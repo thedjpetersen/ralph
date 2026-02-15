@@ -13,7 +13,7 @@ export interface ProviderConfig {
   claudeModel: 'opus' | 'sonnet' | 'haiku';  // Claude-specific model
   geminiModel: 'pro' | 'flash';       // Gemini-specific model
   cursorModel: string;                // Cursor model name
-  cursorMode: 'agent' | 'plan' | 'ask';  // Cursor mode
+  cursorMode?: 'plan' | 'ask';  // Cursor mode (omit for default full-agent --print mode)
   codexModel: string;                 // Codex model name
 }
 
@@ -87,8 +87,7 @@ export interface RalphConfig {
 }
 
 export const defaultConfig: RalphConfig = {
-  // From dist/lib/config.js, go up 2 levels to reach project root
-  projectRoot: resolve(__dirname, '../../'),
+  projectRoot: process.cwd(),
   scriptsDir: resolve(__dirname, '../../'),
   prdDir: '',
   prdFile: '',
@@ -127,7 +126,7 @@ export const defaultConfig: RalphConfig = {
     claudeModel: 'opus',
     geminiModel: 'pro',
     cursorModel: 'claude-3-5-sonnet',
-    cursorMode: 'agent',
+    cursorMode: undefined,
     codexModel: 'default',
   },
 

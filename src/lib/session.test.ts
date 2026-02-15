@@ -53,7 +53,7 @@ describe('SessionManager', () => {
       claudeModel: 'sonnet',
       geminiModel: 'pro',
       cursorModel: 'claude-3-5-sonnet',
-      cursorMode: 'agent',
+      cursorMode: undefined,
       codexModel: 'default',
     },
     haikuTokenLimit: 50000,

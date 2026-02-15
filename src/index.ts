@@ -199,6 +199,7 @@ program
   .option('--no-escalate-on-retry', 'Do not escalate tier on retry')
   .option('--no-auto-route', 'Disable automatic complexity routing')
   .option('--no-cleanup', 'Do not cleanup worktrees on shutdown')
+  .option('--spec-url <url...>', 'URL(s) to fetch as reference specification for the planner')
   .action(async (cmdOpts: Record<string, string | boolean | undefined>) => {
     const opts = program.opts();
     const config = buildConfig(opts);
@@ -221,6 +222,7 @@ program
       escalateOnRetry: cmdOpts.escalateOnRetry !== false,
       autoRoute: cmdOpts.autoRoute !== false,
       cleanup: cmdOpts.cleanup !== false,
+      specUrl: cmdOpts.specUrl as string[] | undefined,
     });
   });
 
@@ -273,7 +275,7 @@ function buildConfig(opts: Record<string, unknown>): RalphConfig {
       claudeModel: (opts.model as 'opus' | 'sonnet' | 'haiku') || 'opus',
       geminiModel: (opts.geminiModel as 'pro' | 'flash') || 'pro',
       cursorModel: (opts.cursorModel as string) || 'claude-3-5-sonnet',
-      cursorMode: (opts.cursorMode as 'agent' | 'plan' | 'ask') || 'agent',
+      cursorMode: opts.cursorMode ? (opts.cursorMode as 'plan' | 'ask') : undefined,
       codexModel: 'default',
     },
   });

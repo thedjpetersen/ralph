@@ -130,6 +130,34 @@ export function loadPrdFile(filepath: string): PrdFile | null {
   }
 }
 
+/**
+ * Save a PrdFile back to disk, preserving all top-level fields (project, description, etc.)
+ */
+function savePrdFile(prdFile: PrdFile): void {
+  // Read the original file to preserve any top-level fields we don't track in PrdFile
+  let original: Record<string, unknown> = {};
+  try {
+    original = JSON.parse(readFileSync(prdFile.filepath, 'utf-8'));
+  } catch {
+    // If we can't read the original, start fresh
+  }
+
+  const data: Record<string, unknown> = {
+    ...original,
+    items: prdFile.items,
+    metadata: {
+      ...prdFile.metadata,
+      updated_at: new Date().toISOString(),
+    },
+  };
+
+  // Ensure project/description are preserved
+  if (prdFile.project) data.project = prdFile.project;
+  if (prdFile.description) data.description = prdFile.description;
+
+  writeFileSync(prdFile.filepath, JSON.stringify(data, null, 2));
+}
+
 export function loadAllPrdFiles(prdDir: string): PrdFile[] {
   if (!existsSync(prdDir)) {
     logger.error(`PRD directory not found: ${prdDir}`);
@@ -247,14 +275,7 @@ export function markTaskComplete(
   }
 
   try {
-    const data = {
-      items: prdFile.items,
-      metadata: {
-        ...prdFile.metadata,
-        updated_at: new Date().toISOString(),
-      },
-    };
-    writeFileSync(prdFile.filepath, JSON.stringify(data, null, 2));
+    savePrdFile(prdFile);
     logger.success(`Marked ${itemId} as completed`);
     return true;
   } catch (error) {
@@ -274,14 +295,7 @@ export function updateTaskValidation(
   item.validation_results = validationResults;
 
   try {
-    const data = {
-      items: prdFile.items,
-      metadata: {
-        ...prdFile.metadata,
-        updated_at: new Date().toISOString(),
-      },
-    };
-    writeFileSync(prdFile.filepath, JSON.stringify(data, null, 2));
+    savePrdFile(prdFile);
     return true;
   } catch {
     return false;
@@ -299,14 +313,7 @@ export function updateTaskJudgeResults(
   item.judge_results = judgeResults;
 
   try {
-    const data = {
-      items: prdFile.items,
-      metadata: {
-        ...prdFile.metadata,
-        updated_at: new Date().toISOString(),
-      },
-    };
-    writeFileSync(prdFile.filepath, JSON.stringify(data, null, 2));
+    savePrdFile(prdFile);
     return true;
   } catch {
     return false;
@@ -324,14 +331,7 @@ export function resetTaskStatus(prdFile: PrdFile, itemId: string): boolean {
   // Don't reset passes - it's a separate tracking mechanism
 
   try {
-    const data = {
-      items: prdFile.items,
-      metadata: {
-        ...prdFile.metadata,
-        updated_at: new Date().toISOString(),
-      },
-    };
-    writeFileSync(prdFile.filepath, JSON.stringify(data, null, 2));
+    savePrdFile(prdFile);
     logger.info(`Reset ${itemId} to pending`);
     return true;
   } catch {
@@ -360,14 +360,7 @@ export function markTaskInProgress(prdFile: PrdFile, itemId: string): boolean {
   item.status = 'in_progress';
 
   try {
-    const data = {
-      items: prdFile.items,
-      metadata: {
-        ...prdFile.metadata,
-        updated_at: new Date().toISOString(),
-      },
-    };
-    writeFileSync(prdFile.filepath, JSON.stringify(data, null, 2));
+    savePrdFile(prdFile);
     return true;
   } catch {
     return false;
@@ -440,14 +433,7 @@ export function popTask(
 
   try {
     // Save the updated PRD file (without the removed item)
-    const data = {
-      items: prdFile.items,
-      metadata: {
-        ...prdFile.metadata,
-        updated_at: new Date().toISOString(),
-      },
-    };
-    writeFileSync(prdFile.filepath, JSON.stringify(data, null, 2));
+    savePrdFile(prdFile);
 
     // Optionally archive the completed task
     if (options?.archiveTo) {

@@ -34,7 +34,7 @@ const createMockContext = (): ExecutionContext => ({
       claudeModel: 'sonnet',
       geminiModel: 'pro',
       cursorModel: 'claude-3-5-sonnet',
-      cursorMode: 'agent',
+      cursorMode: undefined,
     },
     validationGates: {
       oxlint: true,

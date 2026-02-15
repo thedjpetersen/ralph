@@ -136,8 +136,9 @@ const ROUTING_TABLE: Record<ComplexityTier, RoutingEntry> = {
   medium: {
     primary: { provider: 'claude', model: 'sonnet', tier: 'medium' },
     fallbacks: [
+      { provider: 'codex', model: 'default', tier: 'medium' },
       { provider: 'gemini', model: 'pro', tier: 'medium' },
-      { provider: 'cursor', model: 'agent', tier: 'medium' },
+      { provider: 'cursor', model: 'default', tier: 'medium' },
     ],
   },
   low: {
@@ -166,6 +167,7 @@ export function findAvailableSlot(
   const entry = ROUTING_TABLE[tier];
   const candidates = [entry.primary, ...entry.fallbacks];
 
+  // First: try the natural routing for this tier
   for (const slot of candidates) {
     const key = RateLimiter.slotKey(slot.provider, slot.model);
 
@@ -178,6 +180,26 @@ export function findAvailableSlot(
       // Actual acquisition happens at assignment time
       rateLimiter.release(slot.provider, slot.model);
       return slot;
+    }
+  }
+
+  // Fallback: try ANY available slot (downgrade/upgrade) so work isn't stuck
+  const tiers: ComplexityTier[] = ['high', 'medium', 'low'];
+  for (const fallbackTier of tiers) {
+    if (fallbackTier === tier) continue; // already tried
+    const fallbackEntry = ROUTING_TABLE[fallbackTier];
+    const fallbackCandidates = [fallbackEntry.primary, ...fallbackEntry.fallbacks];
+
+    for (const slot of fallbackCandidates) {
+      const key = RateLimiter.slotKey(slot.provider, slot.model);
+      if (config.pool.slots[key] === undefined) continue;
+      if (config.pool.slots[key] <= 0) continue;
+
+      if (rateLimiter.tryAcquire(slot.provider, slot.model)) {
+        rateLimiter.release(slot.provider, slot.model);
+        // Return the slot but with the original tier label
+        return { ...slot, tier };
+      }
     }
   }
 

@@ -47,7 +47,7 @@ export interface GeminiOptions extends ProviderOptions {
 
 export interface CursorOptions extends ProviderOptions {
   model?: string;
-  mode?: 'agent' | 'plan' | 'ask';
+  mode?: 'plan' | 'ask';
 }
 
 // ============================================================================
@@ -103,10 +103,10 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
   gemini: {
     command: 'gemini',
     displayName: 'Gemini CLI',
-    getModelDisplay: (opts) => opts.model === 'flash' ? '2.5-flash' : '2.5-pro',
+    getModelDisplay: (opts) => opts.model === 'flash' ? 'gemini-2.5-flash' : 'gemini-2.5-pro',
     buildArgs: (prompt, options) => [
       '-p', prompt,
-      '-m', options.model === 'flash' ? '2.5-flash' : '2.5-pro',
+      '-m', options.model === 'flash' ? 'gemini-2.5-flash' : 'gemini-2.5-pro',
       '--output-format', 'stream-json',
       '-y',  // YOLO mode - auto-accept actions
     ],
@@ -130,13 +130,20 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
   cursor: {
     command: 'agent',
     displayName: 'Cursor Agent',
-    getModelDisplay: (opts) => `${(opts.model as string) || 'claude-3-5-sonnet'}, ${(opts.mode as string) || 'agent'} mode`,
-    buildArgs: (prompt, options) => [
-      '-p', prompt,
-      '--model', (options.model as string) || 'claude-3-5-sonnet',
-      '--output-format', 'json',
-      `--mode=${(options.mode as string) || 'agent'}`,
-    ],
+    getModelDisplay: (opts) => (opts.model as string) || 'claude-3-5-sonnet',
+    buildArgs: (prompt, options) => {
+      const args = [
+        '--print',
+        '--output-format', 'stream-json',
+        '-p', prompt,
+      ];
+      // Only add --mode if it's a valid cursor mode (plan or ask)
+      const mode = options.mode as string | undefined;
+      if (mode && (mode === 'plan' || mode === 'ask')) {
+        args.push('--mode', mode);
+      }
+      return args;
+    },
     parseEvent: (line, state) => {
       try {
         const event = JSON.parse(line);
@@ -159,9 +166,9 @@ const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
     displayName: 'OpenAI Codex',
     getModelDisplay: () => 'codex',
     buildArgs: (prompt) => [
-      '--prompt', prompt,
-      '--approval-mode', 'full-auto',
-      '--json',
+      'exec',
+      '--full-auto',
+      prompt,
     ],
     parseEvent: (line, state) => {
       try {
@@ -261,7 +268,7 @@ async function runStreamingCLI(
       reject: false,
       stdin: 'ignore',
       buffer: false,
-      env: { ...process.env, FORCE_COLOR: '0' },
+      env: { ...process.env, FORCE_COLOR: '0', ANTHROPIC_API_KEY: '' },
     });
 
     // Progress warning for inactivity
@@ -385,7 +392,7 @@ export async function runProvider(
     claudeModel?: 'opus' | 'sonnet' | 'haiku';
     geminiModel?: 'pro' | 'flash';
     cursorModel?: string;
-    cursorMode?: 'agent' | 'plan' | 'ask';
+    cursorMode?: 'plan' | 'ask';
     codexModel?: string;
   }
 ): Promise<ProviderResult> {
@@ -438,7 +445,7 @@ export interface ResolvedProviderConfig {
   claudeModel: 'opus' | 'sonnet' | 'haiku';
   geminiModel: 'pro' | 'flash';
   cursorModel: string;
-  cursorMode: 'agent' | 'plan' | 'ask';
+  cursorMode?: 'plan' | 'ask';
   codexModel: string;
 }
 
@@ -493,7 +500,7 @@ interface ProviderSetters {
   setClaudeModel: (m: 'opus' | 'sonnet' | 'haiku') => void;
   setGeminiModel: (m: 'pro' | 'flash') => void;
   setCursorModel: (m: string) => void;
-  setCursorMode: (m: 'agent' | 'plan' | 'ask') => void;
+  setCursorMode: (m: 'plan' | 'ask') => void;
 }
 
 function applyProviderOverride(override: PrdProviderConfig, setters: ProviderSetters): void {
@@ -525,7 +532,7 @@ function applyProviderOverride(override: PrdProviderConfig, setters: ProviderSet
 const VALID_PROVIDERS: AIProvider[] = ['claude', 'gemini', 'cursor', 'codex'];
 const VALID_CLAUDE_MODELS = ['opus', 'sonnet', 'haiku'] as const;
 const VALID_GEMINI_MODELS = ['pro', 'flash'] as const;
-const VALID_CURSOR_MODES = ['agent', 'plan', 'ask'] as const;
+const VALID_CURSOR_MODES = ['plan', 'ask'] as const;
 
 export function isValidProvider(value: string): value is AIProvider {
   return VALID_PROVIDERS.includes(value as AIProvider);
@@ -539,6 +546,6 @@ export function isValidGeminiModel(value: string): value is 'pro' | 'flash' {
   return (VALID_GEMINI_MODELS as readonly string[]).includes(value);
 }
 
-export function isValidCursorMode(value: string): value is 'agent' | 'plan' | 'ask' {
+export function isValidCursorMode(value: string): value is 'plan' | 'ask' {
   return (VALID_CURSOR_MODES as readonly string[]).includes(value);
 }

@@ -59,7 +59,6 @@ describe('providers', () => {
 
     describe('isValidCursorMode', () => {
       it('should return true for valid Cursor modes', () => {
-        expect(isValidCursorMode('agent')).toBe(true);
         expect(isValidCursorMode('plan')).toBe(true);
         expect(isValidCursorMode('ask')).toBe(true);
       });
@@ -87,7 +86,7 @@ describe('providers', () => {
       claudeModel: 'sonnet',
       geminiModel: 'pro',
       cursorModel: 'claude-3-5-sonnet',
-      cursorMode: 'agent',
+      cursorMode: undefined,
       codexModel: 'default',
       ...overrides,
     });
@@ -194,17 +193,17 @@ describe('providers', () => {
     });
 
     it('should ignore mode for non-cursor providers', () => {
-      const cliConfig = createCliConfig({ taskProvider: 'claude', cursorMode: 'agent' });
+      const cliConfig = createCliConfig({ taskProvider: 'claude', cursorMode: undefined });
       const prdFile = createPrdFile();
       const item = createPrdItem({ mode: 'plan' });
 
       const result = resolveProviderConfig(cliConfig, prdFile, item);
 
-      expect(result.cursorMode).toBe('agent'); // Mode only applies to cursor
+      expect(result.cursorMode).toBeUndefined(); // Mode only applies to cursor
     });
 
     it('should apply mode for cursor provider', () => {
-      const cliConfig = createCliConfig({ taskProvider: 'cursor', cursorMode: 'agent' });
+      const cliConfig = createCliConfig({ taskProvider: 'cursor', cursorMode: undefined });
       const prdFile = createPrdFile();
       const item = createPrdItem({ mode: 'ask' });
 
